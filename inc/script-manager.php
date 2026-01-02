@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * ============================================================================
  */
 
-register_activation_hook( __FILE__, 'whippet_check_db' );
+// Database check is handled in Plugin::activate()
 
 global $whippet_db_version;
 $whippet_db_version = 1.3;
@@ -417,7 +417,7 @@ class Whippet {
 	 * Initialize interface translation
 	 */
 	public function load_textdomain() {
-		load_plugin_textdomain( 'whippet', false, basename( dirname( __FILE__ ) ) . '/languages' );
+		load_plugin_textdomain( 'whippet', false, dirname( plugin_basename( WHIPPET_PATH . 'whippet.php' ) ) . '/languages' );
 	}
 
 	/**
@@ -465,13 +465,19 @@ class Whippet {
 				'tools_page_whippet-tutorials',
 			);
 
-			if ( $screen && ! in_array( $screen->id, $allowed_screens, true ) ) {
-				return;
-			}
+		if ( $screen && ! in_array( $screen->id, $allowed_screens, true ) ) {
+			return;
 		}
+	}
 
-		wp_enqueue_style( 'whippet', untrailingslashit( plugins_url( '../dist/css/style-whippet.css', __FILE__ ) ), array(), $this->version, false );
-		wp_enqueue_script( 'whippet', untrailingslashit( plugins_url( '../dist/js/app.js', __FILE__ ) ), array(), $this->version, true );
+	// Add preconnect for Google Fonts
+	add_action( is_admin() ? 'admin_head' : 'wp_head', array( $this, 'add_font_preconnect_panel' ), 1 );
+	
+	// Enqueue Figtree font from Google Fonts
+	wp_enqueue_style( 'whippet-figtree-font', 'https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300..900;1,300..900&display=swap', array(), null );
+
+	wp_enqueue_style( 'whippet', untrailingslashit( plugins_url( '../dist/css/style-whippet.css', __FILE__ ) ), array( 'whippet-figtree-font' ), $this->version, false );
+	wp_enqueue_script( 'whippet', untrailingslashit( plugins_url( '../dist/js/app.js', __FILE__ ) ), array(), $this->version, true );
 	}
 
 	/**
@@ -526,30 +532,39 @@ class Whippet {
 		/**
 		 * CSS/JS
 		 */
-		$sql = sprintf( 'DELETE FROM %s WHERE handler_name IN (%s) AND (url = "" OR url = "%s")', $wpdb->prefix . 'whippet_disabled', implode( ', ', array_fill( 0, count( $all_assets ), '%s' ) ), filter_input( INPUT_POST, 'currentURL' ) );
-		$prepared_sql = call_user_func_array( array( $wpdb, 'prepare' ), array_merge( array( $sql ), $all_assets ) );
-		$wpdb->query( $prepared_sql );
+		$current_url = esc_url_raw( filter_input( INPUT_POST, 'currentURL' ) );
+		$placeholders = implode( ', ', array_fill( 0, count( $all_assets ), '%s' ) );
+		$sql = $wpdb->prepare( 
+			"DELETE FROM {$wpdb->prefix}whippet_disabled WHERE handler_name IN ($placeholders) AND (url = '' OR url = %s)",
+			array_merge( $all_assets, array( $current_url ) )
+		);
+		$wpdb->query( $sql );
 
-		$sql = sprintf( 'DELETE FROM %s WHERE handler_name IN (%s) AND (url = "" OR url = "%s")', $wpdb->prefix . 'whippet_enabled', implode( ', ', array_fill( 0, count( $all_assets ), '%s' ) ), filter_input( INPUT_POST, 'currentURL' ) );
-		$prepared_sql = call_user_func_array( array( $wpdb, 'prepare' ), array_merge( array( $sql ), $all_assets ) );
-		$wpdb->query( $prepared_sql );
+		$sql = $wpdb->prepare( 
+			"DELETE FROM {$wpdb->prefix}whippet_enabled WHERE handler_name IN ($placeholders) AND (url = '' OR url = %s)",
+			array_merge( $all_assets, array( $current_url ) )
+		);
+		$wpdb->query( $sql );
 
 
 		/**
 		 * Inserting new configuration
 		 */
-		if ( isset( $_POST['disabled'] ) && ! empty( $_POST['disabled'] ) ) {
+		if ( isset( $_POST['disabled'] ) && ! empty( $_POST['disabled'] ) && is_array( $_POST['disabled'] ) ) {
 			foreach ( $_POST['disabled'] as $type => $assets ) {
-				if ( ! empty( $assets ) ) {
+				if ( ! empty( $assets ) && is_array( $assets ) ) {
+					$type = sanitize_text_field( $type );
 					foreach ( $assets as $handle => $where ) {
-						if ( ! empty( $where ) ) {
-							foreach ( $where as /*$place =>*/ $place ) {
+						if ( ! empty( $where ) && is_array( $where ) ) {
+							$handle = sanitize_text_field( $handle );
+							foreach ( $where as $place ) {
+								$place = sanitize_text_field( $place );
 								$wpdb->insert(
 									$wpdb->prefix . 'whippet_disabled',
 									array(
 										'handler_type' => $this->get_handler_type( $type ),
 										'handler_name' => $handle,
-										'url' => ( 'here' == $place ? filter_input( INPUT_POST, 'currentURL' ) : '' ),
+										'url' => ( 'here' === $place ? esc_url_raw( filter_input( INPUT_POST, 'currentURL' ) ) : '' ),
 									),
 									array( '%d', '%s', '%s' )
 								);
@@ -560,19 +575,22 @@ class Whippet {
 			}
 		}
 
-		if ( isset( $_POST['enabled'] ) && ! empty( $_POST['enabled'] ) ) {
+		if ( isset( $_POST['enabled'] ) && ! empty( $_POST['enabled'] ) && is_array( $_POST['enabled'] ) ) {
 			foreach ( $_POST['enabled'] as $type => $assets ) {
-				if ( ! empty( $assets ) ) {
+				if ( ! empty( $assets ) && is_array( $assets ) ) {
+					$type = sanitize_text_field( $type );
 					foreach ( $assets as $handle => $content_types ) {
-						if ( ! empty( $content_types ) ) {
+						if ( ! empty( $content_types ) && is_array( $content_types ) ) {
+							$handle = sanitize_text_field( $handle );
 							foreach ( $content_types as $content_type => $nvm ) {
+								$content_type = sanitize_text_field( $content_type );
 								$wpdb->insert(
 									$wpdb->prefix . 'whippet_enabled',
 									array(
 										'handler_type' => $this->get_handler_type( $type ),
 										'handler_name' => $handle,
 										'content_type' => $content_type,
-										'url' => ( 'here' == $content_type ? filter_input( INPUT_POST, 'currentURL' ) : '' ),
+										'url' => ( 'here' === $content_type ? esc_url_raw( filter_input( INPUT_POST, 'currentURL' ) ) : '' ),
 									),
 									array( '%d', '%s', '%s', '%s' )
 								);
@@ -587,22 +605,36 @@ class Whippet {
 		/**
 		 * Plugins
 		 */
-		$wpdb->query( sprintf( 'DELETE FROM %s WHERE (url = "" OR url = "%s")', $wpdb->prefix . 'whippet_p_disabled', filter_input( INPUT_POST, 'currentURL' ) ) );
+		$current_url = esc_url_raw( filter_input( INPUT_POST, 'currentURL' ) );
+		$wpdb->query( $wpdb->prepare( 
+			"DELETE FROM {$wpdb->prefix}whippet_p_disabled WHERE (url = '' OR url = %s)",
+			$current_url
+		) );
 
-		$wpdb->query( sprintf( 'DELETE FROM %s WHERE (url = "" OR url = "%s")', $wpdb->prefix . 'whippet_p_enabled', filter_input( INPUT_POST, 'currentURL' ) ) );
+		$wpdb->query( $wpdb->prepare( 
+			"DELETE FROM {$wpdb->prefix}whippet_p_enabled WHERE (url = '' OR url = %s)",
+			$current_url
+		) );
 
 		/**
 		 * Inserting new configuration
 		 */
-		if ( isset( $_POST['disabledPlugin'] ) && ! empty( $_POST['disabledPlugin'] ) ) {
+		if ( isset( $_POST['disabledPlugin'] ) && ! empty( $_POST['disabledPlugin'] ) && is_array( $_POST['disabledPlugin'] ) ) {
 			foreach ( $_POST['disabledPlugin'] as $plugin => $where ) {
 				if ( ! empty( $where ) ) {
+					$plugin = sanitize_text_field( $plugin );
+					$where = sanitize_text_field( $where );
+					$regex = '';
+					if ( 'regex' === $where && isset( $_POST['disabledPluginRegex'][ $plugin ] ) ) {
+						$regex = sanitize_text_field( wp_unslash( $_POST['disabledPluginRegex'][ $plugin ] ) );
+					}
+					
 					$wpdb->insert(
 						$wpdb->prefix . 'whippet_p_disabled',
 						array(
 							'name' => $plugin,
-							'url' => ( 'here' == $where ? filter_input( INPUT_POST, 'currentURL' ) : '' ),
-							'regex' => ( 'regex' == $where ? $_POST['disabledPluginRegex'][$plugin] : '' ),
+							'url' => ( 'here' === $where ? esc_url_raw( filter_input( INPUT_POST, 'currentURL' ) ) : '' ),
+							'regex' => $regex,
 						),
 						array( '%s', '%s', '%s' )
 					);
@@ -610,16 +642,18 @@ class Whippet {
 			}
 		}
 
-		if ( isset( $_POST['enabledPlugin'] ) && ! empty( $_POST['enabledPlugin'] ) ) {
+		if ( isset( $_POST['enabledPlugin'] ) && ! empty( $_POST['enabledPlugin'] ) && is_array( $_POST['enabledPlugin'] ) ) {
 			foreach ( $_POST['enabledPlugin'] as $plugin => $content_types ) {
-				if ( ! empty( $content_types ) ) {
+				if ( ! empty( $content_types ) && is_array( $content_types ) ) {
+					$plugin = sanitize_text_field( $plugin );
 					foreach ( $content_types as $content_type => $nvm ) {
+						$content_type = sanitize_text_field( $content_type );
 						$wpdb->insert(
 							$wpdb->prefix . 'whippet_p_enabled',
 							array(
 								'name' => $plugin,
 								'content_type' => $content_type,
-								'url' => ( 'here' == $content_type ? filter_input( INPUT_POST, 'currentURL' ) : '' ),
+								'url' => ( 'here' === $content_type ? esc_url_raw( filter_input( INPUT_POST, 'currentURL' ) ) : '' ),
 							),
 							array( '%s', '%s', '%s' )
 						);
@@ -629,21 +663,29 @@ class Whippet {
 		}
 
 
-		$http_referer = filter_var( $_SERVER['HTTP_REFERER'], FILTER_SANITIZE_URL );
+		$http_referer = '';
+		if ( isset( $_SERVER['HTTP_REFERER'] ) ) {
+			$http_referer = esc_url_raw( wp_unslash( $_SERVER['HTTP_REFERER'] ) );
+		}
+		
+		// Fallback to current admin URL if referer is invalid
+		if ( empty( $http_referer ) || ! wp_http_validate_url( $http_referer ) ) {
+			$http_referer = admin_url( 'tools.php?page=whippet' );
+		}
+		
 		if ( ! defined( 'whippet_CACHE_CONTROL' ) ) {
 			if ( function_exists( 'w3tc_pgcache_flush' ) ) {
 				w3tc_pgcache_flush();
 			} elseif ( function_exists( 'wp_cache_clear_cache' ) ) {
 				wp_cache_clear_cache();
 			} elseif ( function_exists( 'rocket_clean_files' ) ) {
-				rocket_clean_files( esc_url( $http_referer ) );
+				rocket_clean_files( $http_referer );
 			}
 		}
 
 		// Redirect to refresh plugins configuration.
-		if ( wp_redirect( $http_referer ) ) {
-			exit;
-		}
+		wp_safe_redirect( $http_referer );
+		exit;
 	}
 
 	/**
@@ -878,6 +920,18 @@ class Whippet {
 		}
 
 		$this->whippet_data_plugins = $out;
+	}
+
+	/**
+	 * Add preconnect links and inline font styles for whippet panel
+	 */
+	public function add_font_preconnect_panel() {
+		echo '<link rel="preconnect" href="https://fonts.googleapis.com">' . "\n";
+		echo '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>' . "\n";
+		echo '<style id="whippet-figtree-panel-inline">' . "\n";
+		echo '#whippet, .whippet-panel, .whippet-form, .whippet-wrapper, [class*="whippet"], [id*="whippet"], #whippet *, .whippet-panel *, .whippet-form *, .whippet-wrapper *, [class*="whippet"] *, [id*="whippet"] * { font-family: "Figtree", ui-sans-serif, system-ui, sans-serif !important; }' . "\n";
+		echo '#whippet code, #whippet pre, .g-regex textarea, .whippet-panel code, .whippet-panel pre { font-family: "SF Mono", Monaco, "Cascadia Code", "Roboto Mono", Consolas, "Courier New", monospace !important; }' . "\n";
+		echo '</style>' . "\n";
 	}
 
 	/**

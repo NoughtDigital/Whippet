@@ -39,7 +39,6 @@ function register_save_ga_locally_settings() {
 	register_setting( 'save-ga-locally-basic-settings', 'sgal_anonymize_ip' );
 	register_setting( 'save-ga-locally-basic-settings', 'sgal_track_admin' );
 	register_setting( 'save-ga-locally-basic-settings', 'caos_remove_wp_cron' );
-	register_setting( 'save-ga-locally-basic-settings', 'caos_disable_display_features' );
 }
 
 /**
@@ -66,74 +65,51 @@ function save_ga_locally_settings_page() {
 			$sgal_anonymize_ip             = esc_attr( get_option( 'sgal_anonymize_ip' ) );
 			$sgal_track_admin              = esc_attr( get_option( 'sgal_track_admin' ) );
 			$caos_remove_wp_cron           = esc_attr( get_option( 'caos_remove_wp_cron' ) );
-			$caos_disable_display_features = esc_attr( get_option( 'caos_disable_display_features' ) );
 			?>
 
 			<table class="form-table">
 				<tr valign="top">
-					<th scope="row"><?php _e( 'Google Analytics Tracking ID', 'whippet' ); ?></th>
-					<td><input type="text" name="sgal_tracking_id" value="<?php echo $sgal_tracking_id; ?>" /></td>
+					<th scope="row"><?php esc_html_e( 'Google Analytics Tracking ID', 'whippet' ); ?></th>
+					<td><input type="text" name="sgal_tracking_id" value="<?php echo esc_attr( $sgal_tracking_id ); ?>" /></td>
 				</tr>
 				<tr valign="top">
-					<th scope="row"><?php _e( 'Position of tracking code', 'whippet' ); ?></th>
+					<th scope="row"><?php esc_html_e( 'Position of tracking code', 'whippet' ); ?></th>
 					<td>
 						<?php
 						$sgal_script_position = array( 'header', 'footer' );
+						$current_position = get_option( 'sgal_script_position' );
 
 						foreach ( $sgal_script_position as $option ) {
-							echo "<input type='radio' name='sgal_script_position' value='" . $option . "' ";
-							echo $sgal_checked = ( $option === get_option( 'sgal_script_position' ) ) ? ' checked="checked"' : '';
-							echo ' />';
-							echo ucfirst( $option );
-							echo $sgal_script_default = ( $option === 'header' ) ? _e( ' (default)', 'whippet' ) : '';
+							$checked = ( $option === $current_position ) ? ' checked="checked"' : '';
+							echo "<input type='radio' name='sgal_script_position' value='" . esc_attr( $option ) . "'" . $checked . " />";
+							echo esc_html( ucfirst( $option ) );
+							if ( 'header' === $option ) {
+								echo ' ' . esc_html__( ' (default)', 'whippet' );
+							}
 							echo '<br>';
 						}
 						?>
 					</td>
 				</tr>
 				<tr valign="top">
-					<th scope="row"><?php _e( 'Use adjusted bounce rate?', 'whippet' ); ?></th>
-					<td><input type="number" name="sgal_adjusted_bounce_rate" min="0" max="60" value="<?php echo $sgal_adjusted_bounce_rate; ?>" /></td>
+					<th scope="row"><?php esc_html_e( 'Use adjusted bounce rate?', 'whippet' ); ?></th>
+					<td><input type="number" name="sgal_adjusted_bounce_rate" min="0" max="60" value="<?php echo esc_attr( $sgal_adjusted_bounce_rate ); ?>" /></td>
 				</tr>
 				<tr valign="top">
-					<th scope="row"><?php _e( 'Change enqueue order? (Default = 0)', 'whippet' ); ?></th>
-					<td><input type="number" name="sgal_enqueue_order" min="0" value="<?php echo $sgal_enqueue_order; ?>" /></td>
+					<th scope="row"><?php esc_html_e( 'Change enqueue order? (Default = 0)', 'whippet' ); ?></th>
+					<td><input type="number" name="sgal_enqueue_order" min="0" value="<?php echo esc_attr( $sgal_enqueue_order ); ?>" /></td>
 				</tr>
 				<tr valign="top">
-					<th scope="row"><?php _e( 'Disable all <a href="https://developers.google.com/analytics/devguides/collection/analyticsjs/display-features" target="_blank">display features functionality</a>?', 'whippet' ); ?></th>
-					<td><input type="checkbox" name="caos_disable_display_features"
-					<?php
-					if ( $caos_disable_display_features == 'on' ) {
-						echo 'checked = "checked"';}
-?>
- /></td>
+					<th scope="row"><?php echo wp_kses( __( 'Use <a href="https://support.google.com/analytics/answer/2763052?hl=en" target="_blank">Anonymize IP</a>? (Required by law for some countries)', 'whippet' ), array( 'a' => array( 'href' => array(), 'target' => array() ) ) ); ?></th>
+					<td><input type="checkbox" name="sgal_anonymize_ip" value="on"<?php checked( $sgal_anonymize_ip, 'on' ); ?> /></td>
 				</tr>
 				<tr valign="top">
-					<th scope="row"><?php _e( 'Use <a href="https://support.google.com/analytics/answer/2763052?hl=en" target="_blank">Anonymize IP</a>? (Required by law for some countries)', 'whippet' ); ?></th>
-					<td><input type="checkbox" name="sgal_anonymize_ip"
-					<?php
-					if ( $sgal_anonymize_ip == 'on' ) {
-						echo 'checked = "checked"';}
-?>
- /></td>
+					<th scope="row"><?php esc_html_e( 'Track logged in Administrators?', 'whippet' ); ?></th>
+					<td><input type="checkbox" name="sgal_track_admin" value="on"<?php checked( $sgal_track_admin, 'on' ); ?> /></td>
 				</tr>
 				<tr valign="top">
-					<th scope="row"><?php _e( 'Track logged in Administrators?', 'whippet' ); ?></th>
-					<td><input type="checkbox" name="sgal_track_admin"
-					<?php
-					if ( $sgal_track_admin == 'on' ) {
-						echo 'checked = "checked"';}
-?>
- /></td>
-				</tr>
-				<tr valign="top">
-					<th scope="row"><?php _e( 'Remove script from wp-cron?', 'whippet' ); ?></th>
-					<td><input type="checkbox" name="caos_remove_wp_cron"
-					<?php
-					if ( $caos_remove_wp_cron == 'on' ) {
-						echo 'checked = "checked"';}
-?>
- /></td>
+					<th scope="row"><?php esc_html_e( 'Remove script from wp-cron?', 'whippet' ); ?></th>
+					<td><input type="checkbox" name="caos_remove_wp_cron" value="on"<?php checked( $caos_remove_wp_cron, 'on' ); ?> /></td>
 				</tr>
 			</table>
 
@@ -171,10 +147,8 @@ function update_local_ga_script() {
 
 /**
  * Remove script from wp_cron upon plugin deactivation
- *
- * @var [type]
+ * Note: Deactivation hook is registered in main plugin file
  */
-register_deactivation_hook( __FILE__, 'deactivate_update_local_ga' );
 
 function deactivate_update_local_ga() {
 	if ( wp_next_scheduled( 'update_local_ga' ) ) {
@@ -215,7 +189,6 @@ function add_ga_header_script() {
 	$sgal_tracking_id              = esc_attr( get_option( 'sgal_tracking_id' ) );
 	$sgal_adjusted_bounce_rate     = esc_attr( get_option( 'sgal_adjusted_bounce_rate' ) );
 	$sgal_anonymize_ip             = esc_attr( get_option( 'sgal_anonymize_ip' ) );
-	$caos_disable_display_features = esc_attr( get_option( 'caos_disable_display_features' ) );
 
 	echo '<!-- This site is running Whippet: Whippet for WordPress -->';
 
@@ -225,10 +198,7 @@ function add_ga_header_script() {
             m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
             })(window,document,'script','" . plugin_dir_url( __FILE__ ) . "cache/local-ga.js','ga');";
 
-	echo "ga('create', '" . $sgal_tracking_id . "', 'auto');";
-
-	echo $caos_disable_display_features_code = ( $caos_disable_display_features == 'on' ) ? "ga('set', 'displayFeaturesTask', null);
-" : '';
+	echo "ga('create', '" . esc_js( $sgal_tracking_id ) . "', 'auto');";
 
 	echo $sgal_anonymize_ip_code = ( $sgal_anonymize_ip == 'on' ) ? "ga('set', 'anonymizeIp', true);" : '';
 

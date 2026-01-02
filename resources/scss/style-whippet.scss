@@ -1,6 +1,39 @@
-/* Tailwind CSS removed to prevent WordPress admin conflicts
- * All styling is done with custom SCSS below
- */
+@import "tailwindcss";
+
+@theme {
+	/* Font Family */
+	--font-sans: "Figtree", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+}
+
+@layer base {
+	/* Apply Figtree to all plugin elements */
+	body #whippet,
+	body .whippet-panel,
+	body .whippet-form,
+	body .whippet-wrapper,
+	body [class*="whippet"],
+	body [id*="whippet"] {
+		font-family: "Figtree", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji" !important;
+	}
+	
+	body #whippet *,
+	body .whippet-panel *,
+	body .whippet-form *,
+	body .whippet-wrapper *,
+	body [class*="whippet"] *,
+	body [id*="whippet"] * {
+		font-family: "Figtree", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji" !important;
+	}
+	
+	/* Keep monospace for code elements */
+	body #whippet code,
+	body #whippet pre,
+	body #whippet .g-regex textarea,
+	body .whippet-panel code,
+	body .whippet-panel pre {
+		font-family: "SF Mono", Monaco, "Cascadia Code", "Roboto Mono", Consolas, "Courier New", monospace !important;
+	}
+}
 
 // $color_1: #000;
 // $color_2: #444;
@@ -372,7 +405,7 @@ time, #whippet mark, #whippet audio, #whippet video {
     color: #000;
     overflow: scroll;
     padding: 1em 1em 2em 1em;
-    font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen-Sans,Ubuntu,Cantarell,"Helvetica Neue",sans-serif;
+    font-family: "Figtree", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
     font-size: 14px;
     line-height: 1.6842;
     z-index: 1000000;

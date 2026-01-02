@@ -80,6 +80,7 @@ class Plugin {
 	private function init_hooks() {
 		add_action( 'plugins_loaded', array( $this, 'init' ) );
 		register_activation_hook( WHIPPET_PATH . 'whippet.php', array( $this, 'activate' ) );
+		register_deactivation_hook( WHIPPET_PATH . 'whippet.php', array( $this, 'deactivate' ) );
 	}
 
 	/**
@@ -122,9 +123,24 @@ class Plugin {
 			add_option( 'whippet_version', self::VERSION );
 		}
 
+		// Check and create database tables
+		if ( function_exists( 'whippet_check_db' ) ) {
+			whippet_check_db();
+		}
+
 		// Schedule cron job
 		if ( ! wp_next_scheduled( 'update_local_ga' ) ) {
 			wp_schedule_event( time(), 'weekly', 'update_local_ga' );
+		}
+	}
+
+	/**
+	 * Plugin deactivation
+	 */
+	public function deactivate() {
+		// Clear scheduled cron job
+		if ( wp_next_scheduled( 'update_local_ga' ) ) {
+			wp_clear_scheduled_hook( 'update_local_ga' );
 		}
 	}
 }

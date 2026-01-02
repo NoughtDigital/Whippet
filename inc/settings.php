@@ -528,35 +528,30 @@ public function whippet_print_input($args) {
 
 			//Text
 			if(!empty($args['input']) && ($args['input'] == 'text' || $args['input'] == 'color')) {
-				echo "<input type='text' id='" . $args['id'] . "' name='" . $option . "[" . $args['id'] . "]' value='" . ($options[$args['id']] ? $options[$args['id']] : '') . "' />";
+				$value = isset($options[$args['id']]) ? esc_attr($options[$args['id']]) : '';
+				echo "<input type='text' id='" . esc_attr($args['id']) . "' name='" . esc_attr($option) . "[" . esc_attr($args['id']) . "]' value='" . $value . "' />";
 			}
 
 			//Select
 			elseif(!empty($args['input']) && $args['input'] == 'select') {
-				echo "<select id='" . $args['id'] . "' name='" . $option . "[" . $args['id'] . "]'>";
+				echo "<select id='" . esc_attr($args['id']) . "' name='" . esc_attr($option) . "[" . esc_attr($args['id']) . "]'>";
 					foreach($args['options'] as $value => $title) {
-						echo "<option value='" . $value . "' ";
-						if(!empty($options[$args['id']]) && $options[$args['id']] == $value) {
-							echo "selected";
-						}
-						echo ">" . $title . "</option>";
+						$selected = (!empty($options[$args['id']]) && $options[$args['id']] == $value) ? ' selected' : '';
+						echo "<option value='" . esc_attr($value) . "'" . $selected . ">" . esc_html($title) . "</option>";
 					}
 				echo "</select>";
 			}
 
 			//Checkbox + Toggle
 			else {
-					echo "<input type='checkbox' id='" . $args['id'] . "' name='" . $option . "[" . $args['id'] . "]' value='1' style='display: block; margin: 0px;' ";
-					if(!empty($options[$args['id']]) && $options[$args['id']] == "1") {
-						echo "checked";
-					}
-					echo ">";
+					$checked = (!empty($options[$args['id']]) && $options[$args['id']] == "1") ? ' checked' : '';
+					echo "<input type='checkbox' id='" . esc_attr($args['id']) . "' name='" . esc_attr($option) . "[" . esc_attr($args['id']) . "]' value='1' style='display: block; margin: 0px;'" . $checked . ">";
 			}
 
 		echo "</div>";
 
 		if(!empty($args['tooltip'])) {
-				echo "<p style='font-size: 12px; font-style: italic;'>" . $args['tooltip'] . "</p>";
+				echo "<p style='font-size: 12px; font-style: italic;'>" . esc_html($args['tooltip']) . "</p>";
 		}
 	echo "</div>";
 }

@@ -86,7 +86,6 @@ function whippet_process_settings_export() {
 			'sgal_anonymize_ip'             => esc_attr( get_option( 'sgal_anonymize_ip' ) ),
 			'sgal_track_admin'              => esc_attr( get_option( 'sgal_track_admin' ) ),
 			'caos_remove_wp_cron'           => esc_attr( get_option( 'caos_remove_wp_cron' ) ),
-			'caos_disable_display_features' => esc_attr( get_option( 'caos_disable_display_features' ) ),
 		);
 
 		// Make all Options a main array to encode into json.
@@ -124,25 +123,47 @@ function whippet_process_settings_import() {
 			return;
 		}
 
-		$extension = end( explode( '.', $_FILES['import_file']['name'] ) );
-
-		if ( $extension != 'json' ) {
-			wp_die( __( 'Please upload a valid .json file', 'whippet' ) );
+		if ( ! isset( $_FILES['import_file'] ) || ! is_uploaded_file( $_FILES['import_file']['tmp_name'] ) ) {
+			wp_die( esc_html__( 'Please upload a file to import', 'whippet' ) );
 		}
 
-		$import_file = $_FILES['import_file']['tmp_name'];
+		$file_name = sanitize_file_name( $_FILES['import_file']['name'] );
+		$file_parts = explode( '.', $file_name );
+		$extension = end( $file_parts );
 
-		if ( empty( $import_file ) ) {
-			wp_die( __( 'Please upload a file to import', 'whippet' ) );
+		if ( 'json' !== strtolower( $extension ) ) {
+			wp_die( esc_html__( 'Please upload a valid .json file', 'whippet' ) );
+		}
+
+		$import_file = sanitize_text_field( $_FILES['import_file']['tmp_name'] );
+
+		if ( empty( $import_file ) || ! file_exists( $import_file ) ) {
+			wp_die( esc_html__( 'Please upload a file to import', 'whippet' ) );
 		}
 		$whippet_options = get_option( 'whippet_options' );
 
 		delete_option( 'whippet_options' );
 
 		// Retrieve the settings from the file and convert the json object to an array.
-		$content  = file_get_contents( $import_file );
-		$obj      = json_decode( $content );
-		$settings = json_decode( $obj, true );
+		$content = file_get_contents( $import_file );
+		if ( false === $content ) {
+			wp_die( esc_html__( 'Error reading import file', 'whippet' ) );
+		}
+		
+		$obj = json_decode( $content, true );
+		if ( json_last_error() !== JSON_ERROR_NONE ) {
+			wp_die( esc_html__( 'Invalid JSON file format', 'whippet' ) );
+		}
+		
+		// Handle double-encoded JSON from export
+		if ( is_string( $obj ) ) {
+			$settings = json_decode( $obj, true );
+			if ( json_last_error() !== JSON_ERROR_NONE ) {
+				wp_die( esc_html__( 'Invalid JSON file format', 'whippet' ) );
+			}
+		} else {
+			$settings = $obj;
+		}
 
 		foreach ( $settings as $key => $value ) {
 			if ( $key == 'whippet_core' ) {

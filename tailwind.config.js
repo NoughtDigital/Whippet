@@ -1,5 +1,8 @@
 /**
- * Tailwind CSS configuration scoped to the Whippet plugin.
+ * Tailwind CSS V4 configuration for the Whippet plugin.
+ * 
+ * Theme customization is done via @theme directive in CSS files.
+ * This file handles content paths and plugin-specific configuration.
  *
  * @type {import('tailwindcss').Config}
  */
@@ -9,13 +12,9 @@ module.exports = {
     "./inc/**/*.php",
     "./whippet.php",
   ],
-  prefix: "wpt-", // Prefix all Tailwind classes to avoid conflicts
-  important: "#whippet", // Make Tailwind styles important only within #whippet
+  // Important selector to scope styles to plugin
+  important: "#whippet",
   corePlugins: {
-    preflight: false, // Disable Tailwind's CSS reset
+    preflight: false,
   },
-  theme: {
-    extend: {},
-  },
-  plugins: [],
 };
