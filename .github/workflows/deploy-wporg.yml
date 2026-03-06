@@ -51,6 +51,7 @@ jobs:
           rsync -av --delete \
             --exclude=".git" \
             --exclude=".github" \
+            --exclude="wporg/" \
             --exclude="wporg" \
             --exclude="node_modules" \
             --exclude="vendor" \
@@ -61,6 +62,7 @@ jobs:
             --exclude="composer.json" \
             --exclude="composer.lock" \
             ./ wporg/trunk/
+          R=$?; (($R == 24)) && exit 0; exit $R
 
       # If you DO ship /vendor in the plugin, remove --exclude vendor above.
       # If you do composer install --no-dev in this workflow, also remove it.
