@@ -6,22 +6,22 @@
 }
 
 @layer base {
-	/* Apply Figtree to all plugin elements */
+	/* Apply Figtree to all plugin elements (exclude admin bar so it keeps WP alignment) */
 	body #whippet,
 	body .whippet-panel,
 	body .whippet-form,
 	body .whippet-wrapper,
-	body [class*="whippet"],
-	body [id*="whippet"] {
+	body [class*="whippet"]:not(.whippet-object),
+	body [id="whippet"] {
 		font-family: "Figtree", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji" !important;
 	}
-	
+
 	body #whippet *,
 	body .whippet-panel *,
 	body .whippet-form *,
 	body .whippet-wrapper *,
-	body [class*="whippet"] *,
-	body [id*="whippet"] * {
+	body [class*="whippet"]:not(.whippet-object) *,
+	body [id="whippet"] * {
 		font-family: "Figtree", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji" !important;
 	}
 	
@@ -44,11 +44,54 @@
 // $background_color_1: rgba(238, 238, 238, 0.1);
 // $border_color_1: #0073aa #006799 #006799;
 
-// #wp-admin-bar-whippet {
-// 	.ab-item {
-// 		cursor: pointer;
-// 	}
-// }
+/**
+ * Restore WordPress admin bar after Tailwind preflight.
+ * Preflight resets margin/padding/list-style globally and breaks the admin bar layout.
+ */
+#wpadminbar,
+#wpadminbar * {
+	box-sizing: border-box;
+}
+
+#wpadminbar {
+	position: relative;
+	height: 32px;
+	line-height: 32px;
+	margin: 0;
+	padding: 0;
+}
+
+#wpadminbar .ab-item,
+#wpadminbar a.ab-item {
+	display: inline-block;
+	padding: 0 12px;
+	height: 32px;
+	line-height: 32px;
+	text-decoration: none;
+}
+
+#wpadminbar > #wp-toolbar {
+	margin: 0;
+	padding: 0;
+}
+
+#wpadminbar ul {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+#wpadminbar ul li {
+	display: inline-block;
+	margin: 0;
+	padding: 0;
+}
+
+#wpadminbar .ab-icon::before,
+#wpadminbar .ab-item::before {
+	display: inline-block;
+	margin-right: 6px;
+}
 
 // .font-xs {
 // 	font-size: 0.75rem !important;
@@ -329,8 +372,19 @@
 
 
 
+/* Frontend admin bar: prevent overlap and align with other items */
+#wp-admin-bar-whippet {
+	margin-left: 2px;
+}
+
 #wp-admin-bar-whippet .ab-item {
-    cursor: pointer;
+	display: inline-flex;
+	align-items: center;
+	cursor: pointer;
+	padding: 0 12px;
+	height: 32px;
+	line-height: 32px;
+	white-space: nowrap;
 }
 
 /**

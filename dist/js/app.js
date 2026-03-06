@@ -1,1 +1,391 @@
-(()=>{var e,t={508:()=>{},604:()=>{},988:()=>{var e={menu:{init:function(){"use strict";var e=document.getElementById("wp-admin-bar-whippet");e&&e.addEventListener("click",function(){var e=document.getElementById("whippet");e&&("none"===e.style.display?e.style.display="block":e.style.display="none")})}},UI:{init:function(){"use strict";var t;t=document.querySelectorAll("#whippet input[type=checkbox]"),Array.prototype.forEach.call(t,function(e){e.addEventListener("change",function(){document.whippetChanged=!0})}),t=document.querySelectorAll("#whippet select"),Array.prototype.forEach.call(t,function(t){t.addEventListener("change",function(){var t,r=(t="td"===this.parentNode.tagName.toLowerCase()?this.parentNode.parentNode:this.parentNode.parentNode.parentNode).querySelector(".g-cond"),a=t.querySelector(".g-excp"),n=t.querySelector(".g-regex"),l=t.querySelector(".g-cond input[type=radio]:checked");if("e"===this.value){if(e.helper.addClass("g-disabled",r),e.helper.addClass("g-disabled",a),n&&e.helper.addClass("g-disabled",n),l){l.checked=!1;var d=this.parentNode.parentNode.parentNode.querySelector(".g-excp");e.helper.clearSelected(d)}}else e.helper.removeClass("g-disabled",r),l&&"everywhere"===l.value?(n&&e.helper.addClass("g-disabled",n),e.helper.removeClass("g-disabled",a)):l&&"regex"===l.value&&(e.helper.addClass("g-disabled",a),n&&e.helper.removeClass("g-disabled",n));document.whippetChanged=!0})}),t=document.querySelectorAll("#whippet .g-cond input[type=radio]"),Array.prototype.forEach.call(t,function(t){t.addEventListener("change",function(){var t=this.parentNode.parentNode.parentNode,r=t.querySelector(".g-excp"),a=t.querySelector(".g-regex");"here"===this.value?(e.helper.addClass("g-disabled",r),a&&e.helper.addClass("g-disabled",a),e.helper.clearSelected(r),a&&e.helper.clearSelected(a)):"everywhere"===this.value?(a&&e.helper.addClass("g-disabled",a),e.helper.removeClass("g-disabled",r)):"regex"===this.value&&(e.helper.addClass("g-disabled",r),a&&e.helper.removeClass("g-disabled",a)),document.whippetChanged=!0})});var r=document.getElementById("submit-whippet");r&&r.addEventListener("click",function(){document.whippetChanged=!1})},protection:function(){"use strict";window.addEventListener("beforeunload",function(e){if(document.whippetChanged){var t="It looks like you have been editing configuration and tried to leave page without saving. Press cancel to stay on page.";return(e||window.event).returnValue=t,t}})}},helper:{addClass:function(e,t){"use strict";t.classList?t.classList.add(e):t.className+=" "+e},removeClass:function(e,t){"use strict";t.classList?t.classList.remove(e):t.className=t.className.replace(new RegExp("(^|\\b)"+e.split(" ").join("|")+"(\\b|$)","gi")," ")},clearSelected:function(e){"use strict";var t=e.querySelectorAll("input[type=checkbox]");Array.prototype.forEach.call(t,function(e){e.checked=!1});var r=e.querySelectorAll("textarea");Array.prototype.forEach.call(r,function(e){e.value=""})}},ready:function(e){"use strict";"loading"!==document.readyState?e():document.addEventListener("DOMContentLoaded",e)},init:function(){"use strict";e.ready(e.menu.init),e.ready(e.UI.init),e.ready(e.UI.protection)}};setTimeout(function(){e.init()},100)}},r={};function a(e){var n=r[e];if(void 0!==n)return n.exports;var l=r[e]={exports:{}};return t[e](l,l.exports,a),l.exports}a.m=t,e=[],a.O=(t,r,n,l)=>{if(!r){var d=1/0;for(c=0;c<e.length;c++){for(var[r,n,l]=e[c],o=!0,i=0;i<r.length;i++)(!1&l||d>=l)&&Object.keys(a.O).every(e=>a.O[e](r[i]))?r.splice(i--,1):(o=!1,l<d&&(d=l));if(o){e.splice(c--,1);var s=n();void 0!==s&&(t=s)}}return t}l=l||0;for(var c=e.length;c>0&&e[c-1][2]>l;c--)e[c]=e[c-1];e[c]=[r,n,l]},a.o=(e,t)=>Object.prototype.hasOwnProperty.call(e,t),(()=>{var e={847:0,266:0,220:0};a.O.j=t=>0===e[t];var t=(t,r)=>{var n,l,[d,o,i]=r,s=0;if(d.some(t=>0!==e[t])){for(n in o)a.o(o,n)&&(a.m[n]=o[n]);if(i)var c=i(a)}for(t&&t(r);s<d.length;s++)l=d[s],a.o(e,l)&&e[l]&&e[l][0](),e[l]=0;return a.O(c)},r=self.webpackChunk=self.webpackChunk||[];r.forEach(t.bind(null,0)),r.push=t.bind(null,r.push.bind(r))})(),a.O(void 0,[266,220],()=>a(988)),a.O(void 0,[266,220],()=>a(508));var n=a.O(void 0,[266,220],()=>a(604));n=a.O(n)})();
+/******/ (() => { // webpackBootstrap
+/******/ 	var __webpack_modules__ = ({
+
+/***/ "./resources/js/app.js":
+/*!*****************************!*\
+  !*** ./resources/js/app.js ***!
+  \*****************************/
+/***/ (() => {
+
+/*jslint browser: true*/
+//Revision: 2018.02.13
+
+var whippet = {
+  menu: {
+    init: function init() {
+      "use strict";
+
+      var menuItem = document.getElementById("wp-admin-bar-whippet");
+      if (menuItem) {
+        menuItem.addEventListener("click", function () {
+          var panel = document.getElementById("whippet");
+          if (panel) {
+            if (panel.style.display === "none") {
+              panel.style.display = "block";
+            } else {
+              panel.style.display = "none";
+            }
+          }
+        });
+      }
+    }
+  },
+  UI: {
+    init: function init() {
+      "use strict";
+
+      var elements;
+      elements = document.querySelectorAll("#whippet input[type=checkbox]");
+      Array.prototype.forEach.call(elements, function (el) {
+        el.addEventListener("change", function () {
+          document.whippetChanged = true;
+        });
+      });
+      elements = document.querySelectorAll("#whippet select");
+      Array.prototype.forEach.call(elements, function (el) {
+        el.addEventListener("change", function () {
+          //look for wrappers
+          var tr;
+          if (this.parentNode.tagName.toLowerCase() === "td") {
+            tr = this.parentNode.parentNode;
+          } else {
+            tr = this.parentNode.parentNode.parentNode; //probably wrapper around select
+          }
+          var sectionCond = tr.querySelector(".g-cond");
+          var sectionExcp = tr.querySelector(".g-excp");
+          var sectionRegex = tr.querySelector(".g-regex");
+          var checkedRadio = tr.querySelector(".g-cond input[type=radio]:checked");
+          if (this.value === "e") {
+            /**
+             * State = Enable
+             */
+
+            //ukrywanie sekcji "Where" i "Exceptions"
+            whippet.helper.addClass("g-disabled", sectionCond);
+            whippet.helper.addClass("g-disabled", sectionExcp);
+            if (sectionRegex) {
+              whippet.helper.addClass("g-disabled", sectionRegex);
+            }
+            if (checkedRadio) {
+              //odznaczanie stanu "Where"
+              checkedRadio.checked = false;
+
+              //odznaczanie "Exceptions"
+              var tr2 = this.parentNode.parentNode.parentNode;
+              var section = tr2.querySelector(".g-excp");
+              whippet.helper.clearSelected(section);
+            }
+          } else {
+            /**
+             * State = Disable
+             */
+
+            //pokazywanie sekcji "where"
+            whippet.helper.removeClass("g-disabled", sectionCond);
+
+            //jeśli zaznaczono "Everywhere" pokaż tą sekcję
+            if (checkedRadio && checkedRadio.value === "everywhere") {
+              if (sectionRegex) {
+                whippet.helper.addClass("g-disabled", sectionRegex);
+              }
+              whippet.helper.removeClass("g-disabled", sectionExcp);
+            } else if (checkedRadio && checkedRadio.value === "regex") {
+              whippet.helper.addClass("g-disabled", sectionExcp);
+              if (sectionRegex) {
+                whippet.helper.removeClass("g-disabled", sectionRegex);
+              }
+            }
+          }
+          document.whippetChanged = true;
+        });
+      });
+      elements = document.querySelectorAll("#whippet .g-cond input[type=radio]");
+      Array.prototype.forEach.call(elements, function (el) {
+        el.addEventListener("change", function () {
+          var tr = this.parentNode.parentNode.parentNode;
+          var sectionExcp = tr.querySelector(".g-excp");
+          var sectionRegex = tr.querySelector(".g-regex");
+          if (this.value === "here") {
+            whippet.helper.addClass("g-disabled", sectionExcp);
+            if (sectionRegex) {
+              whippet.helper.addClass("g-disabled", sectionRegex);
+            }
+            whippet.helper.clearSelected(sectionExcp);
+            if (sectionRegex) {
+              whippet.helper.clearSelected(sectionRegex);
+            }
+          } else if (this.value === "everywhere") {
+            if (sectionRegex) {
+              whippet.helper.addClass("g-disabled", sectionRegex);
+            }
+            whippet.helper.removeClass("g-disabled", sectionExcp);
+          } else if (this.value === "regex") {
+            whippet.helper.addClass("g-disabled", sectionExcp);
+            if (sectionRegex) {
+              whippet.helper.removeClass("g-disabled", sectionRegex);
+            }
+          }
+          document.whippetChanged = true;
+        });
+      });
+      var submitButton = document.getElementById("submit-whippet");
+      if (submitButton) {
+        submitButton.addEventListener("click", function () {
+          document.whippetChanged = false;
+        });
+      }
+    },
+    protection: function protection() {
+      "use strict";
+
+      window.addEventListener("beforeunload", function (e) {
+        if (document.whippetChanged) {
+          var confirmationMessage = "It looks like you have been editing configuration and tried to leave page without saving. Press cancel to stay on page.";
+          (e || window.event).returnValue = confirmationMessage;
+          return confirmationMessage;
+        }
+      });
+    }
+  },
+  helper: {
+    addClass: function addClass(className, el) {
+      "use strict";
+
+      if (el.classList) {
+        el.classList.add(className);
+      } else {
+        el.className += " " + className;
+      }
+    },
+    removeClass: function removeClass(className, el) {
+      "use strict";
+
+      if (el.classList) {
+        el.classList.remove(className);
+      } else {
+        el.className = el.className.replace(new RegExp("(^|\\b)" + className.split(" ").join("|") + "(\\b|$)", "gi"), " ");
+      }
+    },
+    clearSelected: function clearSelected(el) {
+      "use strict";
+
+      var checkboxes = el.querySelectorAll("input[type=checkbox]");
+      Array.prototype.forEach.call(checkboxes, function (input) {
+        input.checked = false;
+      });
+      var textareas = el.querySelectorAll("textarea");
+      Array.prototype.forEach.call(textareas, function (input) {
+        input.value = "";
+      });
+    }
+  },
+  ready: function ready(fn) {
+    "use strict";
+
+    if (document.readyState !== "loading") {
+      fn();
+    } else {
+      document.addEventListener("DOMContentLoaded", fn);
+    }
+  },
+  init: function init() {
+    "use strict";
+
+    whippet.ready(whippet.menu.init);
+    whippet.ready(whippet.UI.init);
+    whippet.ready(whippet.UI.protection);
+  }
+};
+setTimeout(function () {
+  whippet.init();
+}, 100);
+
+/***/ }),
+
+/***/ "./resources/scss/admin.scss":
+/*!***********************************!*\
+  !*** ./resources/scss/admin.scss ***!
+  \***********************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+// extracted by mini-css-extract-plugin
+
+
+/***/ }),
+
+/***/ "./resources/scss/style-whippet.scss":
+/*!*******************************************!*\
+  !*** ./resources/scss/style-whippet.scss ***!
+  \*******************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+// extracted by mini-css-extract-plugin
+
+
+/***/ }),
+
+/***/ "./resources/scss/style.scss":
+/*!***********************************!*\
+  !*** ./resources/scss/style.scss ***!
+  \***********************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+// extracted by mini-css-extract-plugin
+
+
+/***/ })
+
+/******/ 	});
+/************************************************************************/
+/******/ 	// The module cache
+/******/ 	var __webpack_module_cache__ = {};
+/******/ 	
+/******/ 	// The require function
+/******/ 	function __webpack_require__(moduleId) {
+/******/ 		// Check if module is in cache
+/******/ 		var cachedModule = __webpack_module_cache__[moduleId];
+/******/ 		if (cachedModule !== undefined) {
+/******/ 			return cachedModule.exports;
+/******/ 		}
+/******/ 		// Create a new module (and put it into the cache)
+/******/ 		var module = __webpack_module_cache__[moduleId] = {
+/******/ 			// no module.id needed
+/******/ 			// no module.loaded needed
+/******/ 			exports: {}
+/******/ 		};
+/******/ 	
+/******/ 		// Execute the module function
+/******/ 		__webpack_modules__[moduleId](module, module.exports, __webpack_require__);
+/******/ 	
+/******/ 		// Return the exports of the module
+/******/ 		return module.exports;
+/******/ 	}
+/******/ 	
+/******/ 	// expose the modules object (__webpack_modules__)
+/******/ 	__webpack_require__.m = __webpack_modules__;
+/******/ 	
+/************************************************************************/
+/******/ 	/* webpack/runtime/chunk loaded */
+/******/ 	(() => {
+/******/ 		var deferred = [];
+/******/ 		__webpack_require__.O = (result, chunkIds, fn, priority) => {
+/******/ 			if(chunkIds) {
+/******/ 				priority = priority || 0;
+/******/ 				for(var i = deferred.length; i > 0 && deferred[i - 1][2] > priority; i--) deferred[i] = deferred[i - 1];
+/******/ 				deferred[i] = [chunkIds, fn, priority];
+/******/ 				return;
+/******/ 			}
+/******/ 			var notFulfilled = Infinity;
+/******/ 			for (var i = 0; i < deferred.length; i++) {
+/******/ 				var [chunkIds, fn, priority] = deferred[i];
+/******/ 				var fulfilled = true;
+/******/ 				for (var j = 0; j < chunkIds.length; j++) {
+/******/ 					if ((priority & 1 === 0 || notFulfilled >= priority) && Object.keys(__webpack_require__.O).every((key) => (__webpack_require__.O[key](chunkIds[j])))) {
+/******/ 						chunkIds.splice(j--, 1);
+/******/ 					} else {
+/******/ 						fulfilled = false;
+/******/ 						if(priority < notFulfilled) notFulfilled = priority;
+/******/ 					}
+/******/ 				}
+/******/ 				if(fulfilled) {
+/******/ 					deferred.splice(i--, 1)
+/******/ 					var r = fn();
+/******/ 					if (r !== undefined) result = r;
+/******/ 				}
+/******/ 			}
+/******/ 			return result;
+/******/ 		};
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/hasOwnProperty shorthand */
+/******/ 	(() => {
+/******/ 		__webpack_require__.o = (obj, prop) => (Object.prototype.hasOwnProperty.call(obj, prop))
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/make namespace object */
+/******/ 	(() => {
+/******/ 		// define __esModule on exports
+/******/ 		__webpack_require__.r = (exports) => {
+/******/ 			if(typeof Symbol !== 'undefined' && Symbol.toStringTag) {
+/******/ 				Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
+/******/ 			}
+/******/ 			Object.defineProperty(exports, '__esModule', { value: true });
+/******/ 		};
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/jsonp chunk loading */
+/******/ 	(() => {
+/******/ 		// no baseURI
+/******/ 		
+/******/ 		// object to store loaded and loading chunks
+/******/ 		// undefined = chunk not loaded, null = chunk preloaded/prefetched
+/******/ 		// [resolve, reject, Promise] = chunk loading, 0 = chunk loaded
+/******/ 		var installedChunks = {
+/******/ 			"/js/app": 0,
+/******/ 			"css/admin": 0,
+/******/ 			"css/style": 0,
+/******/ 			"css/style-whippet": 0
+/******/ 		};
+/******/ 		
+/******/ 		// no chunk on demand loading
+/******/ 		
+/******/ 		// no prefetching
+/******/ 		
+/******/ 		// no preloaded
+/******/ 		
+/******/ 		// no HMR
+/******/ 		
+/******/ 		// no HMR manifest
+/******/ 		
+/******/ 		__webpack_require__.O.j = (chunkId) => (installedChunks[chunkId] === 0);
+/******/ 		
+/******/ 		// install a JSONP callback for chunk loading
+/******/ 		var webpackJsonpCallback = (parentChunkLoadingFunction, data) => {
+/******/ 			var [chunkIds, moreModules, runtime] = data;
+/******/ 			// add "moreModules" to the modules object,
+/******/ 			// then flag all "chunkIds" as loaded and fire callback
+/******/ 			var moduleId, chunkId, i = 0;
+/******/ 			if(chunkIds.some((id) => (installedChunks[id] !== 0))) {
+/******/ 				for(moduleId in moreModules) {
+/******/ 					if(__webpack_require__.o(moreModules, moduleId)) {
+/******/ 						__webpack_require__.m[moduleId] = moreModules[moduleId];
+/******/ 					}
+/******/ 				}
+/******/ 				if(runtime) var result = runtime(__webpack_require__);
+/******/ 			}
+/******/ 			if(parentChunkLoadingFunction) parentChunkLoadingFunction(data);
+/******/ 			for(;i < chunkIds.length; i++) {
+/******/ 				chunkId = chunkIds[i];
+/******/ 				if(__webpack_require__.o(installedChunks, chunkId) && installedChunks[chunkId]) {
+/******/ 					installedChunks[chunkId][0]();
+/******/ 				}
+/******/ 				installedChunks[chunkId] = 0;
+/******/ 			}
+/******/ 			return __webpack_require__.O(result);
+/******/ 		}
+/******/ 		
+/******/ 		var chunkLoadingGlobal = self["webpackChunk"] = self["webpackChunk"] || [];
+/******/ 		chunkLoadingGlobal.forEach(webpackJsonpCallback.bind(null, 0));
+/******/ 		chunkLoadingGlobal.push = webpackJsonpCallback.bind(null, chunkLoadingGlobal.push.bind(chunkLoadingGlobal));
+/******/ 	})();
+/******/ 	
+/************************************************************************/
+/******/ 	
+/******/ 	// startup
+/******/ 	// Load entry module and return exports
+/******/ 	// This entry module depends on other loaded chunks and execution need to be delayed
+/******/ 	__webpack_require__.O(undefined, ["css/admin","css/style","css/style-whippet"], () => (__webpack_require__("./resources/js/app.js")))
+/******/ 	__webpack_require__.O(undefined, ["css/admin","css/style","css/style-whippet"], () => (__webpack_require__("./resources/scss/style-whippet.scss")))
+/******/ 	__webpack_require__.O(undefined, ["css/admin","css/style","css/style-whippet"], () => (__webpack_require__("./resources/scss/style.scss")))
+/******/ 	var __webpack_exports__ = __webpack_require__.O(undefined, ["css/admin","css/style","css/style-whippet"], () => (__webpack_require__("./resources/scss/admin.scss")))
+/******/ 	__webpack_exports__ = __webpack_require__.O(__webpack_exports__);
+/******/ 	
+/******/ })()
+;
+//# sourceMappingURL=app.js.map

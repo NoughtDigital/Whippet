@@ -104,7 +104,11 @@ class Plugin {
 		require_once WHIPPET_PATH . 'inc/script-manager.php';
 		require_once WHIPPET_PATH . 'inc/import-export.php';
 		require_once WHIPPET_PATH . 'inc/tutorials.php';
-		require_once WHIPPET_PATH . 'inc/save-ga-local.php';
+		require_once WHIPPET_PATH . 'analytics/load.php';
+		require_once WHIPPET_PATH . 'fonts/load.php';
+		require_once WHIPPET_PATH . 'nazy-load/load.php';
+		require_once WHIPPET_PATH . 'pages/load.php';
+		require_once WHIPPET_PATH . 'scripts/load.php';
 	}
 
 	/**
@@ -128,20 +132,12 @@ class Plugin {
 			whippet_check_db();
 		}
 
-		// Schedule cron job
-		if ( ! wp_next_scheduled( 'update_local_ga' ) ) {
-			wp_schedule_event( time(), 'weekly', 'update_local_ga' );
-		}
 	}
 
 	/**
 	 * Plugin deactivation
 	 */
 	public function deactivate() {
-		// Clear scheduled cron job
-		if ( wp_next_scheduled( 'update_local_ga' ) ) {
-			wp_clear_scheduled_hook( 'update_local_ga' );
-		}
 	}
 }
 

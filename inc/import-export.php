@@ -66,7 +66,7 @@ function whippet_process_settings_export() {
 
 	if ( isset( $_POST['submit'] ) ) {
 
-		if ( ! wp_verify_nonce( $_POST['whippet_export_nonce'], 'whippet_export_nonce' ) ) {
+		if ( empty( $_POST['whippet_export_nonce'] ) || ! wp_verify_nonce( $_POST['whippet_export_nonce'], 'whippet_export_nonce' ) ) {
 			return;
 		}
 
@@ -77,21 +77,52 @@ function whippet_process_settings_export() {
 		// Get all Options used in core plugin.
 		$whippet_core = get_option( 'whippet_options' );
 
-		// Get all Options used in analytic.
+		// Get all Options used in analytics.
 		$whippet_analytics = array(
-			'sgal_tracking_id'              => esc_attr( get_option( 'sgal_tracking_id' ) ),
-			'sgal_adjusted_bounce_rate'     => esc_attr( get_option( 'sgal_adjusted_bounce_rate' ) ),
-			'sgal_script_position'          => esc_attr( get_option( 'sgal_script_position' ) ),
-			'sgal_enqueue_order'            => esc_attr( get_option( 'sgal_enqueue_order' ) ),
-			'sgal_anonymize_ip'             => esc_attr( get_option( 'sgal_anonymize_ip' ) ),
-			'sgal_track_admin'              => esc_attr( get_option( 'sgal_track_admin' ) ),
-			'caos_remove_wp_cron'           => esc_attr( get_option( 'caos_remove_wp_cron' ) ),
+			'flying_analytics_id'               => esc_attr( get_option( 'flying_analytics_id' ) ),
+			'flying_analytics_method'           => esc_attr( get_option( 'flying_analytics_method' ) ),
+			'flying_analytics_disable_on_login'  => get_option( 'flying_analytics_disable_on_login' ),
+		);
+
+		$whippet_fonts = array(
+			'whippet_fonts_enabled'      => get_option( 'whippet_fonts_enabled', true ),
+			'whippet_fonts_display_swap' => get_option( 'whippet_fonts_display_swap', false ),
+		);
+
+		$whippet_lazyload = array(
+			'flying_images_enable_lazyloading'     => get_option( 'flying_images_enable_lazyloading' ),
+			'flying_images_lazymethod'             => get_option( 'flying_images_lazymethod' ),
+			'flying_images_margin'                 => get_option( 'flying_images_margin' ),
+			'flying_images_exclude_keywords'       => get_option( 'flying_images_exclude_keywords' ),
+			'flying_images_enable_cdn'             => get_option( 'flying_images_enable_cdn' ),
+			'flying_images_cdn_exclude_keywords'   => get_option( 'flying_images_cdn_exclude_keywords' ),
+			'flying_images_enable_compression'     => get_option( 'flying_images_enable_compression' ),
+			'flying_images_quality'                 => get_option( 'flying_images_quality' ),
+			'flying_images_enable_responsive_images' => get_option( 'flying_images_enable_responsive_images' ),
+		);
+
+		$whippet_pages = array(
+			'flying_pages_config_ignore_keywords'  => get_option( 'flying_pages_config_ignore_keywords' ),
+			'flying_pages_config_delay'             => get_option( 'flying_pages_config_delay' ),
+			'flying_pages_config_max_rps'           => get_option( 'flying_pages_config_max_rps' ),
+			'flying_pages_config_hover_delay'       => get_option( 'flying_pages_config_hover_delay' ),
+			'flying_pages_config_disable_on_login'  => get_option( 'flying_pages_config_disable_on_login' ),
+		);
+
+		$whippet_scripts = array(
+			'flying_scripts_timeout'        => get_option( 'flying_scripts_timeout' ),
+			'flying_scripts_include_list'   => get_option( 'flying_scripts_include_list' ),
+			'flying_scripts_disabled_pages' => get_option( 'flying_scripts_disabled_pages' ),
 		);
 
 		// Make all Options a main array to encode into json.
 		$whippet_options = array(
 			'whippet_core'      => $whippet_core,
 			'whippet_analytics' => $whippet_analytics,
+			'whippet_fonts'     => $whippet_fonts,
+			'whippet_lazyload'  => $whippet_lazyload,
+			'whippet_pages'     => $whippet_pages,
+			'whippet_scripts'  => $whippet_scripts,
 		);
 		$data            = json_encode( $whippet_options );
 
@@ -115,7 +146,7 @@ function whippet_process_settings_import() {
 
 	if ( isset( $_POST['submit'] ) ) {
 
-		if ( ! wp_verify_nonce( $_POST['whippet_import_nonce'], 'whippet_import_nonce' ) ) {
+		if ( empty( $_POST['whippet_import_nonce'] ) || ! wp_verify_nonce( $_POST['whippet_import_nonce'], 'whippet_import_nonce' ) ) {
 			return;
 		}
 
@@ -166,13 +197,20 @@ function whippet_process_settings_import() {
 		}
 
 		foreach ( $settings as $key => $value ) {
-			if ( $key == 'whippet_core' ) {
+			if ( $key === 'whippet_core' ) {
 				add_option( 'whippet_options', $value );
-			} elseif ( $key == 'whippet_analytics' ) {
+			} elseif ( in_array( $key, array( 'whippet_analytics', 'whippet_fonts', 'whippet_lazyload', 'whippet_pages', 'whippet_scripts' ), true ) && is_array( $value ) ) {
 				foreach ( $value as $setting => $setting_value ) {
 					update_option( $setting, $setting_value );
 				}
 			}
+		}
+
+		// Migrate legacy sgal_* to analytics options if not in import
+		if ( empty( get_option( 'flying_analytics_id' ) ) && ! empty( get_option( 'sgal_tracking_id' ) ) ) {
+			update_option( 'flying_analytics_id', get_option( 'sgal_tracking_id' ) );
+			update_option( 'flying_analytics_method', 'minimal-analytics' );
+			update_option( 'flying_analytics_disable_on_login', get_option( 'sgal_track_admin' ) === 'on' ? false : true );
 		}
 
 		wp_safe_redirect( admin_url( 'tools.php?page=whippet' ) );

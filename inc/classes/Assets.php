@@ -33,8 +33,6 @@ class Assets {
 	 */
 	public function __construct() {
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_assets' ) );
-		// Always load font preconnect on admin pages
-		add_action( 'admin_head', array( $this, 'add_font_preconnect' ), 1 );
 	}
 
 	/**
@@ -55,34 +53,12 @@ class Assets {
 	 * Enqueue admin styles
 	 */
 	private function enqueue_styles() {
-		// Enqueue Figtree font from Google Fonts (only once)
-		if ( ! wp_style_is( 'whippet-figtree-font', 'enqueued' ) ) {
-			wp_enqueue_style(
-				'whippet-figtree-font',
-				'https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300..900;1,300..900&display=swap',
-				array(),
-				null
-			);
-		}
-
 		wp_enqueue_style(
 			'whippet-admin',
-			WHIPPET_URL . 'dist/css/style.css',
-			array( 'whippet-figtree-font' ),
+			WHIPPET_URL . 'dist/css/admin.css',
+			array(),
 			WHIPPET_VERSION
 		);
-	}
-
-	/**
-	 * Add preconnect links for Google Fonts
-	 */
-	public function add_font_preconnect() {
-		echo '<link rel="preconnect" href="https://fonts.googleapis.com">' . "\n";
-		echo '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>' . "\n";
-		echo '<style id="whippet-figtree-inline">' . "\n";
-		echo '.whippet-admin, #whippet, .whippet-panel, .whippet-form, .whippet-wrapper, [class*="whippet"], [id*="whippet"], .whippet-admin *, #whippet *, .whippet-panel *, .whippet-form *, .whippet-wrapper *, [class*="whippet"] *, [id*="whippet"] * { font-family: "Figtree", ui-sans-serif, system-ui, sans-serif !important; }' . "\n";
-		echo 'code, pre, .g-regex textarea { font-family: "SF Mono", Monaco, "Cascadia Code", "Roboto Mono", Consolas, "Courier New", monospace !important; }' . "\n";
-		echo '</style>' . "\n";
 	}
 
 	/**

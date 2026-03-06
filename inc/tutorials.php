@@ -34,6 +34,7 @@ function whippet_tutorials_page() {
 					<li class="leading-relaxed"><?php esc_html_e( 'Navigate to the Dashboard tab to configure performance options', 'whippet' ); ?></li>
 					<li class="leading-relaxed"><?php esc_html_e( 'Use the Script Manager (admin bar) to disable scripts on specific pages', 'whippet' ); ?></li>
 					<li class="leading-relaxed"><?php esc_html_e( 'Configure local analytics in the Analytics tab for improved privacy', 'whippet' ); ?></li>
+					<li class="leading-relaxed"><?php esc_html_e( 'Use Import/Export to backup or migrate your settings', 'whippet' ); ?></li>
 					<li class="leading-relaxed"><?php esc_html_e( 'Export your settings regularly as a backup', 'whippet' ); ?></li>
 				</ul>
 			</div>

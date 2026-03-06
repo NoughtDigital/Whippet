@@ -52,6 +52,11 @@
 
 /* Modern Admin Styles */
 .whippet-admin {
+	position: relative;
+	width: 100%;
+	max-width: 100%;
+	box-sizing: border-box;
+
 	/* Tab Button Styles */
 	.tab-button {
 		display: flex;
@@ -194,15 +199,35 @@ img {
 
 
 
+#wp-admin-bar-whippet {
+	margin-left: 2px;
+}
+
 #wp-admin-bar-whippet .ab-item {
-    cursor: pointer;
+	display: inline-flex;
+	align-items: center;
+	cursor: pointer;
+	padding: 0 12px;
+	height: 32px;
+	line-height: 32px;
+	white-space: nowrap;
 }
 
 /**
- * BEGIN RESET STYLE
+ * Restore WordPress admin layout (Tailwind preflight can zero margins)
+ */
+.wp-admin #wpcontent {
+	margin-left: 160px;
+}
+.wp-admin.folded #wpcontent {
+	margin-left: 36px;
+}
+
+/**
+ * BEGIN RESET STYLE (scoped to #whippet overlay only, not admin page)
  */
 #whippet div, #whippet span, #whippet applet, #whippet object, #whippet iframe,
-h1, #whippet h2, #whippet h3, #whippet h4, #whippet h5, #whippet h6, #whippet p, #whippet blockquote, #whippet pre,
+#whippet h1, #whippet h2, #whippet h3, #whippet h4, #whippet h5, #whippet h6, #whippet p, #whippet blockquote, #whippet pre,
 a, #whippet abbr, #whippet acronym, #whippet address, #whippet big, #whippet cite, #whippet code,
 del, #whippet dfn, #whippet em, #whippet img, #whippet ins, #whippet kbd, #whippet q, #whippet s, #whippet samp,
 small, #whippet strike, #whippet strong, #whippet sub, #whippet sup, #whippet tt, #whippet var,

@@ -1,0 +1,136 @@
+/**
+ * Admin-only styles. No Tailwind, no resets, no font overrides.
+ * Only scoped rules for .whippet-admin so WP admin nav and content are untouched.
+ * Tabs and cards use Tailwind-like design (rounded, shadow, blue active state).
+ */
+
+.whippet-admin {
+	/* Tab bar container - Tailwind-style */
+	.whippet-tabs-bar {
+		background: #fff;
+		border: 1px solid #e5e7eb;
+		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+		border-radius: 8px;
+		margin-bottom: 1.5rem;
+		overflow: hidden;
+	}
+
+	.whippet-tabs-list {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0;
+		background: #f8fafc;
+		border-bottom: 1px solid #e2e8f0;
+		padding: 0.25rem 0.25rem 0 0.25rem;
+	}
+
+	.tab-button {
+		display: inline-flex;
+		align-items: center;
+		padding: 0.625rem 1rem;
+		font-weight: 500;
+		font-size: 0.875rem;
+		border: none;
+		border-radius: 6px 6px 0 0;
+		background: transparent;
+		cursor: pointer;
+		color: #64748b;
+		transition: color 0.15s ease, background 0.15s ease, color 0.15s ease;
+		margin-bottom: -1px;
+		border-bottom: 2px solid transparent;
+	}
+
+	.tab-button svg {
+		width: 1.25rem;
+		height: 1.25rem;
+		margin-right: 0.5rem;
+		vertical-align: middle;
+		flex-shrink: 0;
+	}
+
+	.tab-active {
+		color: #1e40af;
+		background: #fff;
+		border-bottom-color: #2563eb;
+		box-shadow: 0 -1px 2px rgba(0, 0, 0, 0.04);
+		font-weight: 600;
+	}
+
+	.tab-inactive:hover {
+		color: #334155;
+		background: rgba(255, 255, 255, 0.8);
+	}
+
+	.whippet-tabs-content {
+		padding: 1.5rem;
+		background: #fff;
+	}
+
+	/* Import/Export grid and cards - layout when Tailwind not available */
+	.whippet-cards-grid {
+		display: grid;
+		grid-template-columns: 1fr;
+		gap: 1.5rem;
+		margin-top: 1rem;
+	}
+
+	@media (min-width: 768px) {
+		.whippet-cards-grid {
+			grid-template-columns: repeat(2, 1fr);
+		}
+	}
+
+	.whippet-card {
+		background: #fff;
+		padding: 1.5rem;
+		border-radius: 8px;
+		border: 1px solid #e5e7eb;
+		box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+	}
+
+	.whippet-card h3 {
+		display: flex;
+		align-items: center;
+		font-size: 1.125rem;
+		font-weight: 600;
+		margin-bottom: 0.75rem;
+	}
+
+	.whippet-card h3 svg {
+		width: 1.25rem;
+		height: 1.25rem;
+		margin-right: 0.5rem;
+		flex-shrink: 0;
+	}
+
+	.whippet-card .whippet-drop-zone {
+		padding: 1.5rem;
+		text-align: center;
+		background: #f9fafb;
+	}
+
+	.whippet-card .whippet-drop-zone svg {
+		width: 2.5rem;
+		height: 2.5rem;
+		margin: 0 auto 0.75rem;
+		display: block;
+	}
+
+	.whippet-card .button svg,
+	.whippet-card button[type="submit"] svg {
+		width: 1rem;
+		height: 1rem;
+		vertical-align: middle;
+		margin-right: 0.5rem;
+	}
+
+	.button-large {
+		padding: 0.75rem 1.5rem !important;
+		font-size: 1rem !important;
+		height: auto !important;
+	}
+
+	[x-cloak] {
+		display: none !important;
+	}
+}

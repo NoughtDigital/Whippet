@@ -102,7 +102,8 @@ var sassConfig = {
 // Compile SASS/CSS.
 mix
   .sass(`${devPath}/scss/style-whippet.scss`, "css", sassConfig)
-  .sass(`${devPath}/scss/style.scss`, "css", sassConfig);
+  .sass(`${devPath}/scss/style.scss`, "css", sassConfig)
+  .sass(`${devPath}/scss/admin.scss`, "css", sassConfig);
 
 // // Compile Tailwind
 // mix.tailwind();

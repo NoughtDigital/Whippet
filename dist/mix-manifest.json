@@ -1,5 +1,10 @@
 {
-    "/js/app.js": "/js/app.js?id=a9a08a17c217b643552d383e2a14373f",
-    "/css/style.css": "/css/style.css?id=03bf54ec0dd64c12f2592374fc6f1a3e",
-    "/css/style-whippet.css": "/css/style-whippet.css?id=6f1a78b76d7704e797d72fa7408b5188"
+    "/js/app.js": "/js/app.js?id=2bc5dc914cc4852dbb58a92d13b59f68",
+    "/js/app.js.map": "/js/app.js.map?id=9322196bcb8634424e47f66593542a76",
+    "/css/admin.css": "/css/admin.css?id=5b366bd9df195a7d6a45b07be1df0a4d",
+    "/css/admin.css.map": "/css/admin.css.map?id=4327ec9b1bd2a84cd94f4bad1545ed39",
+    "/css/style.css": "/css/style.css?id=a97c3117ebdde08996987b2e579aa153",
+    "/css/style.css.map": "/css/style.css.map?id=b6c0589290518001e02ae5fadacebb6b",
+    "/css/style-whippet.css": "/css/style-whippet.css?id=561370bd158c8066189ba58e018e2160",
+    "/css/style-whippet.css.map": "/css/style-whippet.css.map?id=eca98aaa8a365b92eb5d28dda7f280ca"
 }
