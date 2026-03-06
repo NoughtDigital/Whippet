@@ -1,0 +1,117 @@
+name: Deploy to WordPress.org
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Git repository
+        uses: actions/checkout@v4
+
+      # OPTIONAL: Build steps (uncomment if you actually need them)
+      # - name: Setup Node
+      #   uses: actions/setup-node@v4
+      #   with:
+      #     node-version: 20
+      #
+      # - name: Install npm deps and build
+      #   run: |
+      #     npm ci
+      #     npm run build
+      #
+      # - name: Setup PHP
+      #   uses: shivammathur/setup-php@v2
+      #   with:
+      #     php-version: '8.2'
+      #
+      # - name: Install composer deps (no-dev)
+      #   run: composer install --no-dev --prefer-dist --no-interaction --no-progress
+
+      - name: Extract version from tag
+        id: version
+        run: |
+          TAG="${GITHUB_REF_NAME}"
+          # Accept v1.2.3 or 1.2.3
+          VERSION="${TAG#v}"
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Install SVN
+        run: sudo apt-get update && sudo apt-get install -y subversion rsync
+
+      - name: Checkout WordPress.org SVN repository
+        run: |
+          svn checkout "https://plugins.svn.wordpress.org/${{ secrets.WPORG_SLUG }}/" wporg
+
+      - name: Sync files to trunk
+        run: |
+          rsync -av --delete \
+            --exclude=".git" \
+            --exclude=".github" \
+            --exclude="node_modules" \
+            --exclude="vendor" \
+            --exclude=".env" \
+            --exclude=".env.*" \
+            --exclude="tests" \
+            --exclude="phpunit.xml" \
+            --exclude="composer.json" \
+            --exclude="composer.lock" \
+            ./ wporg/trunk/
+
+      # If you DO ship /vendor in the plugin, remove --exclude vendor above.
+      # If you do composer install --no-dev in this workflow, also remove it.
+
+      - name: Update version in plugin header + readme stable tag
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+
+          # Update readme stable tag
+          if [ -f "wporg/trunk/readme.txt" ]; then
+            sed -i "s/^Stable tag: .*/Stable tag: ${VERSION}/" wporg/trunk/readme.txt || true
+          fi
+
+          # Update the main plugin file header version:
+          # If your main plugin file isn't named like the slug, change this path.
+          PLUGIN_FILE="wporg/trunk/${{ secrets.WPORG_SLUG }}.php"
+          if [ -f "$PLUGIN_FILE" ]; then
+            sed -i "s/^Version: .*/Version: ${VERSION}/" "$PLUGIN_FILE" || true
+          else
+            echo "Main plugin file not found at $PLUGIN_FILE"
+            echo "Edit the workflow to point to your actual main plugin file."
+            exit 1
+          fi
+
+      - name: SVN add/remove
+        run: |
+          cd wporg
+          svn status
+          svn add --force trunk/* --auto-props --parents --depth infinity
+          svn status | awk '/^\!/ {print $2}' | xargs -r svn delete
+          svn status
+
+      - name: Commit trunk
+        env:
+          WPORG_USERNAME: ${{ secrets.WPORG_USERNAME }}
+          WPORG_PASSWORD: ${{ secrets.WPORG_PASSWORD }}
+        run: |
+          cd wporg
+          svn commit -m "Release ${{ steps.version.outputs.version }}" \
+            --username "$WPORG_USERNAME" \
+            --password "$WPORG_PASSWORD" \
+            --no-auth-cache
+
+      - name: Create tag
+        env:
+          WPORG_USERNAME: ${{ secrets.WPORG_USERNAME }}
+          WPORG_PASSWORD: ${{ secrets.WPORG_PASSWORD }}
+        run: |
+          cd wporg
+          VERSION="${{ steps.version.outputs.version }}"
+          svn copy trunk "tags/${VERSION}"
+          svn commit -m "Tag ${VERSION}" \
+            --username "$WPORG_USERNAME" \
+            --password "$WPORG_PASSWORD" \
+            --no-auth-cache

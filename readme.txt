@@ -1,6 +1,6 @@
 === Whippet ===
 
-Contributors: JaHe
+Contributors: JaHe, noughtdigital
 Plugin Name: Whippet
 Plugin URI: https://whippetwp.com/
 Tags: Speed, Optimisation, Google Analytics, Script Manager, Speed, Performance, Disable Emoji, Remove Querystrings, Reduce HTTP Requests, Disable Embeds, Disable Gravatars, Whippet
