@@ -44,15 +44,13 @@ jobs:
 
       - name: Checkout WordPress.org SVN repository
         run: |
-          svn checkout "https://plugins.svn.wordpress.org/${{ secrets.WPORG_SLUG }}/" wporg
+          svn checkout "https://plugins.svn.wordpress.org/${{ secrets.WPORG_SLUG }}/" "$RUNNER_TEMP/wporg"
 
       - name: Sync files to trunk
         run: |
           rsync -av --delete \
             --exclude=".git" \
             --exclude=".github" \
-            --exclude="wporg/" \
-            --exclude="wporg" \
             --exclude="node_modules" \
             --exclude="vendor" \
             --exclude=".env" \
@@ -61,8 +59,7 @@ jobs:
             --exclude="phpunit.xml" \
             --exclude="composer.json" \
             --exclude="composer.lock" \
-            ./ wporg/trunk/
-          R=$?; (($R == 24)) && exit 0; exit $R
+            ./ "$RUNNER_TEMP/wporg/trunk/"
 
       # If you DO ship /vendor in the plugin, remove --exclude vendor above.
       # If you do composer install --no-dev in this workflow, also remove it.
@@ -70,15 +67,16 @@ jobs:
       - name: Update version in plugin header + readme stable tag
         run: |
           VERSION="${{ steps.version.outputs.version }}"
+          WPORG="$RUNNER_TEMP/wporg"
 
           # Update readme stable tag
-          if [ -f "wporg/trunk/readme.txt" ]; then
-            sed -i "s/^Stable tag: .*/Stable tag: ${VERSION}/" wporg/trunk/readme.txt || true
+          if [ -f "$WPORG/trunk/readme.txt" ]; then
+            sed -i "s/^Stable tag: .*/Stable tag: ${VERSION}/" "$WPORG/trunk/readme.txt" || true
           fi
 
           # Update the main plugin file header version:
           # If your main plugin file isn't named like the slug, change this path.
-          PLUGIN_FILE="wporg/trunk/${{ secrets.WPORG_SLUG }}.php"
+          PLUGIN_FILE="$WPORG/trunk/${{ secrets.WPORG_SLUG }}.php"
           if [ -f "$PLUGIN_FILE" ]; then
             sed -i "s/^Version: .*/Version: ${VERSION}/" "$PLUGIN_FILE" || true
           else
@@ -89,7 +87,7 @@ jobs:
 
       - name: SVN add/remove
         run: |
-          cd wporg
+          cd "$RUNNER_TEMP/wporg"
           svn status
           svn add --force trunk/* --auto-props --parents --depth infinity
           svn status | awk '/^\!/ {print $2}' | xargs -r svn delete
@@ -100,7 +98,7 @@ jobs:
           WPORG_USERNAME: ${{ secrets.WPORG_USERNAME }}
           WPORG_PASSWORD: ${{ secrets.WPORG_PASSWORD }}
         run: |
-          cd wporg
+          cd "$RUNNER_TEMP/wporg"
           svn commit -m "Release ${{ steps.version.outputs.version }}" \
             --username "$WPORG_USERNAME" \
             --password "$WPORG_PASSWORD" \
@@ -111,7 +109,7 @@ jobs:
           WPORG_USERNAME: ${{ secrets.WPORG_USERNAME }}
           WPORG_PASSWORD: ${{ secrets.WPORG_PASSWORD }}
         run: |
-          cd wporg
+          cd "$RUNNER_TEMP/wporg"
           VERSION="${{ steps.version.outputs.version }}"
           svn copy trunk "tags/${VERSION}"
           svn commit -m "Tag ${VERSION}" \
