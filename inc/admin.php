@@ -1,6 +1,6 @@
 <?php
 /**
- * Modern Admin Page Template
+ * Admin Page Template
  *
  * @package Whippet
  */
@@ -10,12 +10,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 ?>
-
 <div class="wrap whippet-admin" x-data="{
 	activeTab: (function() {
 		var h = window.location.hash.slice(1) || localStorage.getItem('whippet_tab') || 'dashboard';
-		var valid = ['dashboard','analytics','fonts','lazyload','pages','scripts','import-export','docs'].indexOf(h) !== -1;
-		return valid ? h : 'dashboard';
+		var valid = ['dashboard','performance','analytics','fonts','lazyload','pages','scripts','tools','import-export','docs'];
+		return valid.indexOf(h) !== -1 ? h : 'dashboard';
 	})(),
 	isDragging: false,
 	setTab(tab) {
@@ -31,446 +30,516 @@ if ( ! defined( 'ABSPATH' ) ) {
 		var form = document.getElementById('whippet-dashboard-form');
 		if (form) form.querySelectorAll('input[type=checkbox]').forEach(function(cb) { cb.checked = false; });
 	}
-}">
+}" x-cloak>
 
-	<!-- Header -->
-	<div class="px-2 mt-8">
-		<div class="flex -mx-2 mb-4">
-			<div class="w-full px-2">
-				<div class="flex items-center justify-between">
+<div class="wa-shell">
+
+	<!-- ── Sidebar ─────────────────────────────────────────────── -->
+	<aside class="wa-sidebar">
+
+		<div class="wa-brand">
+			<div class="wa-brand-icon">
+				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+					<path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+				</svg>
+			</div>
+			<div>
+				<div class="wa-brand-name"><?php esc_html_e( 'Whippet', 'whippet' ); ?></div>
+				<span class="wa-brand-ver">v<?php echo esc_html( WHIPPET_VERSION ); ?></span>
+			</div>
+		</div>
+
+		<nav class="wa-nav">
+
+			<button class="wa-nav-btn" :class="activeTab === 'dashboard' ? 'active' : ''" @click="setTab('dashboard')">
+				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+					<rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+				</svg>
+				<span><?php esc_html_e( 'Dashboard', 'whippet' ); ?></span>
+			</button>
+
+			<button class="wa-nav-btn" :class="activeTab === 'performance' ? 'active' : ''" @click="setTab('performance')">
+				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+					<path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+				</svg>
+				<span><?php esc_html_e( 'Performance', 'whippet' ); ?></span>
+			</button>
+
+			<button class="wa-nav-btn" :class="activeTab === 'analytics' ? 'active' : ''" @click="setTab('analytics')">
+				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+					<path d="M18 20V10M12 20V4M6 20v-6"/>
+				</svg>
+				<span><?php esc_html_e( 'Analytics', 'whippet' ); ?></span>
+			</button>
+
+			<button class="wa-nav-btn" :class="activeTab === 'fonts' ? 'active' : ''" @click="setTab('fonts')">
+				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+					<polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/>
+				</svg>
+				<span><?php esc_html_e( 'Fonts', 'whippet' ); ?></span>
+			</button>
+
+			<button class="wa-nav-btn" :class="activeTab === 'lazyload' ? 'active' : ''" @click="setTab('lazyload')">
+				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+					<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>
+				</svg>
+				<span><?php esc_html_e( 'Lazy Load', 'whippet' ); ?></span>
+			</button>
+
+			<button class="wa-nav-btn" :class="activeTab === 'pages' ? 'active' : ''" @click="setTab('pages')">
+				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+					<path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+				</svg>
+				<span><?php esc_html_e( 'Preload', 'whippet' ); ?></span>
+			</button>
+
+			<button class="wa-nav-btn" :class="activeTab === 'scripts' ? 'active' : ''" @click="setTab('scripts')">
+				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+					<polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+				</svg>
+				<span><?php esc_html_e( 'Scripts', 'whippet' ); ?></span>
+			</button>
+
+			<button class="wa-nav-btn" :class="activeTab === 'tools' ? 'active' : ''" @click="setTab('tools')">
+				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+					<path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+				</svg>
+				<span><?php esc_html_e( 'Tools', 'whippet' ); ?></span>
+			</button>
+
+			<div class="wa-nav-divider"></div>
+
+			<button class="wa-nav-btn" :class="activeTab === 'import-export' ? 'active' : ''" @click="setTab('import-export')">
+				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+					<path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+				</svg>
+				<span><?php esc_html_e( 'Import / Export', 'whippet' ); ?></span>
+			</button>
+
+			<button class="wa-nav-btn" :class="activeTab === 'docs' ? 'active' : ''" @click="setTab('docs')">
+				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+					<path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/>
+				</svg>
+				<span><?php esc_html_e( 'Docs', 'whippet' ); ?></span>
+			</button>
+
+		</nav>
+	</aside>
+	<!-- /sidebar -->
+
+	<!-- ── Main Content ───────────────────────────────────────── -->
+	<div class="wa-content">
+
+		<!-- ============================================================
+		     DASHBOARD TAB
+		     ============================================================ -->
+		<div class="wa-panel" x-show="activeTab === 'dashboard'" style="display:none"
+			 x-transition:enter="wa-fade-in" x-transition:enter-start="wa-fade-start" x-transition:enter-end="wa-fade-end">
+
+			<div class="wa-panel-hd">
+				<h2><?php esc_html_e( 'Dashboard', 'whippet' ); ?></h2>
+				<p><?php esc_html_e( 'Enable or disable WordPress features to reduce page weight and improve performance.', 'whippet' ); ?></p>
+			</div>
+
+			<div class="wa-card">
+				<form method="post" action="options.php" id="whippet-dashboard-form">
+					<?php
+					settings_fields( 'whippet_options' );
+					do_settings_sections( 'whippet_options' );
+					?>
+					<div class="wa-actions">
+						<?php submit_button( __( 'Save Settings', 'whippet' ), 'primary', 'submit', false ); ?>
+						<button type="button" class="button" @click="selectAllDashboard()"><?php esc_html_e( 'Enable all', 'whippet' ); ?></button>
+						<button type="button" class="button" @click="deselectAllDashboard()"><?php esc_html_e( 'Disable all', 'whippet' ); ?></button>
+					</div>
+				</form>
+			</div>
+		</div>
+
+		<!-- ============================================================
+		     PERFORMANCE TAB
+		     ============================================================ -->
+		<div class="wa-panel" x-show="activeTab === 'performance'" style="display:none"
+			 x-transition:enter="wa-fade-in" x-transition:enter-start="wa-fade-start" x-transition:enter-end="wa-fade-end">
+
+			<div class="wa-panel-hd">
+				<h2><?php esc_html_e( 'Performance', 'whippet' ); ?></h2>
+				<p><?php esc_html_e( 'Page caching, compression, image optimisation, database cleanup and server tuning.', 'whippet' ); ?></p>
+			</div>
+
+			<div class="wa-card">
+				<form method="post" action="options.php">
+					<?php
+					settings_fields( 'whippet_performance' );
+					do_settings_sections( 'whippet_performance' );
+					?>
+					<div class="wa-actions">
+						<?php submit_button( __( 'Save Settings', 'whippet' ), 'primary', 'submit', false ); ?>
+					</div>
+				</form>
+			</div>
+		</div>
+
+		<!-- ============================================================
+		     ANALYTICS TAB
+		     ============================================================ -->
+		<div class="wa-panel" x-show="activeTab === 'analytics'" style="display:none"
+			 x-transition:enter="wa-fade-in" x-transition:enter-start="wa-fade-start" x-transition:enter-end="wa-fade-end">
+
+			<div class="wa-panel-hd">
+				<h2><?php esc_html_e( 'Analytics', 'whippet' ); ?></h2>
+				<p><?php esc_html_e( 'Configure your local analytics settings for improved privacy and performance.', 'whippet' ); ?></p>
+			</div>
+
+			<div class="wa-card">
+				<?php
+				if ( function_exists( 'whippet_analytics_settings' ) ) {
+					whippet_analytics_settings();
+				} else {
+					echo '<div style="padding:1.25rem;"><p style="color:#64748b;font-size:.875rem;">' . esc_html__( 'Analytics module not loaded.', 'whippet' ) . '</p></div>';
+				}
+				?>
+			</div>
+		</div>
+
+		<!-- ============================================================
+		     FONTS TAB
+		     ============================================================ -->
+		<div class="wa-panel" x-show="activeTab === 'fonts'" style="display:none"
+			 x-transition:enter="wa-fade-in" x-transition:enter-start="wa-fade-start" x-transition:enter-end="wa-fade-end">
+
+			<div class="wa-panel-hd">
+				<h2><?php esc_html_e( 'Fonts', 'whippet' ); ?></h2>
+				<p><?php esc_html_e( 'Remove Google Fonts overhead and control font display behaviour.', 'whippet' ); ?></p>
+			</div>
+
+			<?php
+			if ( isset( $_POST['whippet_fonts_save'] ) && check_admin_referer( 'whippet_fonts', 'whippet_fonts_nonce' ) ) {
+				update_option( 'whippet_fonts_enabled', ! empty( $_POST['whippet_fonts_enabled'] ) );
+				update_option( 'whippet_fonts_display_swap', ! empty( $_POST['whippet_fonts_display_swap'] ) );
+				echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__( 'Settings saved.', 'whippet' ) . '</p></div>';
+			}
+			$fonts_enabled = get_option( 'whippet_fonts_enabled', true );
+			$fonts_swap    = get_option( 'whippet_fonts_display_swap', false );
+			?>
+
+			<div class="wa-card">
+				<form method="post">
+					<?php wp_nonce_field( 'whippet_fonts', 'whippet_fonts_nonce' ); ?>
+					<table class="form-table" role="presentation">
+						<tbody>
+						<tr>
+							<th scope="row"><label for="whippet_fonts_enabled"><?php esc_html_e( 'Remove Google Fonts', 'whippet' ); ?></label></th>
+							<td>
+								<input type="checkbox" name="whippet_fonts_enabled" id="whippet_fonts_enabled" value="1" <?php checked( $fonts_enabled ); ?> />
+								<p class="description"><?php esc_html_e( 'Replace Google Fonts with system fonts — removes external DNS lookups.', 'whippet' ); ?></p>
+							</td>
+						</tr>
+						<tr>
+							<th scope="row"><label for="whippet_fonts_display_swap"><?php esc_html_e( 'font-display: swap', 'whippet' ); ?></label></th>
+							<td>
+								<input type="checkbox" name="whippet_fonts_display_swap" id="whippet_fonts_display_swap" value="1" <?php checked( $fonts_swap ); ?> />
+								<p class="description"><?php esc_html_e( 'Keeps text visible during font load. Only applies when Remove Google Fonts is off.', 'whippet' ); ?></p>
+							</td>
+						</tr>
+						</tbody>
+					</table>
+					<div class="wa-actions">
+						<button type="submit" name="whippet_fonts_save" class="button button-primary"><?php esc_html_e( 'Save Settings', 'whippet' ); ?></button>
+					</div>
+				</form>
+			</div>
+		</div>
+
+		<!-- ============================================================
+		     LAZY LOAD TAB
+		     ============================================================ -->
+		<div class="wa-panel" x-show="activeTab === 'lazyload'" style="display:none"
+			 x-transition:enter="wa-fade-in" x-transition:enter-start="wa-fade-start" x-transition:enter-end="wa-fade-end">
+
+			<div class="wa-panel-hd">
+				<h2><?php esc_html_e( 'Lazy Load', 'whippet' ); ?></h2>
+				<p><?php esc_html_e( 'Lazy load images and optimise delivery.', 'whippet' ); ?></p>
+			</div>
+
+			<?php
+			$whippet_ltab  = isset( $_GET['whippet_ltab'] ) ? sanitize_text_field( $_GET['whippet_ltab'] ) : 'lazyload';
+			$lazyload_tabs = array(
+				'lazyload'       => __( 'Lazy Load', 'whippet' ),
+				'cdn'            => __( 'CDN', 'whippet' ),
+				'responsiveness' => __( 'Responsiveness', 'whippet' ),
+				'compression'    => __( 'Compression', 'whippet' ),
+				'webp'           => __( 'WebP', 'whippet' ),
+			);
+			?>
+			<div class="wa-subtabs">
+				<?php foreach ( $lazyload_tabs as $key => $label ) : ?>
+					<a href="<?php echo esc_url( add_query_arg( array( 'page' => 'whippet', 'whippet_ltab' => $key ), admin_url( 'tools.php' ) ) . '#lazyload' ); ?>"
+					   class="wa-subtab-btn <?php echo $whippet_ltab === $key ? 'active' : ''; ?>">
+						<?php echo esc_html( $label ); ?>
+					</a>
+				<?php endforeach; ?>
+			</div>
+
+			<div class="wa-card">
+				<?php
+				if ( isset( $_POST['submit'] ) ) {
+					echo '<div class="notice notice-success is-dismissible" style="margin:1rem 1.25rem 0;"><p>' . esc_html__( 'Settings saved. Clear cache if you use a cache plugin.', 'whippet' ) . '</p></div>';
+				}
+				switch ( $whippet_ltab ) {
+					case 'cdn':            whippet_images_settings_cdn(); break;
+					case 'compression':    whippet_images_settings_compression(); break;
+					case 'responsiveness': whippet_images_settings_responsiveness(); break;
+					case 'webp':           whippet_images_settings_webp(); break;
+					default:               whippet_images_settings_lazy_load(); break;
+				}
+				?>
+			</div>
+		</div>
+
+		<!-- ============================================================
+		     PRELOAD / PAGES TAB
+		     ============================================================ -->
+		<div class="wa-panel" x-show="activeTab === 'pages'" style="display:none"
+			 x-transition:enter="wa-fade-in" x-transition:enter-start="wa-fade-start" x-transition:enter-end="wa-fade-end">
+
+			<div class="wa-panel-hd">
+				<h2><?php esc_html_e( 'Preload', 'whippet' ); ?></h2>
+				<p><?php esc_html_e( 'Preload pages so they appear to load instantly on click.', 'whippet' ); ?></p>
+			</div>
+
+			<div class="wa-card">
+				<?php
+				if ( isset( $_POST['submit'] ) ) {
+					echo '<div class="notice notice-success is-dismissible" style="margin:1rem 1.25rem 0;"><p>' . esc_html__( 'Settings saved.', 'whippet' ) . '</p></div>';
+				}
+				whippet_pages_settings();
+				?>
+			</div>
+		</div>
+
+		<!-- ============================================================
+		     SCRIPTS TAB
+		     ============================================================ -->
+		<div class="wa-panel" x-show="activeTab === 'scripts'" style="display:none"
+			 x-transition:enter="wa-fade-in" x-transition:enter-start="wa-fade-start" x-transition:enter-end="wa-fade-end">
+
+			<div class="wa-panel-hd">
+				<h2><?php esc_html_e( 'Scripts', 'whippet' ); ?></h2>
+				<p><?php esc_html_e( 'Delay JavaScript to reduce render-blocking.', 'whippet' ); ?></p>
+			</div>
+
+			<div class="wa-card">
+				<?php whippet_scripts_view_settings(); ?>
+			</div>
+		</div>
+
+		<!-- ============================================================
+		     TOOLS TAB
+		     ============================================================ -->
+		<div class="wa-panel" x-show="activeTab === 'tools'" style="display:none"
+			 x-transition:enter="wa-fade-in" x-transition:enter-start="wa-fade-start" x-transition:enter-end="wa-fade-end">
+
+			<div class="wa-panel-hd">
+				<h2><?php esc_html_e( 'Tools', 'whippet' ); ?></h2>
+				<p><?php esc_html_e( 'Site health checks and server capability diagnostics.', 'whippet' ); ?></p>
+			</div>
+
+			<?php
+			$run_checks       = isset( $_GET['whippet_tools'] );
+			$is_https         = is_ssl();
+			$brotli_available = function_exists( 'brotli_compress' );
+			$webp_gd          = function_exists( 'imagewebp' );
+			$webp_imagick     = class_exists( 'Imagick' ) && ( new \Imagick() )->queryFormats( 'WEBP' );
+			$webp_ok          = $webp_gd || $webp_imagick;
+			$php_ver          = phpversion();
+			global $wp_version;
+
+			$cc_header  = null;
+			$cc_checked = false;
+			if ( $run_checks ) {
+				$response = wp_remote_get( home_url( '/' ), array( 'timeout' => 10, 'sslverify' => false ) );
+				if ( ! is_wp_error( $response ) ) {
+					$cc_header  = wp_remote_retrieve_header( $response, 'cache-control' );
+					$cc_checked = true;
+				}
+			}
+
+			$checks = array(
+				array(
+					'label' => __( 'HTTPS', 'whippet' ),
+					'ok'    => $is_https,
+					'pass'  => __( 'Your site is served over HTTPS.', 'whippet' ),
+					'fail'  => __( 'HTTPS not detected. Required for HTTP/2 and improved performance.', 'whippet' ),
+				),
+				array(
+					'label' => __( 'PHP Brotli', 'whippet' ),
+					'ok'    => $brotli_available,
+					'pass'  => __( 'php-brotli detected — cached pages will be saved as .br files.', 'whippet' ),
+					'fail'  => __( 'php-brotli not installed. Gzip will be used instead.', 'whippet' ),
+				),
+				array(
+					'label' => __( 'WebP (GD / Imagick)', 'whippet' ),
+					'ok'    => $webp_ok,
+					'pass'  => sprintf( __( 'WebP available via %s.', 'whippet' ), implode( ' + ', array_filter( array( $webp_gd ? 'GD' : '', $webp_imagick ? 'Imagick' : '' ) ) ) ),
+					'fail'  => __( 'Neither GD imagewebp() nor Imagick with WebP support found.', 'whippet' ),
+				),
+			);
+			?>
+
+			<div class="wa-tools-checks">
+				<?php foreach ( $checks as $check ) : ?>
+				<div class="wa-check-card <?php echo $check['ok'] ? 'ok' : 'fail'; ?>">
+					<div class="wa-check-badge"><?php echo $check['ok'] ? '✓' : '✗'; ?></div>
 					<div>
-						<h1 class="text-xl font-bold"><?php esc_html_e( 'Whippet', 'whippet' ); ?></h1>
-						<p class="text-sm"><?php esc_html_e( 'Disable scripts and styles conditionally to improve performance', 'whippet' ); ?></p>
-					</div>
-					<div class="text-sm">
-						<?php printf( esc_html__( 'Version %s', 'whippet' ), esc_html( WHIPPET_VERSION ) ); ?>
+						<div class="wa-check-label"><?php echo esc_html( $check['label'] ); ?></div>
+						<div class="wa-check-msg"><?php echo esc_html( $check['ok'] ? $check['pass'] : $check['fail'] ); ?></div>
 					</div>
 				</div>
+				<?php endforeach; ?>
 			</div>
+
+			<div class="wa-card" style="margin-bottom:1rem;">
+				<div class="wa-card-section-title"><?php esc_html_e( 'Server Info', 'whippet' ); ?></div>
+				<table class="form-table" role="presentation">
+					<tbody>
+					<tr><th><?php esc_html_e( 'PHP', 'whippet' ); ?></th><td><code><?php echo esc_html( $php_ver ); ?></code></td></tr>
+					<tr><th><?php esc_html_e( 'WordPress', 'whippet' ); ?></th><td><code><?php echo esc_html( $wp_version ); ?></code></td></tr>
+					<tr><th><?php esc_html_e( 'GD', 'whippet' ); ?></th><td><code><?php echo function_exists( 'gd_info' ) ? esc_html( ( gd_info() )['GD Version'] ?? 'available' ) : esc_html__( 'not available', 'whippet' ); ?></code></td></tr>
+					<tr><th><?php esc_html_e( 'Imagick', 'whippet' ); ?></th><td><code><?php echo class_exists( 'Imagick' ) ? esc_html( \Imagick::getVersion()['versionString'] ?? 'available' ) : esc_html__( 'not available', 'whippet' ); ?></code></td></tr>
+					<tr><th><?php esc_html_e( 'Gzip', 'whippet' ); ?></th><td><code><?php echo defined( 'ZLIB_VERSION' ) ? esc_html( ZLIB_VERSION ) : ( function_exists( 'ob_gzhandler' ) ? esc_html__( 'available', 'whippet' ) : esc_html__( 'not available', 'whippet' ) ); ?></code></td></tr>
+					<tr><th><?php esc_html_e( 'Brotli', 'whippet' ); ?></th><td><code><?php echo $brotli_available ? esc_html__( 'available', 'whippet' ) : esc_html__( 'not available', 'whippet' ); ?></code></td></tr>
+					</tbody>
+				</table>
+			</div>
+
+			<div class="wa-card">
+				<div class="wa-card-section-title"><?php esc_html_e( 'Cache-Control Header', 'whippet' ); ?></div>
+				<?php if ( $cc_checked ) :
+					$no_store = strpos( $cc_header ?? '', 'no-store' ) !== false; ?>
+					<?php if ( ! $no_store ) : ?>
+						<p style="font-size:.8125rem;color:#15803d;padding:0 1.25rem .75rem;">✓ <?php esc_html_e( '"no-store" not found — caching is not blocked by your server.', 'whippet' ); ?></p>
+					<?php else : ?>
+						<p style="font-size:.8125rem;color:#b91c1c;padding:0 1.25rem .5rem;">✗ <?php esc_html_e( '"no-store" found — server is preventing caching. Contact your host.', 'whippet' ); ?></p>
+						<p style="font-size:.8125rem;padding:0 1.25rem .75rem;"><?php esc_html_e( 'Current:', 'whippet' ); ?> <code><?php echo esc_html( $cc_header ); ?></code></p>
+					<?php endif; ?>
+				<?php else : ?>
+					<p style="font-size:.8125rem;color:#64748b;padding:0 1.25rem .75rem;"><?php esc_html_e( 'Makes an HTTP request to your homepage to inspect response headers.', 'whippet' ); ?></p>
+					<div style="padding:0 1.25rem 1rem;">
+						<a href="<?php echo esc_url( add_query_arg( array( 'page' => 'whippet', 'whippet_tools' => '1' ), admin_url( 'tools.php' ) ) . '#tools' ); ?>" class="button button-secondary">
+							<?php esc_html_e( 'Run Cache-Control Check', 'whippet' ); ?>
+						</a>
+					</div>
+				<?php endif; ?>
+			</div>
+
 		</div>
 
-		<!-- Tabs Navigation -->
-		<div class="whippet-tabs-bar">
-			<div class="whippet-tabs-list">
-				<button 
-					@click="setTab('dashboard')" 
-					:class="activeTab === 'dashboard' ? 'tab-active' : 'tab-inactive'" 
-					class="tab-button">
-					<svg class="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
-					</svg>
-					<?php esc_html_e( 'Dashboard', 'whippet' ); ?>
-				</button>
-				<button 
-					@click="setTab('analytics')" 
-					:class="activeTab === 'analytics' ? 'tab-active' : 'tab-inactive'" 
-					class="tab-button">
-					<svg class="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
-					</svg>
-					<?php esc_html_e( 'Analytics', 'whippet' ); ?>
-				</button>
-				<button 
-					@click="setTab('fonts')" 
-					:class="activeTab === 'fonts' ? 'tab-active' : 'tab-inactive'" 
-					class="tab-button">
-					<svg class="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12 17h7"/>
-					</svg>
-					<?php esc_html_e( 'Fonts', 'whippet' ); ?>
-				</button>
-				<button 
-					@click="setTab('lazyload')" 
-					:class="activeTab === 'lazyload' ? 'tab-active' : 'tab-inactive'" 
-					class="tab-button">
-					<svg class="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-					</svg>
-					<?php esc_html_e( 'Lazy Load', 'whippet' ); ?>
-				</button>
-				<button 
-					@click="setTab('pages')" 
-					:class="activeTab === 'pages' ? 'tab-active' : 'tab-inactive'" 
-					class="tab-button">
-					<svg class="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
-					</svg>
-					<?php esc_html_e( 'Pages', 'whippet' ); ?>
-				</button>
-				<button 
-					@click="setTab('scripts')" 
-					:class="activeTab === 'scripts' ? 'tab-active' : 'tab-inactive'" 
-					class="tab-button">
-					<svg class="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/>
-					</svg>
-					<?php esc_html_e( 'Scripts', 'whippet' ); ?>
-				</button>
-				<button 
-					@click="setTab('import-export')" 
-					:class="activeTab === 'import-export' ? 'tab-active' : 'tab-inactive'" 
-					class="tab-button">
-					<svg class="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/>
-					</svg>
-					<?php esc_html_e( 'Import / Export', 'whippet' ); ?>
-				</button>
-				<button 
-					@click="setTab('docs')" 
-					:class="activeTab === 'docs' ? 'tab-active' : 'tab-inactive'" 
-					class="tab-button">
-					<svg class="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
-					</svg>
-					<?php esc_html_e( 'Documentation', 'whippet' ); ?>
-				</button>
+		<!-- ============================================================
+		     IMPORT / EXPORT TAB
+		     ============================================================ -->
+		<div class="wa-panel" x-show="activeTab === 'import-export'" style="display:none"
+			 x-transition:enter="wa-fade-in" x-transition:enter-start="wa-fade-start" x-transition:enter-end="wa-fade-end">
+
+			<div class="wa-panel-hd">
+				<h2><?php esc_html_e( 'Import / Export', 'whippet' ); ?></h2>
+				<p><?php esc_html_e( 'Back up your settings or migrate them to another site.', 'whippet' ); ?></p>
 			</div>
 
-			<!-- Tab Content -->
-			<div class="whippet-tabs-content">
-				
-				<!-- Dashboard Tab -->
-				<div x-show="activeTab === 'dashboard'" 
-					 x-transition:enter="transition ease-out duration-200"
-					 x-transition:enter-start="opacity-0"
-					 x-transition:enter-end="opacity-100"
-					 x-transition:leave="transition ease-in duration-150"
-					 x-transition:leave-start="opacity-100"
-					 x-transition:leave-end="opacity-0"
-					 style="display: none;">
-					<div class="mb-6">
-						<h2 class="text-lg font-bold mb-2"><?php esc_html_e( 'Dashboard', 'whippet' ); ?></h2>
-						<p class="text-sm text-gray-600 mb-4">
-							<?php esc_html_e( 'Manage your script and style settings to optimize your site performance.', 'whippet' ); ?>
-						</p>
-					</div>
-					
-					<form method="post" action="options.php" class="whippet-form" id="whippet-dashboard-form">
-						<?php
-						settings_fields( 'whippet_options' );
-						do_settings_sections( 'whippet_options' );
-						?>
-						<div class="mt-4" style="display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem;">
-							<?php submit_button( __( 'Save Settings', 'whippet' ), 'primary', 'submit', false ); ?>
-							<button type="button" class="button" @click="selectAllDashboard()"><?php esc_html_e( 'Select all', 'whippet' ); ?></button>
-							<button type="button" class="button" @click="deselectAllDashboard()"><?php esc_html_e( 'Deselect all', 'whippet' ); ?></button>
-						</div>
+			<div class="wa-2col">
+
+				<div class="wa-io-card">
+					<h3>
+						<svg viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+							<path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+						</svg>
+						<?php esc_html_e( 'Export Settings', 'whippet' ); ?>
+					</h3>
+					<p><?php esc_html_e( 'Download all plugin settings as a JSON file. Use this to back up or copy your config to another site.', 'whippet' ); ?></p>
+					<form method="post">
+						<input type="hidden" name="whippet_action" value="export_settings" />
+						<?php wp_nonce_field( 'whippet_export_nonce', 'whippet_export_nonce' ); ?>
+						<button type="submit" name="submit" class="button button-primary"><?php esc_html_e( 'Download Export File', 'whippet' ); ?></button>
 					</form>
 				</div>
 
-				<!-- Analytics Tab -->
-				<div x-show="activeTab === 'analytics'" 
-					 x-transition:enter="transition ease-out duration-200"
-					 x-transition:enter-start="opacity-0"
-					 x-transition:enter-end="opacity-100"
-					 x-transition:leave="transition ease-in duration-150"
-					 x-transition:leave-start="opacity-100"
-					 x-transition:leave-end="opacity-0"
-					 style="display: none;">
-					<div class="mb-6">
-						<h2 class="text-lg font-bold mb-2"><?php esc_html_e( 'Analytics', 'whippet' ); ?></h2>
-						<p class="text-sm text-gray-600 mb-4">
-							<?php esc_html_e( 'Configure your local analytics settings for improved privacy and performance.', 'whippet' ); ?>
-						</p>
-					</div>
-					
-					<div class="whippet-form">
-						<?php
-						if ( function_exists( 'flying_analytics_settings' ) ) {
-							flying_analytics_settings();
-						} else {
-							echo '<div class="notice notice-info inline"><p>';
-							esc_html_e( 'Analytics settings will be displayed here.', 'whippet' );
-							echo '</p></div>';
-						}
-						?>
-					</div>
-				</div>
-
-				<!-- Fonts Tab -->
-				<div x-show="activeTab === 'fonts'"
-					 x-transition:enter="transition ease-out duration-200"
-					 x-transition:enter-start="opacity-0"
-					 x-transition:enter-end="opacity-100"
-					 x-transition:leave="transition ease-in duration-150"
-					 x-transition:leave-start="opacity-100"
-					 x-transition:leave-end="opacity-0"
-					 style="display: none;">
-					<div class="mb-6">
-						<h2 class="text-lg font-bold mb-2"><?php esc_html_e( 'Fonts', 'whippet' ); ?></h2>
-						<p class="text-sm text-gray-600 mb-4">
-							<?php esc_html_e( 'Remove Google Fonts and use system fonts to reduce requests and improve performance.', 'whippet' ); ?>
-						</p>
-					</div>
-					<?php
-					if ( isset( $_POST['whippet_fonts_save'] ) && check_admin_referer( 'whippet_fonts', 'whippet_fonts_nonce' ) ) {
-						update_option( 'whippet_fonts_enabled', ! empty( $_POST['whippet_fonts_enabled'] ) );
-						update_option( 'whippet_fonts_display_swap', ! empty( $_POST['whippet_fonts_display_swap'] ) );
-						echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__( 'Settings saved.', 'whippet' ) . '</p></div>';
-					}
-					$fonts_enabled   = get_option( 'whippet_fonts_enabled', true );
-					$fonts_swap     = get_option( 'whippet_fonts_display_swap', false );
-					?>
-					<form method="post" class="whippet-form">
-						<?php wp_nonce_field( 'whippet_fonts', 'whippet_fonts_nonce' ); ?>
-						<table class="form-table" role="presentation">
-							<tbody>
-							<tr>
-								<th scope="row"><?php esc_html_e( 'Remove Google Fonts', 'whippet' ); ?></th>
-								<td>
-									<label for="whippet_fonts_enabled"><input type="checkbox" name="whippet_fonts_enabled" id="whippet_fonts_enabled" value="1" <?php checked( $fonts_enabled ); ?> /> <?php esc_html_e( 'Replace Google Fonts with system fonts', 'whippet' ); ?></label>
-								</td>
-							</tr>
-							<tr>
-								<th scope="row"><?php esc_html_e( 'Add font-display:swap', 'whippet' ); ?></th>
-								<td>
-									<label for="whippet_fonts_display_swap"><input type="checkbox" name="whippet_fonts_display_swap" id="whippet_fonts_display_swap" value="1" <?php checked( $fonts_swap ); ?> /> <?php esc_html_e( 'Add font-display:swap to Google Fonts so text remains visible during font load', 'whippet' ); ?></label>
-									<p class="description"><?php esc_html_e( 'Only applies when "Remove Google Fonts" is unchecked.', 'whippet' ); ?></p>
-								</td>
-							</tr>
-							</tbody>
-						</table>
-						<p class="submit"><button type="submit" name="whippet_fonts_save" class="button button-primary"><?php esc_html_e( 'Save Settings', 'whippet' ); ?></button></p>
+				<div class="wa-io-card">
+					<h3>
+						<svg viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+							<path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+						</svg>
+						<?php esc_html_e( 'Import Settings', 'whippet' ); ?>
+					</h3>
+					<p><?php esc_html_e( 'Restore settings from a JSON export file. This will overwrite your current configuration.', 'whippet' ); ?></p>
+					<form method="post" enctype="multipart/form-data">
+						<div class="wa-drop-zone"
+							 @drop.prevent="isDragging = false; $refs.importFile.files = $event.dataTransfer.files"
+							 @dragover.prevent="isDragging = true"
+							 @dragleave.prevent="isDragging = false"
+							 :class="isDragging ? 'dragging' : ''"
+							 @click="$refs.importFile.click()">
+							<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+								<polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/>
+								<path d="M20.39 18.39A5 5 0 0018 9h-1.26A8 8 0 103 16.3"/>
+							</svg>
+							<p><strong><?php esc_html_e( 'Drop JSON file here', 'whippet' ); ?></strong></p>
+							<p><?php esc_html_e( 'or click to browse', 'whippet' ); ?></p>
+							<input type="file" name="import_file" x-ref="importFile" style="display:none" accept=".json" />
+						</div>
+						<input type="hidden" name="whippet_action" value="import_settings" />
+						<?php wp_nonce_field( 'whippet_import_nonce', 'whippet_import_nonce' ); ?>
+						<button type="submit" name="submit" class="button button-primary"><?php esc_html_e( 'Import Settings', 'whippet' ); ?></button>
 					</form>
 				</div>
 
-				<!-- Lazy Load Tab -->
-				<div x-show="activeTab === 'lazyload'"
-					 x-transition:enter="transition ease-out duration-200"
-					 x-transition:enter-start="opacity-0"
-					 x-transition:enter-end="opacity-100"
-					 x-transition:leave="transition ease-in duration-150"
-					 x-transition:leave-start="opacity-100"
-					 x-transition:leave-end="opacity-0"
-					 style="display: none;">
-					<div class="mb-6">
-						<h2 class="text-lg font-bold mb-2"><?php esc_html_e( 'Lazy Load', 'whippet' ); ?></h2>
-						<p class="text-sm text-gray-600 mb-4">
-							<?php esc_html_e( 'Lazy load images and optimise delivery.', 'whippet' ); ?>
-						</p>
-					</div>
-					<?php
-					$whippet_ltab = isset( $_GET['whippet_ltab'] ) ? sanitize_text_field( $_GET['whippet_ltab'] ) : 'lazyload';
-					$lazyload_tabs = array( 'lazyload' => __( 'Lazy load', 'whippet' ), 'cdn' => __( 'CDN', 'whippet' ), 'responsiveness' => __( 'Responsiveness', 'whippet' ), 'compression' => __( 'Compression', 'whippet' ), 'webp' => __( 'WebP', 'whippet' ) );
-					?>
-					<div class="nav-tab-wrapper wp-clearfix" style="margin-bottom: 1rem;">
-						<?php foreach ( $lazyload_tabs as $key => $label ) : ?>
-							<a href="<?php echo esc_url( add_query_arg( array( 'page' => 'whippet', 'whippet_ltab' => $key ), admin_url( 'tools.php' ) ) . '#lazyload' ); ?>" class="nav-tab <?php echo $whippet_ltab === $key ? 'nav-tab-active' : ''; ?>"><?php echo esc_html( $label ); ?></a>
-						<?php endforeach; ?>
-					</div>
-					<?php
-					if ( isset( $_POST['submit'] ) ) {
-						echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__( 'Settings saved. Clear cache if you use a cache plugin.', 'whippet' ) . '</p></div>';
-					}
-					switch ( $whippet_ltab ) {
-						case 'cdn': flying_pages_settings_cdn(); break;
-						case 'compression': flying_pages_settings_compression(); break;
-						case 'responsiveness': flying_pages_settings_responsiveness(); break;
-						case 'webp': flying_pages_settings_webp(); break;
-						default: flying_pages_settings_lazy_load(); break;
-					}
-					?>
-				</div>
-
-				<!-- Pages Tab -->
-				<div x-show="activeTab === 'pages'"
-					 x-transition:enter="transition ease-out duration-200"
-					 x-transition:enter-start="opacity-0"
-					 x-transition:enter-end="opacity-100"
-					 x-transition:leave="transition ease-in duration-150"
-					 x-transition:leave-start="opacity-100"
-					 x-transition:leave-end="opacity-0"
-					 style="display: none;">
-					<div class="mb-6">
-						<h2 class="text-lg font-bold mb-2"><?php esc_html_e( 'Pages', 'whippet' ); ?></h2>
-						<p class="text-sm text-gray-600 mb-4">
-							<?php esc_html_e( 'Preload pages for faster navigation.', 'whippet' ); ?>
-						</p>
-					</div>
-					<?php
-					$whippet_ptab = isset( $_GET['whippet_ptab'] ) ? sanitize_text_field( $_GET['whippet_ptab'] ) : 'settings';
-					$pages_tabs = array( 'settings' => __( 'Settings', 'whippet' ), 'compatibility' => __( 'Compatibility', 'whippet' ) );
-					?>
-					<div class="nav-tab-wrapper wp-clearfix" style="margin-bottom: 1rem;">
-						<?php foreach ( $pages_tabs as $key => $label ) : ?>
-							<a href="<?php echo esc_url( add_query_arg( array( 'page' => 'whippet', 'whippet_ptab' => $key ), admin_url( 'tools.php' ) ) . '#pages' ); ?>" class="nav-tab <?php echo $whippet_ptab === $key ? 'nav-tab-active' : ''; ?>"><?php echo esc_html( $label ); ?></a>
-						<?php endforeach; ?>
-					</div>
-					<?php
-					switch ( $whippet_ptab ) {
-						case 'compatibility': flying_pages_compatibility(); break;
-						default: flying_pages_settings(); break;
-					}
-					?>
-				</div>
-
-				<!-- Scripts Tab -->
-				<div x-show="activeTab === 'scripts'"
-					 x-transition:enter="transition ease-out duration-200"
-					 x-transition:enter-start="opacity-0"
-					 x-transition:enter-end="opacity-100"
-					 x-transition:leave="transition ease-in duration-150"
-					 x-transition:leave-start="opacity-100"
-					 x-transition:leave-end="opacity-0"
-					 style="display: none;">
-					<div class="mb-6">
-						<h2 class="text-lg font-bold mb-2"><?php esc_html_e( 'Scripts', 'whippet' ); ?></h2>
-						<p class="text-sm text-gray-600 mb-4">
-							<?php esc_html_e( 'Delay JavaScript to reduce render-blocking.', 'whippet' ); ?>
-						</p>
-					</div>
-					<?php
-					$whippet_stab = isset( $_GET['whippet_stab'] ) ? sanitize_text_field( $_GET['whippet_stab'] ) : 'settings';
-					$scripts_tabs = array( 'settings' => __( 'Settings', 'whippet' ) );
-					?>
-					<div class="nav-tab-wrapper wp-clearfix" style="margin-bottom: 1rem;">
-						<?php foreach ( $scripts_tabs as $key => $label ) : ?>
-							<a href="<?php echo esc_url( add_query_arg( array( 'page' => 'whippet', 'whippet_stab' => $key ), admin_url( 'tools.php' ) ) . '#scripts' ); ?>" class="nav-tab <?php echo $whippet_stab === $key ? 'nav-tab-active' : ''; ?>"><?php echo esc_html( $label ); ?></a>
-						<?php endforeach; ?>
-					</div>
-					<?php
-					switch ( $whippet_stab ) {
-						default: flying_scripts_view_settings(); break;
-					}
-					?>
-				</div>
-
-				<!-- Import/Export Tab -->
-				<div x-show="activeTab === 'import-export'" 
-					 x-transition:enter="transition ease-out duration-200"
-					 x-transition:enter-start="opacity-0"
-					 x-transition:enter-end="opacity-100"
-					 x-transition:leave="transition ease-in duration-150"
-					 x-transition:leave-start="opacity-100"
-					 x-transition:leave-end="opacity-0"
-					 style="display: none;">
-					<div class="mb-6">
-						<h2 class="text-lg font-bold mb-2"><?php esc_html_e( 'Import / Export', 'whippet' ); ?></h2>
-						<p class="text-sm text-gray-600 mb-4">
-							<?php esc_html_e( 'Backup and restore your Whippet settings.', 'whippet' ); ?>
-						</p>
-					</div>
-					
-					<div class="whippet-cards-grid">
-						<!-- Export Settings -->
-						<div class="whippet-card">
-							<h3>
-								<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="color: #3b82f6;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-								<?php esc_html_e( 'Export Settings', 'whippet' ); ?>
-							</h3>
-							<p class="text-sm mb-4" style="color: #4b5563;"><?php esc_html_e( 'Export the plugin settings for this site as a .json file. This allows you to easily import the configuration into another site.', 'whippet' ); ?></p>
-							<form method="post">
-								<input type="hidden" name="whippet_action" value="export_settings" />
-								<?php wp_nonce_field( 'whippet_export_nonce', 'whippet_export_nonce' ); ?>
-								<button type="submit" name="submit" class="button button-primary button-large w-full">
-									<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-									<?php esc_html_e( 'Download Export File', 'whippet' ); ?>
-								</button>
-							</form>
-						</div>
-
-						<!-- Import Settings -->
-						<div class="whippet-card">
-							<h3>
-								<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="color: #16a34a;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
-								<?php esc_html_e( 'Import Settings', 'whippet' ); ?>
-							</h3>
-							<p class="text-sm mb-4" style="color: #4b5563;"><?php esc_html_e( 'Import the plugin settings from a .json file. This file can be obtained by exporting the settings on another site.', 'whippet' ); ?></p>
-							<form method="post" enctype="multipart/form-data" id="whippet-import-form">
-								<div
-									class="whippet-drop-zone"
-									@drop.prevent="isDragging = false; $refs.fileInput.files = $event.dataTransfer.files"
-									@dragover.prevent="isDragging = true"
-									@dragleave.prevent="isDragging = false"
-									:style="isDragging ? 'border-color: #3b82f6; background: #eff6ff;' : ''"
-									style="border: 2px dashed #d1d5db; border-radius: 8px; margin-bottom: 1rem; transition: border-color 0.15s, background 0.15s;">
-									<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="color: #9ca3af;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
-									<p class="text-sm mb-2" style="color: #4b5563;"><span style="font-weight: 600;"><?php esc_html_e( 'Drop your file here', 'whippet' ); ?></span> <?php esc_html_e( 'or', 'whippet' ); ?></p>
-									<label for="import_file" style="cursor: pointer; color: #3b82f6; font-weight: 600;"><?php esc_html_e( 'browse to upload', 'whippet' ); ?></label>
-									<input type="file" name="import_file" id="import_file" x-ref="fileInput" class="hidden" accept=".json" />
-									<p class="text-xs mt-2" style="color: #6b7280;"><?php esc_html_e( 'JSON files only', 'whippet' ); ?></p>
-								</div>
-								<input type="hidden" name="whippet_action" value="import_settings" />
-								<?php wp_nonce_field( 'whippet_import_nonce', 'whippet_import_nonce' ); ?>
-								<button type="submit" name="submit" class="button button-primary button-large w-full">
-									<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
-									<?php esc_html_e( 'Import Settings', 'whippet' ); ?>
-								</button>
-							</form>
-						</div>
-					</div>
-				</div>
-
-				<!-- Documentation Tab -->
-				<div x-show="activeTab === 'docs'" 
-					 x-transition:enter="transition ease-out duration-200"
-					 x-transition:enter-start="opacity-0"
-					 x-transition:enter-end="opacity-100"
-					 x-transition:leave="transition ease-in duration-150"
-					 x-transition:leave-start="opacity-100"
-					 x-transition:leave-end="opacity-0"
-					 style="display: none;">
-					<div class="mb-6">
-						<h2 class="text-lg font-bold mb-2"><?php esc_html_e( 'Documentation', 'whippet' ); ?></h2>
-						<p class="text-sm text-gray-600 mb-4">
-							<?php esc_html_e( 'Learn how to use Whippet and fix common issues.', 'whippet' ); ?>
-						</p>
-					</div>
-					
-					<div class="whippet-documentation">
-						<?php
-						if ( function_exists( 'whippet_tutorials_page' ) ) {
-							whippet_tutorials_page();
-						} else {
-							?>
-							<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-								<div class="bg-blue-500 p-6 rounded">
-									<div class="text-center text-white">
-										<svg class="w-16 h-16 mx-auto mb-4" fill="currentColor" viewBox="0 0 20 20">
-											<path d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 14c1.669 0 3.218.51 4.5 1.385A7.962 7.962 0 0114.5 14c1.255 0 2.443.29 3.5.804v-10A7.968 7.968 0 0014.5 4c-1.255 0-2.443.29-3.5.804V12a1 1 0 11-2 0V4.804z"/>
-										</svg>
-										<h3 class="font-bold text-xl mb-2"><?php esc_html_e( 'Getting Started', 'whippet' ); ?></h3>
-										<p class="text-sm mb-4"><?php esc_html_e( 'Learn the basics of Whippet and how to optimize your site.', 'whippet' ); ?></p>
-										<button type="button" @click="setTab('docs')" class="inline-block bg-blue-700 hover:bg-blue-800 text-white font-bold py-2 px-4 rounded transition-colors">
-											<?php esc_html_e( 'Read Documentation', 'whippet' ); ?>
-										</button>
 			</div>
 		</div>
 
-								<div class="bg-gray-100 p-6 rounded border">
-									<h3 class="font-bold text-lg mb-3"><?php esc_html_e( 'Quick Tips', 'whippet' ); ?></h3>
-									<ul class="space-y-2 text-sm">
-										<li class="flex items-start">
-											<span class="text-blue-500 mr-2">•</span>
-											<span><?php esc_html_e( 'Disable unused scripts to improve page load times', 'whippet' ); ?></span>
-										</li>
-										<li class="flex items-start">
-											<span class="text-blue-500 mr-2">•</span>
-											<span><?php esc_html_e( 'Use local analytics for better privacy', 'whippet' ); ?></span>
-										</li>
-										<li class="flex items-start">
-											<span class="text-blue-500 mr-2">•</span>
-											<span><?php esc_html_e( 'Export your settings regularly as backup', 'whippet' ); ?></span>
-										</li>
-										<li class="flex items-start">
-											<span class="text-blue-500 mr-2">•</span>
-											<span><?php esc_html_e( 'Use Import/Export to migrate settings between sites', 'whippet' ); ?></span>
-										</li>
-										<li class="flex items-start">
-											<span class="text-blue-500 mr-2">•</span>
-											<span><?php esc_html_e( 'Test changes on a staging site first', 'whippet' ); ?></span>
-										</li>
-									</ul>
-								</div>
-							</div>
-							<?php
-						}
-						?>
+		<!-- ============================================================
+		     DOCS TAB
+		     ============================================================ -->
+		<div class="wa-panel" x-show="activeTab === 'docs'" style="display:none"
+			 x-transition:enter="wa-fade-in" x-transition:enter-start="wa-fade-start" x-transition:enter-end="wa-fade-end">
+
+			<div class="wa-panel-hd">
+				<h2><?php esc_html_e( 'Documentation', 'whippet' ); ?></h2>
+				<p><?php esc_html_e( 'Learn how to use Whippet and fix common issues.', 'whippet' ); ?></p>
+			</div>
+
+			<?php
+			if ( function_exists( 'whippet_tutorials_page' ) ) {
+				whippet_tutorials_page();
+			} else {
+				?>
+				<div class="wa-docs-grid">
+					<div class="wa-docs-feature">
+						<h3><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg><?php esc_html_e( 'Getting Started', 'whippet' ); ?></h3>
+						<ul>
+							<li><?php esc_html_e( 'Enable Dashboard tweaks one by one and test after each change', 'whippet' ); ?></li>
+							<li><?php esc_html_e( 'Turn on Page Caching in Performance for the biggest single speed gain', 'whippet' ); ?></li>
+							<li><?php esc_html_e( 'Enable Apache Direct-Serve to bypass PHP for cached pages entirely', 'whippet' ); ?></li>
+							<li><?php esc_html_e( 'Always clear third-party caches after saving settings', 'whippet' ); ?></li>
+						</ul>
+					</div>
+					<div class="wa-docs-feature">
+						<h3><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><?php esc_html_e( 'Troubleshooting', 'whippet' ); ?></h3>
+						<ul>
+							<li><?php esc_html_e( 'If a plugin breaks, add its script keyword to the Scripts exclude list', 'whippet' ); ?></li>
+							<li><?php esc_html_e( 'Use local Analytics for better Core Web Vitals (avoids GA blocking)', 'whippet' ); ?></li>
+							<li><?php esc_html_e( 'Check Tools tab to verify your server supports Brotli and WebP', 'whippet' ); ?></li>
+							<li><?php esc_html_e( 'Export settings before major changes as a quick backup', 'whippet' ); ?></li>
+						</ul>
 					</div>
 				</div>
-
+				<?php
+			}
+			?>
 		</div>
+
 	</div>
-</div>
+	<!-- /wa-content -->
 
 </div>
+<!-- /wa-shell -->
+</div>
+<!-- /wrap.whippet-admin -->

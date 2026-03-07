@@ -38,6 +38,7 @@ function whippet_tutorials_page() {
 					<li class="leading-relaxed"><?php esc_html_e( 'Export your settings regularly as a backup', 'whippet' ); ?></li>
 				</ul>
 			</div>
+		</div>
 
 		<!-- Features Overview -->
 		<div>

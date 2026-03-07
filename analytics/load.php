@@ -8,8 +8,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-if ( ! defined( 'FLYING_ANALYTICS_VERSION' ) ) {
-	define( 'FLYING_ANALYTICS_VERSION', '2.0.0' );
+if ( ! defined( 'WHIPPET_ANALYTICS_VERSION' ) ) {
+	define( 'WHIPPET_ANALYTICS_VERSION', '2.0.0' );
 }
 
 $analytics_dir = dirname( __FILE__ );

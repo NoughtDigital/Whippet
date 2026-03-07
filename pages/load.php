@@ -11,8 +11,8 @@ if ( ! defined( 'WHIPPET_INTEGRATION' ) ) {
 	define( 'WHIPPET_INTEGRATION', true );
 }
 
-if ( ! defined( 'FLYING_PAGES_VERSION' ) ) {
-	define( 'FLYING_PAGES_VERSION', '2.4.7' );
+if ( ! defined( 'WHIPPET_PAGES_VERSION' ) ) {
+	define( 'WHIPPET_PAGES_VERSION', '2.4.7' );
 }
 
 $dir = dirname( __FILE__ );
@@ -21,5 +21,3 @@ require_once $dir . '/inject-js.php';
 
 require_once $dir . '/settings/settings.php';
 require_once $dir . '/settings/compatibility.php';
-require_once $dir . '/settings/faq.php';
-require_once $dir . '/settings/optimize-more.php';

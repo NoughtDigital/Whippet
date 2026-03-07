@@ -1,10 +1,11 @@
 <?php
+if ( ! defined( 'ABSPATH' ) ) { exit; }
 
-function flying_analytics_inject_js() {
+function whippet_analytics_inject_js() {
 
-  $id = esc_html( get_option( 'flying_analytics_id' ) );
-  $method = esc_html( get_option( 'flying_analytics_method' ) );
-  $disable_on_login = get_option( 'flying_analytics_disable_on_login' );
+  $id = sanitize_text_field( get_option( 'whippet_analytics_id' ) );
+  $method = sanitize_text_field( get_option( 'whippet_analytics_method' ) );
+  $disable_on_login = get_option( 'whippet_analytics_disable_on_login' );
 
   if ( empty( $id ) ) {
 	return;
@@ -13,19 +14,18 @@ function flying_analytics_inject_js() {
 	return;
   }
 
-  if ($method =="minimal-analytics") {
-    $local_js = plugins_url( 'js/minimal-analytics.js', __FILE__ );
-    echo "<script>window.GA_ID='{$id}'</script>";
-    echo "<script src='{$local_js}' defer></script>"; 
-  }
+  $escaped_id = esc_js( $id );
 
-  else {
-    $local_js = plugins_url( 'js/gtag.js', __FILE__ );
-    echo "<script>window.GA_ID='{$id}'</script>";
-    echo "<script src='{$local_js}' defer></script>"; 
-    echo "<script>window.dataLayer = window.dataLayer || [];function gtag(){dataLayer.push(arguments);}gtag('js', new Date());gtag('config', '{$id}');</script>";
+  if ( 'minimal-analytics' === $method ) {
+    $local_js = esc_url( plugins_url( 'js/minimal-analytics.js', __FILE__ ) );
+    echo "<script>window.GA_ID='" . $escaped_id . "'</script>";
+    echo "<script src='" . $local_js . "' defer></script>";
+  } else {
+    $local_js = esc_url( plugins_url( 'js/gtag.js', __FILE__ ) );
+    echo "<script>window.GA_ID='" . $escaped_id . "'</script>";
+    echo "<script src='" . $local_js . "' defer></script>";
+    echo "<script>window.dataLayer = window.dataLayer || [];function gtag(){dataLayer.push(arguments);}gtag('js', new Date());gtag('config', '" . $escaped_id . "');</script>";
   }
-  
 }
 
-add_action( 'wp_print_footer_scripts', 'flying_analytics_inject_js');
+add_action( 'wp_print_footer_scripts', 'whippet_analytics_inject_js');

@@ -64,78 +64,75 @@ function whippet_settings_page() {
  */
 function whippet_process_settings_export() {
 
-	if ( isset( $_POST['submit'] ) ) {
-
-		if ( empty( $_POST['whippet_export_nonce'] ) || ! wp_verify_nonce( $_POST['whippet_export_nonce'], 'whippet_export_nonce' ) ) {
-			return;
-		}
-
-		if ( ! current_user_can( 'manage_options' ) ) {
-			return;
-		}
-
-		// Get all Options used in core plugin.
-		$whippet_core = get_option( 'whippet_options' );
-
-		// Get all Options used in analytics.
-		$whippet_analytics = array(
-			'flying_analytics_id'               => esc_attr( get_option( 'flying_analytics_id' ) ),
-			'flying_analytics_method'           => esc_attr( get_option( 'flying_analytics_method' ) ),
-			'flying_analytics_disable_on_login'  => get_option( 'flying_analytics_disable_on_login' ),
-		);
-
-		$whippet_fonts = array(
-			'whippet_fonts_enabled'      => get_option( 'whippet_fonts_enabled', true ),
-			'whippet_fonts_display_swap' => get_option( 'whippet_fonts_display_swap', false ),
-		);
-
-		$whippet_lazyload = array(
-			'flying_images_enable_lazyloading'     => get_option( 'flying_images_enable_lazyloading' ),
-			'flying_images_lazymethod'             => get_option( 'flying_images_lazymethod' ),
-			'flying_images_margin'                 => get_option( 'flying_images_margin' ),
-			'flying_images_exclude_keywords'       => get_option( 'flying_images_exclude_keywords' ),
-			'flying_images_enable_cdn'             => get_option( 'flying_images_enable_cdn' ),
-			'flying_images_cdn_exclude_keywords'   => get_option( 'flying_images_cdn_exclude_keywords' ),
-			'flying_images_enable_compression'     => get_option( 'flying_images_enable_compression' ),
-			'flying_images_quality'                 => get_option( 'flying_images_quality' ),
-			'flying_images_enable_responsive_images' => get_option( 'flying_images_enable_responsive_images' ),
-		);
-
-		$whippet_pages = array(
-			'flying_pages_config_ignore_keywords'  => get_option( 'flying_pages_config_ignore_keywords' ),
-			'flying_pages_config_delay'             => get_option( 'flying_pages_config_delay' ),
-			'flying_pages_config_max_rps'           => get_option( 'flying_pages_config_max_rps' ),
-			'flying_pages_config_hover_delay'       => get_option( 'flying_pages_config_hover_delay' ),
-			'flying_pages_config_disable_on_login'  => get_option( 'flying_pages_config_disable_on_login' ),
-		);
-
-		$whippet_scripts = array(
-			'flying_scripts_timeout'        => get_option( 'flying_scripts_timeout' ),
-			'flying_scripts_include_list'   => get_option( 'flying_scripts_include_list' ),
-			'flying_scripts_disabled_pages' => get_option( 'flying_scripts_disabled_pages' ),
-		);
-
-		// Make all Options a main array to encode into json.
-		$whippet_options = array(
-			'whippet_core'      => $whippet_core,
-			'whippet_analytics' => $whippet_analytics,
-			'whippet_fonts'     => $whippet_fonts,
-			'whippet_lazyload'  => $whippet_lazyload,
-			'whippet_pages'     => $whippet_pages,
-			'whippet_scripts'  => $whippet_scripts,
-		);
-		$data            = json_encode( $whippet_options );
-
-		ignore_user_abort( true );
-
-		nocache_headers();
-		header( 'Content-Type: application/json; charset=utf-8' );
-		header( 'Content-Disposition: attachment; filename=whippet-settings-export-' . date( 'm-d-Y' ) . '.json' );
-		header( 'Expires: 0' );
-
-		echo json_encode( $data, JSON_UNESCAPED_SLASHES );
-		exit;
+	if ( ! isset( $_POST['whippet_action'] ) || 'export_settings' !== $_POST['whippet_action'] ) {
+		return;
 	}
+
+	if ( empty( $_POST['whippet_export_nonce'] ) || ! wp_verify_nonce( $_POST['whippet_export_nonce'], 'whippet_export_nonce' ) ) {
+		return;
+	}
+
+	if ( ! current_user_can( 'manage_options' ) ) {
+		return;
+	}
+
+	$whippet_core = get_option( 'whippet_options' );
+
+	$whippet_analytics = array(
+		'whippet_analytics_id'              => esc_attr( get_option( 'whippet_analytics_id' ) ),
+		'whippet_analytics_method'          => esc_attr( get_option( 'whippet_analytics_method' ) ),
+		'whippet_analytics_disable_on_login' => get_option( 'whippet_analytics_disable_on_login' ),
+	);
+
+	$whippet_fonts = array(
+		'whippet_fonts_enabled'      => get_option( 'whippet_fonts_enabled', true ),
+		'whippet_fonts_display_swap' => get_option( 'whippet_fonts_display_swap', false ),
+	);
+
+	$whippet_lazyload = array(
+		'whippet_images_enable_lazyloading'       => get_option( 'whippet_images_enable_lazyloading' ),
+		'whippet_images_lazymethod'               => get_option( 'whippet_images_lazymethod' ),
+		'whippet_images_margin'                   => get_option( 'whippet_images_margin' ),
+		'whippet_images_exclude_keywords'         => get_option( 'whippet_images_exclude_keywords' ),
+		'whippet_images_enable_cdn'               => get_option( 'whippet_images_enable_cdn' ),
+		'whippet_images_cdn_exclude_keywords'     => get_option( 'whippet_images_cdn_exclude_keywords' ),
+		'whippet_images_enable_compression'       => get_option( 'whippet_images_enable_compression' ),
+		'whippet_images_quality'                  => get_option( 'whippet_images_quality' ),
+		'whippet_images_enable_responsive_images' => get_option( 'whippet_images_enable_responsive_images' ),
+	);
+
+	$whippet_pages = array(
+		'whippet_pages_config_ignore_keywords' => get_option( 'whippet_pages_config_ignore_keywords' ),
+		'whippet_pages_config_delay'           => get_option( 'whippet_pages_config_delay' ),
+		'whippet_pages_config_max_rps'         => get_option( 'whippet_pages_config_max_rps' ),
+		'whippet_pages_config_hover_delay'     => get_option( 'whippet_pages_config_hover_delay' ),
+		'whippet_pages_config_disable_on_login' => get_option( 'whippet_pages_config_disable_on_login' ),
+	);
+
+	$whippet_scripts = array(
+		'whippet_scripts_timeout'        => get_option( 'whippet_scripts_timeout' ),
+		'whippet_scripts_include_list'   => get_option( 'whippet_scripts_include_list' ),
+		'whippet_scripts_disabled_pages' => get_option( 'whippet_scripts_disabled_pages' ),
+	);
+
+	$whippet_options = array(
+		'whippet_core'      => $whippet_core,
+		'whippet_analytics' => $whippet_analytics,
+		'whippet_fonts'     => $whippet_fonts,
+		'whippet_lazyload'  => $whippet_lazyload,
+		'whippet_pages'     => $whippet_pages,
+		'whippet_scripts'   => $whippet_scripts,
+	);
+
+	ignore_user_abort( true );
+
+	nocache_headers();
+	header( 'Content-Type: application/json; charset=utf-8' );
+	header( 'Content-Disposition: attachment; filename=whippet-settings-export-' . gmdate( 'm-d-Y' ) . '.json' );
+	header( 'Expires: 0' );
+
+	echo wp_json_encode( $whippet_options, JSON_UNESCAPED_SLASHES );
+	exit;
 }
 add_action( 'admin_init', 'whippet_process_settings_export' );
 
@@ -144,78 +141,78 @@ add_action( 'admin_init', 'whippet_process_settings_export' );
  */
 function whippet_process_settings_import() {
 
-	if ( isset( $_POST['submit'] ) ) {
+	if ( ! isset( $_POST['whippet_action'] ) || 'import_settings' !== $_POST['whippet_action'] ) {
+		return;
+	}
 
-		if ( empty( $_POST['whippet_import_nonce'] ) || ! wp_verify_nonce( $_POST['whippet_import_nonce'], 'whippet_import_nonce' ) ) {
-			return;
-		}
+	if ( empty( $_POST['whippet_import_nonce'] ) || ! wp_verify_nonce( $_POST['whippet_import_nonce'], 'whippet_import_nonce' ) ) {
+		return;
+	}
 
-		if ( ! current_user_can( 'manage_options' ) ) {
-			return;
-		}
+	if ( ! current_user_can( 'manage_options' ) ) {
+		return;
+	}
 
-		if ( ! isset( $_FILES['import_file'] ) || ! is_uploaded_file( $_FILES['import_file']['tmp_name'] ) ) {
-			wp_die( esc_html__( 'Please upload a file to import', 'whippet' ) );
-		}
+	if ( ! isset( $_FILES['import_file'] ) || ! is_uploaded_file( $_FILES['import_file']['tmp_name'] ) ) {
+		wp_die( esc_html__( 'Please upload a file to import', 'whippet' ) );
+	}
 
-		$file_name = sanitize_file_name( $_FILES['import_file']['name'] );
-		$file_parts = explode( '.', $file_name );
-		$extension = end( $file_parts );
+	$file_name  = sanitize_file_name( $_FILES['import_file']['name'] );
+	$file_parts = explode( '.', $file_name );
+	$extension  = end( $file_parts );
 
-		if ( 'json' !== strtolower( $extension ) ) {
-			wp_die( esc_html__( 'Please upload a valid .json file', 'whippet' ) );
-		}
+	if ( 'json' !== strtolower( $extension ) ) {
+		wp_die( esc_html__( 'Please upload a valid .json file', 'whippet' ) );
+	}
 
-		$import_file = sanitize_text_field( $_FILES['import_file']['tmp_name'] );
+	$import_file = sanitize_text_field( $_FILES['import_file']['tmp_name'] );
 
-		if ( empty( $import_file ) || ! file_exists( $import_file ) ) {
-			wp_die( esc_html__( 'Please upload a file to import', 'whippet' ) );
-		}
-		$whippet_options = get_option( 'whippet_options' );
+	if ( empty( $import_file ) || ! file_exists( $import_file ) ) {
+		wp_die( esc_html__( 'Please upload a file to import', 'whippet' ) );
+	}
 
-		delete_option( 'whippet_options' );
+	delete_option( 'whippet_options' );
 
-		// Retrieve the settings from the file and convert the json object to an array.
-		$content = file_get_contents( $import_file );
-		if ( false === $content ) {
-			wp_die( esc_html__( 'Error reading import file', 'whippet' ) );
-		}
-		
-		$obj = json_decode( $content, true );
+	$content = file_get_contents( $import_file );
+	if ( false === $content ) {
+		wp_die( esc_html__( 'Error reading import file', 'whippet' ) );
+	}
+
+	$settings = json_decode( $content, true );
+	if ( json_last_error() !== JSON_ERROR_NONE ) {
+		wp_die( esc_html__( 'Invalid JSON file format', 'whippet' ) );
+	}
+
+	// Handle double-encoded JSON from legacy exports.
+	if ( is_string( $settings ) ) {
+		$settings = json_decode( $settings, true );
 		if ( json_last_error() !== JSON_ERROR_NONE ) {
 			wp_die( esc_html__( 'Invalid JSON file format', 'whippet' ) );
 		}
-		
-		// Handle double-encoded JSON from export
-		if ( is_string( $obj ) ) {
-			$settings = json_decode( $obj, true );
-			if ( json_last_error() !== JSON_ERROR_NONE ) {
-				wp_die( esc_html__( 'Invalid JSON file format', 'whippet' ) );
-			}
-		} else {
-			$settings = $obj;
-		}
-
-		foreach ( $settings as $key => $value ) {
-			if ( $key === 'whippet_core' ) {
-				add_option( 'whippet_options', $value );
-			} elseif ( in_array( $key, array( 'whippet_analytics', 'whippet_fonts', 'whippet_lazyload', 'whippet_pages', 'whippet_scripts' ), true ) && is_array( $value ) ) {
-				foreach ( $value as $setting => $setting_value ) {
-					update_option( $setting, $setting_value );
-				}
-			}
-		}
-
-		// Migrate legacy sgal_* to analytics options if not in import
-		if ( empty( get_option( 'flying_analytics_id' ) ) && ! empty( get_option( 'sgal_tracking_id' ) ) ) {
-			update_option( 'flying_analytics_id', get_option( 'sgal_tracking_id' ) );
-			update_option( 'flying_analytics_method', 'minimal-analytics' );
-			update_option( 'flying_analytics_disable_on_login', get_option( 'sgal_track_admin' ) === 'on' ? false : true );
-		}
-
-		wp_safe_redirect( admin_url( 'tools.php?page=whippet' ) );
-		exit;
-
 	}
+
+	$valid_groups = array( 'whippet_analytics', 'whippet_fonts', 'whippet_lazyload', 'whippet_pages', 'whippet_scripts' );
+
+	foreach ( $settings as $key => $value ) {
+		if ( 'whippet_core' === $key ) {
+			add_option( 'whippet_options', $value );
+		} elseif ( in_array( $key, $valid_groups, true ) && is_array( $value ) ) {
+			foreach ( $value as $setting => $setting_value ) {
+				update_option( $setting, $setting_value );
+			}
+		}
+	}
+
+	// Migrate legacy sgal_* to analytics options if not in import.
+	$analytics_id = get_option( 'whippet_analytics_id' );
+	$legacy_id    = get_option( 'sgal_tracking_id' );
+	if ( empty( $analytics_id ) && ! empty( $legacy_id ) ) {
+		update_option( 'whippet_analytics_id', $legacy_id );
+		update_option( 'whippet_analytics_method', 'minimal-analytics' );
+		update_option( 'whippet_analytics_disable_on_login', get_option( 'sgal_track_admin' ) !== 'on' );
+	}
+
+	wp_safe_redirect( admin_url( 'tools.php?page=whippet' ) );
+	exit;
 }
 add_action( 'admin_init', 'whippet_process_settings_import' );

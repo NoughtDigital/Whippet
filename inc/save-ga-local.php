@@ -19,14 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @var [type]
  */
-add_action( 'admin_menu', 'save_ga_locally_create_menu' );
-
-/**
- * Create Menu
- */
-function save_ga_locally_create_menu() {
-	add_action( 'admin_init', 'register_save_ga_locally_settings' );
-}
+add_action( 'admin_init', 'register_save_ga_locally_settings' );
 
 /**
  * Register Settings
@@ -180,15 +173,15 @@ switch ( $caos_remove_wp_cron ) {
  * Generate tracking code and add to header/footer (default is header)
  */
 function add_ga_header_script() {
-	$sgal_track_admin = esc_attr( get_option( 'sgal_track_admin' ) );
-	// If user is admin we don't want to render the tracking code, when option is disabled.
-	if ( current_user_can( 'manage_options' ) && ( ! $sgal_track_admin ) ) {
+	$sgal_track_admin = get_option( 'sgal_track_admin' );
+	if ( current_user_can( 'manage_options' ) && ! $sgal_track_admin ) {
 		return;
 	}
 
-	$sgal_tracking_id              = esc_attr( get_option( 'sgal_tracking_id' ) );
-	$sgal_adjusted_bounce_rate     = esc_attr( get_option( 'sgal_adjusted_bounce_rate' ) );
-	$sgal_anonymize_ip             = esc_attr( get_option( 'sgal_anonymize_ip' ) );
+	$sgal_tracking_id          = esc_js( sanitize_text_field( get_option( 'sgal_tracking_id' ) ) );
+	$sgal_adjusted_bounce_rate = absint( get_option( 'sgal_adjusted_bounce_rate', 0 ) );
+	$sgal_anonymize_ip         = get_option( 'sgal_anonymize_ip' );
+	$local_ga_url              = esc_url( plugin_dir_url( __FILE__ ) . 'cache/local-ga.js' );
 
 	echo '<!-- This site is running Whippet: Whippet for WordPress -->';
 
@@ -196,15 +189,20 @@ function add_ga_header_script() {
             (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
             (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
             m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-            })(window,document,'script','" . plugin_dir_url( __FILE__ ) . "cache/local-ga.js','ga');";
+            })(window,document,'script','" . $local_ga_url . "','ga');";
 
-	echo "ga('create', '" . esc_js( $sgal_tracking_id ) . "', 'auto');";
+	echo "ga('create', '" . $sgal_tracking_id . "', 'auto');";
 
-	echo $sgal_anonymize_ip_code = ( $sgal_anonymize_ip == 'on' ) ? "ga('set', 'anonymizeIp', true);" : '';
+	if ( 'on' === $sgal_anonymize_ip ) {
+		echo "ga('set', 'anonymizeIp', true);";
+	}
 
 	echo "ga('send', 'pageview');";
 
-	echo $sgal_abr_code = ( $sgal_adjusted_bounce_rate ) ? 'setTimeout("ga(' . "'send','event','adjusted bounce rate','" . $sgal_adjusted_bounce_rate . " seconds')" . '"' . ',' . $sgal_adjusted_bounce_rate * 1000 . ');' : '';
+	if ( $sgal_adjusted_bounce_rate > 0 ) {
+		$delay_ms = $sgal_adjusted_bounce_rate * 1000;
+		echo "setTimeout(function(){ga('send','event','adjusted bounce rate','" . $sgal_adjusted_bounce_rate . " seconds')}," . $delay_ms . ");";
+	}
 
 	echo '</script>';
 }

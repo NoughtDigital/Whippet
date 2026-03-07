@@ -93,13 +93,15 @@ class Helper {
 	 * @return string Formatted file size.
 	 */
 	public static function format_bytes( $bytes ) {
-		$units = array( 'B', 'KB', 'MB', 'GB', 'TB' );
-		
-		for ( $i = 0; $bytes > 1024; $i++ ) {
-			$bytes /= 1024;
+		if ( $bytes <= 0 ) {
+			return '0 B';
 		}
-		
-		return round( $bytes, 2 ) . ' ' . $units[ $i ];
+
+		$units = array( 'B', 'KB', 'MB', 'GB', 'TB' );
+		$i     = floor( log( $bytes, 1024 ) );
+		$i     = min( $i, count( $units ) - 1 );
+
+		return round( $bytes / pow( 1024, $i ), 2 ) . ' ' . $units[ $i ];
 	}
 
 	/**

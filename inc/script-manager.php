@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 // Database check is handled in Plugin::activate()
 
 global $whippet_db_version;
-$whippet_db_version = 1.3;
+$whippet_db_version = '1.3';
 
 /**
  * Created certain tables
@@ -78,7 +78,7 @@ function whippet_create_db( $table ) {
 function whippet_check_db() {
 	global $whippet_db_version;
 	$updated = false;
-	$current_db_version = floatval( get_option( 'whippet_db_version', 1.0 ) );
+	$current_db_version = get_option( 'whippet_db_version', '1.0' );
 
 	require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
 
@@ -212,8 +212,6 @@ class Whippet {
 		add_action( 'init', array( $this, 'conditionally_remove_emoji' ), 4 );
 
 		add_action( 'plugins_loaded', array( $this, 'load_textdomain' ) );
-		// add_action( 'admin_init', array( $this, 'check_updates' ), 1 );
-
 		add_action( 'template_redirect', array( $this, 'detect_content_type' ) );
 
 		if ( ! defined( 'WHIPPET_DISABLE_ON_FRONTEND' ) && ! is_admin() ) {
@@ -265,15 +263,13 @@ class Whippet {
 	 * @return mixed
 	 */
 	public function unload_assets( $url, $handle ) {
-		// WordPress 5.0.0.
-		$polyfills_filter = 'wp-polyfill';
-
-		if ( substr( $handle, 0, strlen( $polyfills_filter ) ) !== $polyfills_filter ) {
-			$type = ( current_filter() == 'script_loader_src' ) ? 'js' : 'css';
-			$source = ( current_filter() == 'script_loader_src' ) ? wp_scripts() : wp_styles();
-
-			return ( $this->get_visibility_asset( $type, $handle ) ? $url : false);
+		if ( strpos( $handle, 'wp-polyfill' ) === 0 ) {
+			return $url;
 		}
+
+		$type = ( current_filter() === 'script_loader_src' ) ? 'js' : 'css';
+
+		return $this->get_visibility_asset( $type, $handle ) ? $url : false;
 	}
 
 	/**
@@ -331,9 +327,8 @@ class Whippet {
 						if ( false !== strpos( $url, $plugins_url ) ) {
 							$resource_name = 'plugins';
 
-							// Generuje nazwę folderu pluginu z URL asseta.
 							$plugin_path = str_replace( $plugins_url, '', $url );
-							if ( '/' == $plugin_path[0] ) {
+							if ( '/' === $plugin_path[0] ) {
 								$plugin_path = substr( $plugin_path, 1 );
 							}
 							$plugin_path = explode( '/', $plugin_path );
@@ -361,7 +356,7 @@ class Whippet {
 							'deps' => ( isset( $data->registered[ $el ]->deps ) ? $data->registered[ $el ]->deps : array() ),
 						);
 
-						if ( 'plugins' == $resource_name ) {
+						if ( 'plugins' === $resource_name ) {
 							$arr['plugin'] = '';
 							$this->collection[ $resource_name ][ $plugin_dir ][ $type ][ $el ] = $arr;
 						} else {
@@ -443,7 +438,7 @@ class Whippet {
 			}
 		}
 
-		if ( is_admin() && 'Whippet' == get_option( 'Activated_Plugin' ) ) {
+		if ( is_admin() && 'Whippet' === get_option( 'Activated_Plugin' ) ) {
 			delete_option( 'Activated_Plugin' );
 		}
 	}
@@ -465,19 +460,16 @@ class Whippet {
 				'tools_page_whippet-tutorials',
 			);
 
-		if ( $screen && ! in_array( $screen->id, $allowed_screens, true ) ) {
-			return;
+			if ( $screen && ! in_array( $screen->id, $allowed_screens, true ) ) {
+				return;
+			}
 		}
-	}
 
-	// Add preconnect for Google Fonts
-	add_action( is_admin() ? 'admin_head' : 'wp_head', array( $this, 'add_font_preconnect_panel' ), 1 );
-	
-	// Enqueue Figtree font from Google Fonts
-	wp_enqueue_style( 'whippet-figtree-font', 'https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300..900;1,300..900&display=swap', array(), null );
+		add_action( is_admin() ? 'admin_head' : 'wp_head', array( $this, 'add_font_preconnect_panel' ), 1 );
 
-	wp_enqueue_style( 'whippet', untrailingslashit( plugins_url( '../dist/css/style-whippet.css', __FILE__ ) ), array( 'whippet-figtree-font' ), $this->version, false );
-	wp_enqueue_script( 'whippet', untrailingslashit( plugins_url( '../dist/js/app.js', __FILE__ ) ), array(), $this->version, true );
+		wp_enqueue_style( 'whippet-figtree-font', 'https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300..900;1,300..900&display=swap', array(), null );
+		wp_enqueue_style( 'whippet', untrailingslashit( plugins_url( '../dist/css/style-whippet.css', __FILE__ ) ), array( 'whippet-figtree-font' ), $this->version, false );
+		wp_enqueue_script( 'whippet', untrailingslashit( plugins_url( '../dist/js/app.js', __FILE__ ) ), array(), $this->version, true );
 	}
 
 	/**
@@ -745,10 +737,13 @@ class Whippet {
 
 		if ( isset( $this->whippet_data_plugins['disabled'][ $plugin ] ) ) {
 
-			// Even if regex is available checks if it's valid!
-			if ( isset( $this->whippet_data_plugins['disabled'][ $plugin ]['regex'] ) ) {
+				if ( isset( $this->whippet_data_plugins['disabled'][ $plugin ]['regex'] ) ) {
+				$pattern = $this->whippet_data_plugins['disabled'][ $plugin ]['regex'];
+				$regex   = '/' . str_replace( '/', '\/', $pattern ) . '/';
 				$matches = array();
-				@preg_match( '/' . $this->whippet_data_plugins['disabled'][ $plugin ]['regex'] . '/', esc_url( $this->get_current_url() ), $matches );
+				if ( false !== @preg_match( $regex, '' ) ) {
+					preg_match( $regex, esc_url( $this->get_current_url() ), $matches );
+				}
 				$state = ( count( $matches ) ? 0 : 1 );
 			} else {
 				$state = 0;
@@ -771,7 +766,7 @@ class Whippet {
 	 * @return string      Correct URL.
 	 */
 	private function prepare_correct_url( $url ) {
-		if ( isset( $url[0] ) && isset( $url[1] ) && '/' == $url[0] && '/' == $url[1] ) {
+		if ( isset( $url[0] ) && isset( $url[1] ) && '/' === $url[0] && '/' === $url[1] ) {
 			$out = (is_ssl() ? 'https:' : 'http:') . $url;
 		} else {
 			$out = $url;
@@ -820,7 +815,8 @@ class Whippet {
 
 		foreach ( $tables as $table ) {
 			$table_name = $wpdb->prefix . $table;
-			if ( $wpdb->get_var( 'SHOW TABLES LIKE "' . $table_name . '"' ) != $table_name ) {
+			$found = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table_name ) );
+			if ( $found !== $table_name ) {
 				whippet_create_db( $table );
 			}
 		}
@@ -840,16 +836,17 @@ class Whippet {
 		// Verify that database structure is correct.
 		whippet_check_db();
 
-		$disabled_global = $wpdb->get_results( 'SELECT * FROM ' . $wpdb->prefix . 'whippet_disabled WHERE url = ""', ARRAY_A );
-		$disabled_here = $wpdb->get_results( sprintf( 'SELECT * FROM ' . $wpdb->prefix . 'whippet_disabled WHERE url = "%s"',
-			esc_url( $this->get_current_url() )
-			), ARRAY_A );
+		$disabled_global = $wpdb->get_results( "SELECT * FROM {$wpdb->prefix}whippet_disabled WHERE url = ''", ARRAY_A );
+		$disabled_here = $wpdb->get_results( $wpdb->prepare(
+			"SELECT * FROM {$wpdb->prefix}whippet_disabled WHERE url = %s",
+			$this->get_current_url()
+		), ARRAY_A );
 
-		$enabled_posts = $wpdb->get_results( 'SELECT * FROM ' . $wpdb->prefix . 'whippet_enabled WHERE content_type != "here"', ARRAY_A );
-		$enabled_here = $wpdb->get_results( sprintf( 'SELECT * FROM %s WHERE content_type = \'%s\' AND url=\'%s\'',
-			$wpdb->prefix . 'whippet_enabled',
-			'here',
-			esc_url( $this->get_current_url() ) ), ARRAY_A );
+		$enabled_posts = $wpdb->get_results( "SELECT * FROM {$wpdb->prefix}whippet_enabled WHERE content_type != 'here'", ARRAY_A );
+		$enabled_here = $wpdb->get_results( $wpdb->prepare(
+			"SELECT * FROM {$wpdb->prefix}whippet_enabled WHERE content_type = 'here' AND url = %s",
+			$this->get_current_url()
+		), ARRAY_A );
 		$enabled = array_merge( $enabled_here, $enabled_posts );
 
 		if ( ! empty( $disabled_global ) ) {
@@ -882,17 +879,18 @@ class Whippet {
 		$out = array();
 		$current_url = esc_url( $this->get_current_url() );
 
-		$disabled_global = $wpdb->get_results( 'SELECT * FROM ' . $wpdb->prefix . 'whippet_p_disabled WHERE url = "" AND regex = ""', ARRAY_A );
-		$disabled_here = $wpdb->get_results( sprintf( 'SELECT * FROM ' . $wpdb->prefix . 'whippet_p_disabled WHERE url = "%s"',
+		$disabled_global = $wpdb->get_results( "SELECT * FROM {$wpdb->prefix}whippet_p_disabled WHERE url = '' AND regex = ''", ARRAY_A );
+		$disabled_here = $wpdb->get_results( $wpdb->prepare(
+			"SELECT * FROM {$wpdb->prefix}whippet_p_disabled WHERE url = %s",
 			$current_url
-			), ARRAY_A );
-		$disabled_regex = $wpdb->get_results( 'SELECT * FROM ' . $wpdb->prefix . 'whippet_p_disabled WHERE regex != ""', ARRAY_A );
+		), ARRAY_A );
+		$disabled_regex = $wpdb->get_results( "SELECT * FROM {$wpdb->prefix}whippet_p_disabled WHERE regex != ''", ARRAY_A );
 
-		$enabled_posts = $wpdb->get_results( 'SELECT * FROM ' . $wpdb->prefix . 'whippet_p_enabled WHERE content_type != "here"', ARRAY_A );
-		$enabled_here = $wpdb->get_results( sprintf( 'SELECT * FROM %s WHERE content_type = \'%s\' AND url=\'%s\'',
-			$wpdb->prefix . 'whippet_p_enabled',
-			'here',
-			$current_url ), ARRAY_A );
+		$enabled_posts = $wpdb->get_results( "SELECT * FROM {$wpdb->prefix}whippet_p_enabled WHERE content_type != 'here'", ARRAY_A );
+		$enabled_here = $wpdb->get_results( $wpdb->prepare(
+			"SELECT * FROM {$wpdb->prefix}whippet_p_enabled WHERE content_type = 'here' AND url = %s",
+			$current_url
+		), ARRAY_A );
 		$enabled = array_merge( $enabled_here, $enabled_posts );
 
 		if ( ! empty( $disabled_global ) ) {
@@ -968,7 +966,7 @@ class Whippet {
 
 		foreach ( $this->collection as $resource_type => $types ) {
 
-			if ( 'plugins' == $resource_type ) {
+			if ( 'plugins' === $resource_type ) {
 				$out .= '<h2>' . __( $resource_type , 'whippet' ) . '</h2>';
 
 				foreach ( $types as $plugin_dir => $types_sub ) {
@@ -999,7 +997,7 @@ class Whippet {
 								continue;
 							}
 
-							if ( 'disabled' == $plugin_state ) {
+							if ( 'disabled' === $plugin_state ) {
 								$out .= $this->render_empty_disabled_plugin_group( $types_sub, $plugin_info );
 							} else {
 								$out .= $this->render_empty_enabled_plugin_group( $types_sub, $plugin_info );
@@ -1027,19 +1025,10 @@ class Whippet {
 	 * @param  string $plugin_path Input.
 	 * @return string              Output
 	 */
-	/*private function get_plugin_dir_by_path( $plugin_path ) {
-		$plugin_dir = explode( '/', $plugin_path );
-		$plugin_dir = $plugin_dir[0];
-		if ( '/' == $plugin_dir[0] ) {
-			$plugin_dir = substr( $plugin_dir, 1 );
-		}
-
-		return $plugin_dir;
-	}*/
 	private function get_plugin_slug( $plugin_path ) {
 		$out = explode( '/', $plugin_path );
 
-		if ( count( $out ) == 1 ) {
+		if ( count( $out ) === 1 ) {
 			/**
 			 * Single file, not nested in folder.
 			 * Exploding and removing extension assuming it can be .php5 or php7 instead of traditional .php
@@ -1108,7 +1097,7 @@ class Whippet {
 		$out .= '</thead>';
 		$out .= '<tbody>';
 		$out .= '<tr>';
-		$out .= '<td><div class="state-' . $real_state . '">' . ( true == $real_state ? 'YES' : 'NO' ) . '</div></td>';
+		$out .= '<td><div class="state-' . (int) $real_state . '">' . ( $real_state ? 'YES' : 'NO' ) . '</div></td>';
 		$out .= '<td class="overflow">';
 
 		if ( ! empty( $plugin_info['PluginURI'] ) ) {
@@ -1135,7 +1124,7 @@ class Whippet {
 
 		$out .= '<td class="option-everwhere">';
 			$option_everywhere = '<select>';
-				$option_everywhere .= '<option value="e">' . __( 'Enable', 'gonales' ) . '</option>';
+				$option_everywhere .= '<option value="e">' . __( 'Enable', 'whippet' ) . '</option>';
 				$option_everywhere .= '<option value="d" ' . ( ( $is_checked_ever || $is_checked_here || $is_checked_regex ) ? 'selected' : '' ) . '>' . __( 'Disable', 'whippet' ) . '</option>';
 			$option_everywhere .= '</select>';
 
@@ -1245,7 +1234,7 @@ class Whippet {
 			$out .= '<th>' . __( 'Asset info', 'whippet' ) . '</th>';
 			$out .= '<th>' . __( 'Size', 'whippet' ) . '</th>';
 			$out .= '<th>' . __( 'State', 'whippet' ) . '</th>';
-			$out .= '<th>' /*. __( 'Conditions', 'whippet' )*/ . '</th>';
+			$out .= '<th></th>';
 		$out .= '</thead>';
 		$out .= '<tbody>';
 
@@ -1260,7 +1249,7 @@ class Whippet {
 					$unique = $type_name . '-' . $dep_val;
 
 					// jQuery is not visible to connect with formal owenr of jQuery handle.
-					$href_name = ( 'js-jquery' == $unique ? 'js-jquery-core' : $unique );
+					$href_name = ( 'js-jquery' === $unique ? 'js-jquery-core' : $unique );
 					$deps[] = '<a href="#' . $href_name . '">' . $dep_val . '</a>';
 				}
 
@@ -1270,7 +1259,7 @@ class Whippet {
 						$unique = $asset['file_extension'] . '-' . $asset['name'];
 
 						// jQuery is not visible to connect with formal owenr of jQuery handle.
-						$href_name = ( 'js-jquery' == $unique ? 'js-jquery-core' : $unique );
+						$href_name = ( 'js-jquery' === $unique ? 'js-jquery-core' : $unique );
 						$depend_on[ $unique ] = '<a href="#' . $href_name . '">' . $asset['name'] . '</a>';
 					}
 				}
@@ -1293,12 +1282,12 @@ class Whippet {
 				}
 
 				$option_everywhere = '<select>';
-					$option_everywhere .= '<option value="e">' . __( 'Enable', 'gonales' ) . '</option>';
+					$option_everywhere .= '<option value="e">' . __( 'Enable', 'whippet' ) . '</option>';
 					$option_everywhere .= '<option value="d" ' . ( ( $is_checked_ever || $is_checked_here ) ? 'selected' : '' ) . '>' . __( 'Disable', 'whippet' ) . '</option>';
 				$option_everywhere .= '</select>';
 
 				$out .= '<tr>';
-					$out .= '<td><div class="state-' . (int) $row['state'] . '">' . ( true == $row['state'] ? 'YES' : 'NO' ) . '</div></td>';
+					$out .= '<td><div class="state-' . (int) $row['state'] . '">' . ( $row['state'] ? 'YES' : 'NO' ) . '</div></td>';
 					$out .= '<td class="overflow"><a class="g-link" name="' . $type_name . '-' . $handle . '" href="' . $row['url_full'] . '" target="_blank">' . ($row['is_external'] ? $row['url_full'] : ($row['file_base'] . '.<b>' . $row['file_extension'] . '</b>')) . '</a>';
 					$out .= '<div class="g-info">';
 						$out .= '<div><b>' . __( 'Handle', 'whippet' ) . ':</b> ' . $handle . '</div>';
@@ -1389,9 +1378,11 @@ class Whippet {
  * @return mixed
  */
 function check_whippet() {
+	$response = wp_remote_get( home_url( '/' ) );
 	if ( ! is_wp_error( $response ) ) {
 		return json_decode( $response['body'] );
 	}
+	return null;
 }
 
 new Whippet;

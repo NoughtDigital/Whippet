@@ -1,27 +1,26 @@
 <?php
-function flying_analytics_settings() {
-    
-    // Validate nonce
-    if(isset($_POST['submit']) && !wp_verify_nonce($_POST['flying_analytics_settings_form'], 'flying_analytics')) {
-        echo '<div class="notice notice-error"><p>Nonce verification failed</p></div>';
-        exit;
+function whippet_analytics_settings() {
+
+    if ( isset( $_POST['submit'] ) ) {
+        if ( ! isset( $_POST['whippet_analytics_settings_form'] )
+            || ! wp_verify_nonce( $_POST['whippet_analytics_settings_form'], 'whippet_analytics' ) ) {
+            echo '<div class="notice notice-error"><p>' . esc_html__( 'Nonce verification failed', 'whippet' ) . '</p></div>';
+            return;
+        }
+
+        update_option( 'whippet_analytics_id', sanitize_text_field( wp_unslash( $_POST['id'] ?? '' ) ) );
+        update_option( 'whippet_analytics_method', sanitize_text_field( wp_unslash( $_POST['method'] ?? '' ) ) );
+        update_option( 'whippet_analytics_disable_on_login', ! empty( $_POST['disable_on_login'] ) ? 1 : 0 );
+
+        echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__( 'Settings have been saved! Please clear cache if you\'re using a cache plugin.', 'whippet' ) . '</p></div>';
     }
 
-    // Update config in database after form submission
-    if (isset($_POST['submit'])) {
-        update_option('flying_analytics_id', sanitize_text_field($_POST['id']));
-        update_option('flying_analytics_method', sanitize_text_field($_POST['method']));
-        update_option('flying_analytics_disable_on_login', sanitize_text_field($_POST['disable_on_login']));
-
-        echo '<div class="notice notice-success is-dismissible"><p>Settings have been saved! Please clear cache if you\'re using a cache plugin</p></div>';
-    }
-
-    $id = esc_attr(get_option('flying_analytics_id'));
-    $method = esc_attr(get_option('flying_analytics_method'));
-    $disable_on_login = get_option('flying_analytics_disable_on_login');
+    $id = esc_attr(get_option('whippet_analytics_id'));
+    $method = esc_attr(get_option('whippet_analytics_method'));
+    $disable_on_login = get_option('whippet_analytics_disable_on_login');
 ?>
 <form method="POST">
-    <?php wp_nonce_field( 'flying_analytics', 'flying_analytics_settings_form' ); ?>
+    <?php wp_nonce_field( 'whippet_analytics', 'whippet_analytics_settings_form' ); ?>
     <table class="form-table" role="presentation">
     <tbody>
         <tr>
@@ -35,11 +34,11 @@ function flying_analytics_settings() {
             <th scope="row"><label>Tracking script</label></th>
             <td>
                 <label>
-                    <input type="radio" name="method" value="gtag.js" <?php if ($method == "gtag.js") echo 'checked'; ?>>
+                    <input type="radio" name="method" value="gtag.js" <?php checked( $method, 'gtag.js' ); ?>>
                     Gtag.js (90KB)
                 </label><br>
                 <label>
-                    <input type="radio" name="method" value="minimal-analytics" <?php if ($method == "minimal-analytics") echo 'checked'; ?>>
+                    <input type="radio" name="method" value="minimal-analytics" <?php checked( $method, 'minimal-analytics' ); ?>>
                     Minimal Analytics.js (1.4KB)
                 </label>
                 <p class="description">Minimal Analytics is lightweight; Gtag.js supports advanced features like AdWords.</p>

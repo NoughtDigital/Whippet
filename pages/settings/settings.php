@@ -1,37 +1,38 @@
 <?php
-function flying_pages_settings() {
-    
-    // Validate nonce
-    if(isset($_POST['submit']) && !wp_verify_nonce($_POST['flying_pages_settings_form'], 'flying_pages')) {
-        echo '<div class="notice notice-error"><p>Nonce verification failed</p></div>';
-        exit;
+if ( ! defined( 'ABSPATH' ) ) { exit; }
+
+function whippet_pages_settings() {
+
+    if ( isset( $_POST['submit'] ) ) {
+        if ( ! current_user_can( 'manage_options' )
+            || ! isset( $_POST['whippet_pages_settings_form'] )
+            || ! wp_verify_nonce( $_POST['whippet_pages_settings_form'], 'whippet_pages' ) ) {
+            wp_die( esc_html__( 'Unauthorized request.', 'whippet' ) );
+        }
+
+        $raw_keywords = isset( $_POST['ignore_keywords'] ) ? sanitize_textarea_field( wp_unslash( $_POST['ignore_keywords'] ) ) : '';
+        $keywords = trim( $raw_keywords ) ? array_map( 'trim', explode( "\n", str_replace( "\r", "", $raw_keywords ) ) ) : array();
+
+        update_option( 'whippet_pages_config_ignore_keywords', $keywords );
+        update_option( 'whippet_pages_config_delay', absint( $_POST['mouse_hover_only'] ?? $_POST['delay'] ?? 0 ) );
+        update_option( 'whippet_pages_config_max_rps', absint( $_POST['max_rps'] ?? 3 ) );
+        update_option( 'whippet_pages_config_hover_delay', absint( $_POST['hover_delay'] ?? 50 ) );
+        update_option( 'whippet_pages_config_disable_on_login', ! empty( $_POST['disable_on_login'] ) ? 1 : 0 );
+
+        echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__( 'Settings saved. Clear cache if using a cache plugin.', 'whippet' ) . '</p></div>';
     }
 
-    // Update config in database after form submission
-    if (isset($_POST['submit'])) {
-        
-        $keywords = trim($_POST['ignore_keywords']) ? array_map('trim', explode("\n", str_replace("\r", "", sanitize_textarea_field($_POST['ignore_keywords'])))) : [];
-
-        update_option('flying_pages_config_ignore_keywords', $keywords);
-        update_option('flying_pages_config_delay', sanitize_text_field($_POST['mouse_hover_only'] ?? $_POST['delay'] ?? false));
-        update_option('flying_pages_config_max_rps', sanitize_text_field($_POST['max_rps']));
-        update_option('flying_pages_config_hover_delay', sanitize_text_field($_POST['hover_delay']));
-        update_option('flying_pages_config_disable_on_login', sanitize_text_field($_POST['disable_on_login'] ?? false));
-
-        echo '<div class="notice notice-success is-dismissible"><p>Settings have been saved! Please clear cache if you\'re using a cache plugin</p></div>';
-    }
-
-    $ignore_keywords = get_option('flying_pages_config_ignore_keywords');
+    $ignore_keywords = get_option('whippet_pages_config_ignore_keywords');
     $ignore_keywords = implode("\n", $ignore_keywords);
     $ignore_keywords = esc_textarea($ignore_keywords);
     
-    $delay = esc_attr(get_option('flying_pages_config_delay'));
-    $max_rps =  esc_attr(get_option('flying_pages_config_max_rps'));
-    $hover_delay =  esc_attr(get_option('flying_pages_config_hover_delay'));
-    $disable_on_login =  esc_attr(get_option('flying_pages_config_disable_on_login'));
+    $delay = esc_attr(get_option('whippet_pages_config_delay'));
+    $max_rps =  esc_attr(get_option('whippet_pages_config_max_rps'));
+    $hover_delay =  esc_attr(get_option('whippet_pages_config_hover_delay'));
+    $disable_on_login =  esc_attr(get_option('whippet_pages_config_disable_on_login'));
 ?>
 <form method="POST">
-    <?php wp_nonce_field( 'flying_pages', 'flying_pages_settings_form' ); ?>
+    <?php wp_nonce_field( 'whippet_pages', 'whippet_pages_settings_form' ); ?>
     <table class="form-table" role="presentation">
     <tbody>
         <tr>

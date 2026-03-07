@@ -25,6 +25,17 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @license  http://www.gnu.org/copyleft/gpl.html GNU General Public License
  * @link     http://www.hashbangcode.com/
  */
+// Register a 'monthly' WP-Cron interval if not already present.
+add_filter( 'cron_schedules', function( $schedules ) {
+	if ( ! isset( $schedules['monthly'] ) ) {
+		$schedules['monthly'] = array(
+			'interval' => 30 * DAY_IN_SECONDS,
+			'display'  => __( 'Once Monthly', 'whippet' ),
+		);
+	}
+	return $schedules;
+} );
+
 class Functions {
 
 	private static $comment_pages = array(
@@ -34,135 +45,99 @@ class Functions {
 		'options-discussion.php',
 	);
 
+	/**
+	 * Check if an option is enabled (equals '1').
+	 *
+	 * @param array  $options Option array.
+	 * @param string $key     Option key.
+	 * @return bool
+	 */
+	private static function is_enabled( $options, $key ) {
+		return ! empty( $options[ $key ] ) && '1' === $options[ $key ];
+	}
+
 	public function __construct() {
+		global $whippet_options;
 		$whippet_options = get_option( 'whippet_options' );
 
-		/**
-		 * Options Actions + Filters
-		 *
-		 * @var [type]
-		 */
-		if ( ! empty( $whippet_options['disable_emojis'] ) && $whippet_options['disable_emojis'] === '1' ) {
+		if ( self::is_enabled( $whippet_options, 'disable_emojis' ) ) {
 			add_action( 'init', array( __CLASS__, 'whippet_disable_emojis' ) );
 		}
 
-		if ( ! empty( $whippet_options['disable_embeds'] ) && $whippet_options['disable_embeds'] === '1' ) {
+		if ( self::is_enabled( $whippet_options, 'disable_embeds' ) ) {
 			add_action( 'init', array( __CLASS__, 'whippet_disable_embeds' ), 9999 );
 		}
 
-		if ( ! empty( $whippet_options['remove_query_strings'] ) && $whippet_options['remove_query_strings'] === '1' ) {
+		if ( self::is_enabled( $whippet_options, 'remove_query_strings' ) ) {
 			add_action( 'init', array( __CLASS__, 'whippet_remove_query_strings' ) );
 		}
 
-		/**
-		 * Disable XML-RPC
-		 *
-		 * @var [type]
-		 */
-		if ( ! empty( $whippet_options['disable_xmlrpc'] ) && $whippet_options['disable_xmlrpc'] === '1' ) {
+		if ( self::is_enabled( $whippet_options, 'disable_xmlrpc' ) ) {
 			add_filter( 'xmlrpc_enabled', '__return_false' );
 			add_filter( 'wp_headers', array( __CLASS__, 'whippet_remove_x_pingback' ) );
 			add_filter( 'pings_open', '__return_false', 9999 );
 		}
 
-		if ( ! empty( $whippet_options['remove_jquery_migrate'] ) && $whippet_options['remove_jquery_migrate'] === '1' ) {
+		if ( self::is_enabled( $whippet_options, 'remove_jquery_migrate' ) ) {
 			add_filter( 'wp_default_scripts', array( __CLASS__, 'whippet_remove_jquery_migrate' ) );
 		}
 
-		if ( ! empty( $whippet_options['hide_wp_version'] ) && $whippet_options['hide_wp_version'] === '1' ) {
+		if ( self::is_enabled( $whippet_options, 'hide_wp_version' ) ) {
 			remove_action( 'wp_head', 'wp_generator' );
 			add_filter( 'the_generator', array( __CLASS__, 'whippet_hide_wp_version' ) );
 		}
 
-		if ( ! empty( $whippet_options['remove_wlwmanifest_link'] ) && $whippet_options['remove_wlwmanifest_link'] === '1' ) {
+		if ( self::is_enabled( $whippet_options, 'remove_wlwmanifest_link' ) ) {
 			remove_action( 'wp_head', 'wlwmanifest_link' );
 		}
 
-		if ( ! empty( $whippet_options['remove_rsd_link'] ) && $whippet_options['remove_rsd_link'] === '1' ) {
+		if ( self::is_enabled( $whippet_options, 'remove_rsd_link' ) ) {
 			remove_action( 'wp_head', 'rsd_link' );
 		}
 
-		/**
-		 * Remove Shortlink
-		 *
-		 * @var [type]
-		 */
-		if ( ! empty( $whippet_options['remove_shortlink'] ) && $whippet_options['remove_shortlink'] === '1' ) {
+		if ( self::is_enabled( $whippet_options, 'remove_shortlink' ) ) {
 			remove_action( 'wp_head', 'wp_shortlink_wp_head', 10 );
 			remove_action( 'template_redirect', 'wp_shortlink_header', 11 );
 		}
 
-		if ( ! empty( $whippet_options['disable_rss_feeds'] ) && $whippet_options['disable_rss_feeds'] === '1' ) {
-			add_action( 'do_feed', array( __CLASS__, 'whippet_disable_rss_feeds' ), 1 );
-			add_action( 'do_feed_rdf', array( __CLASS__, 'whippet_disable_rss_feeds' ), 1 );
-			add_action( 'do_feed_rss', array( __CLASS__, 'whippet_disable_rss_feeds' ), 1 );
-			add_action( 'do_feed_rss2', array( __CLASS__, 'whippet_disable_rss_feeds' ), 1 );
-			add_action( 'do_feed_atom', array( __CLASS__, 'whippet_disable_rss_feeds' ), 1 );
-			add_action( 'do_feed_rss2_comments', array( __CLASS__, 'whippet_disable_rss_feeds' ), 1 );
-			add_action( 'do_feed_atom_comments', array( __CLASS__, 'whippet_disable_rss_feeds' ), 1 );
+		if ( self::is_enabled( $whippet_options, 'disable_rss_feeds' ) ) {
+			$feed_hooks = array( 'do_feed', 'do_feed_rdf', 'do_feed_rss', 'do_feed_rss2', 'do_feed_atom', 'do_feed_rss2_comments', 'do_feed_atom_comments' );
+			foreach ( $feed_hooks as $hook ) {
+				add_action( $hook, array( __CLASS__, 'whippet_disable_rss_feeds' ), 1 );
+			}
 		}
 
-		if ( ! empty( $whippet_options['remove_feed_links'] ) && $whippet_options['remove_feed_links'] === '1' ) {
+		if ( self::is_enabled( $whippet_options, 'remove_feed_links' ) ) {
 			remove_action( 'wp_head', 'feed_links', 2 );
 			remove_action( 'wp_head', 'feed_links_extra', 3 );
 		}
 
-		if ( ! empty( $whippet_options['disable_self_pingbacks'] ) && $whippet_options['disable_self_pingbacks'] === '1' ) {
+		if ( self::is_enabled( $whippet_options, 'disable_self_pingbacks' ) ) {
 			add_action( 'pre_ping', array( $this, 'whippet_disable_self_pingbacks' ) );
 		}
 
-		/**
-		 * Remove REST API Links
-		 *
-		 * @var [type]
-		 */
-		if ( ! empty( $whippet_options['remove_rest_api_links'] ) && $whippet_options['remove_rest_api_links'] === '1' ) {
+		if ( self::is_enabled( $whippet_options, 'remove_rest_api_links' ) ) {
 			remove_action( 'wp_head', 'rest_output_link_wp_head', 10 );
 			remove_action( 'template_redirect', 'rest_output_link_header', 11 );
 		}
 
-		/**
-		 * Disable Google Maps
-		 *
-		 * @var [type]
-		 */
-		if ( ! empty( $whippet_options['disable_google_maps'] ) && $whippet_options['disable_google_maps'] === '1' ) {
+		if ( self::is_enabled( $whippet_options, 'disable_google_maps' ) ) {
 			add_action( 'wp_loaded', array( __CLASS__, 'whippet_disable_google_maps' ) );
 		}
 
-		/**
-		 * Disable WooCommerce Scripts
-		 *
-		 * @var [type]
-		 */
-		if ( ! empty( $whippet_options['disable_woocommerce_scripts'] ) && $whippet_options['disable_woocommerce_scripts'] === '1' ) {
+		if ( self::is_enabled( $whippet_options, 'disable_woocommerce_scripts' ) ) {
 			add_action( 'wp_enqueue_scripts', array( __CLASS__, 'whippet_disable_woocommerce_scripts' ), 99 );
 		}
 
-		/**
-		 * Disable WooCommerce Cart Fragmentation
-		 *
-		 * @var [type]
-		 */
-		if ( ! empty( $whippet_options['disable_woocommerce_cart_fragmentation'] ) && $whippet_options['disable_woocommerce_cart_fragmentation'] === '1' ) {
+		if ( self::is_enabled( $whippet_options, 'disable_woocommerce_cart_fragmentation' ) ) {
 			add_action( 'wp_enqueue_scripts', array( __CLASS__, 'whippet_disable_woocommerce_cart_fragmentation' ), 99 );
 		}
 
-		/**
-		 * Disable WooCommerce Status Meta Box
-		 *
-		 * @var [type]
-		 */
-		if ( ! empty( $whippet_options['disable_woocommerce_status'] ) && $whippet_options['disable_woocommerce_status'] === '1' ) {
+		if ( self::is_enabled( $whippet_options, 'disable_woocommerce_status' ) ) {
 			add_action( 'wp_dashboard_setup', array( __CLASS__, 'whippet_disable_woocommerce_status' ) );
 		}
 
-		/**
-		 * Disable WooCommerce Widgets
-		 *
-		 * @var [type]
-		 */
-		if ( ! empty( $whippet_options['disable_woocommerce_widgets'] ) && $whippet_options['disable_woocommerce_widgets'] === '1' ) {
+		if ( self::is_enabled( $whippet_options, 'disable_woocommerce_widgets' ) ) {
 			add_action( 'widgets_init', array( __CLASS__, 'whippet_disable_woocommerce_widgets' ), 99 );
 		}
 
@@ -174,20 +149,37 @@ class Functions {
 			add_filter( 'heartbeat_settings', array( __CLASS__, 'whippet_heartbeat_frequency' ) );
 		}
 
-		if ( ! empty( $whippet_options['limit_post_revisions'] ) ) {
+		if ( ! empty( $whippet_options['limit_post_revisions'] ) && ! defined( 'WP_POST_REVISIONS' ) ) {
 			define( 'WP_POST_REVISIONS', $whippet_options['limit_post_revisions'] );
 		}
 
-		if ( ! empty( $whippet_options['autosave_interval'] ) ) {
+		if ( ! empty( $whippet_options['autosave_interval'] ) && ! defined( 'AUTOSAVE_INTERVAL' ) ) {
 			define( 'AUTOSAVE_INTERVAL', $whippet_options['autosave_interval'] );
 		}
 
-		if ( ! empty( $whippet_options['disable_admin_bar'] ) && $whippet_options['disable_admin_bar'] === '1' ) {
+		if ( self::is_enabled( $whippet_options, 'disable_admin_bar' ) ) {
 			add_filter( 'show_admin_bar', '__return_false' );
 			add_action( 'admin_print_scripts-profile.php', array( __CLASS__, 'whippet_disable_admin_bar' ) );
 		}
 
-		if ( ! empty( $whippet_options['remove_comments'] ) && $whippet_options['remove_comments'] === '1' ) {
+		if ( self::is_enabled( $whippet_options, 'enable_browser_cache' ) ) {
+			add_action( 'send_headers', array( __CLASS__, 'whippet_browser_cache_headers' ) );
+		}
+
+		if ( self::is_enabled( $whippet_options, 'enable_gzip' ) ) {
+			add_action( 'init', array( __CLASS__, 'whippet_enable_gzip' ), 1 );
+		}
+
+		if ( ! empty( $whippet_options['image_quality'] ) ) {
+			add_filter( 'jpeg_quality',          array( __CLASS__, 'whippet_image_quality' ) );
+			add_filter( 'wp_editor_set_quality', array( __CLASS__, 'whippet_image_quality' ) );
+		}
+
+		if ( ! empty( $whippet_options['preload_fonts'] ) ) {
+			add_action( 'wp_head', array( __CLASS__, 'whippet_preload_fonts' ), 1 );
+		}
+
+		if ( self::is_enabled( $whippet_options, 'remove_comments' ) ) {
 			// Remove update check.
 			add_filter( 'the_posts', array( $this, 'set_comment_status' ) );
 			add_filter( 'comments_open', array( $this, 'close_comments' ), 20, 2 );
@@ -381,39 +373,37 @@ class Functions {
 	 * @return [type] [description]
 	 */
 	public static function whippet_disable_woocommerce_scripts() {
-		if ( function_exists( 'is_woocommerce' ) ) {
-			if ( ! is_woocommerce() && ! is_cart() && ! is_checkout() ) {
-				global $whippet_options;
+		if ( ! function_exists( 'is_woocommerce' ) || is_woocommerce() || is_cart() || is_checkout() ) {
+			return;
+		}
 
-				// Dequeue WooCommerce Styles.
-				wp_dequeue_style( 'woocommerce-general' );
-				wp_dequeue_style( 'woocommerce-layout' );
-				wp_dequeue_style( 'woocommerce-smallscreen' );
-				wp_dequeue_style( 'woocommerce_frontend_styles' );
-				wp_dequeue_style( 'woocommerce_fancybox_styles' );
-				wp_dequeue_style( 'woocommerce_chosen_styles' );
-				wp_dequeue_style( 'woocommerce_prettyPhoto_css' );
-				// Dequeue WooCommerce Scripts.
-				wp_dequeue_script( 'wc_price_slider' );
-				wp_dequeue_script( 'wc-single-product' );
-				wp_dequeue_script( 'wc-add-to-cart' );
-				wp_dequeue_script( 'wc-checkout' );
-				wp_dequeue_script( 'wc-add-to-cart-variation' );
-				wp_dequeue_script( 'wc-single-product' );
-				wp_dequeue_script( 'wc-cart' );
-				wp_dequeue_script( 'wc-chosen' );
-				wp_dequeue_script( 'woocommerce' );
-				wp_dequeue_script( 'prettyPhoto' );
-				wp_dequeue_script( 'prettyPhoto-init' );
-				wp_dequeue_script( 'jquery-blockui' );
-				wp_dequeue_script( 'jquery-placeholder' );
-				wp_dequeue_script( 'fancybox' );
-				wp_dequeue_script( 'jqueryui' );
+		global $whippet_options;
 
-				if ( empty( $whippet_options['disable_woocommerce_cart_fragmentation']) || $whippet_options['disable_woocommerce_cart_fragmentation'] === '0' ) {
-					wp_dequeue_script( 'wc-cart-fragments' );
-				}
-			}
+		wp_dequeue_style( 'woocommerce-general' );
+		wp_dequeue_style( 'woocommerce-layout' );
+		wp_dequeue_style( 'woocommerce-smallscreen' );
+		wp_dequeue_style( 'woocommerce_frontend_styles' );
+		wp_dequeue_style( 'woocommerce_fancybox_styles' );
+		wp_dequeue_style( 'woocommerce_chosen_styles' );
+		wp_dequeue_style( 'woocommerce_prettyPhoto_css' );
+
+		wp_dequeue_script( 'wc_price_slider' );
+		wp_dequeue_script( 'wc-single-product' );
+		wp_dequeue_script( 'wc-add-to-cart' );
+		wp_dequeue_script( 'wc-checkout' );
+		wp_dequeue_script( 'wc-add-to-cart-variation' );
+		wp_dequeue_script( 'wc-cart' );
+		wp_dequeue_script( 'wc-chosen' );
+		wp_dequeue_script( 'woocommerce' );
+		wp_dequeue_script( 'prettyPhoto' );
+		wp_dequeue_script( 'prettyPhoto-init' );
+		wp_dequeue_script( 'jquery-blockui' );
+		wp_dequeue_script( 'jquery-placeholder' );
+		wp_dequeue_script( 'fancybox' );
+		wp_dequeue_script( 'jqueryui' );
+
+		if ( empty( $whippet_options['disable_woocommerce_cart_fragmentation'] ) || '0' === $whippet_options['disable_woocommerce_cart_fragmentation'] ) {
+			wp_dequeue_script( 'wc-cart-fragments' );
 		}
 	}
 
@@ -445,17 +435,23 @@ class Functions {
 	public static function whippet_disable_woocommerce_widgets() {
 		global $whippet_options;
 
-		unregister_widget( 'WC_Widget_Products' );
-		unregister_widget( 'WC_Widget_Product_Categories' );
-		unregister_widget( 'WC_Widget_Product_Tag_Cloud' );
-		unregister_widget( 'WC_Widget_Cart' );
-		unregister_widget( 'WC_Widget_Layered_Nav' );
-		unregister_widget( 'WC_Widget_Layered_Nav_Filters' );
-		unregister_widget( 'WC_Widget_Price_Filter' );
-		unregister_widget( 'WC_Widget_Product_Search' );
-		unregister_widget( 'WC_Widget_Recently_Viewed' );
+		$widgets = array(
+			'WC_Widget_Products',
+			'WC_Widget_Product_Categories',
+			'WC_Widget_Product_Tag_Cloud',
+			'WC_Widget_Cart',
+			'WC_Widget_Layered_Nav',
+			'WC_Widget_Layered_Nav_Filters',
+			'WC_Widget_Price_Filter',
+			'WC_Widget_Product_Search',
+			'WC_Widget_Recently_Viewed',
+		);
 
-		if ( empty( $whippet_options['disable_woocommerce_reviews']) || $whippet_options['disable_woocommerce_reviews'] === '0' ) {
+		foreach ( $widgets as $widget ) {
+			unregister_widget( $widget );
+		}
+
+		if ( empty( $whippet_options['disable_woocommerce_reviews'] ) || '0' === $whippet_options['disable_woocommerce_reviews'] ) {
 			unregister_widget( 'WC_Widget_Recent_Reviews' );
 			unregister_widget( 'WC_Widget_Top_Rated_Products' );
 			unregister_widget( 'WC_Widget_Rating_Filter' );
@@ -516,7 +512,7 @@ class Functions {
 	 * @param  [type] $links [description]
 	 * @return [type]        [description]
 	 */
-	public static function whippet_disable_self_pingbacks( &$links ) {
+	public function whippet_disable_self_pingbacks( &$links ) {
 		$home = get_option( 'home' );
 		foreach ( $links as $l => $link ) {
 			if ( strpos( $link, $home ) === 0 ) {
@@ -532,14 +528,16 @@ class Functions {
 	 */
 	public static function whippet_disable_heartbeat() {
 		global $whippet_options;
-		if ( ! empty( $whippet_options['disable_heartbeat'] ) ) {
-			if ( $whippet_options['disable_heartbeat'] === 'disable_everywhere' ) {
+		if ( empty( $whippet_options['disable_heartbeat'] ) ) {
+			return;
+		}
+
+		if ( 'disable_everywhere' === $whippet_options['disable_heartbeat'] ) {
+			wp_deregister_script( 'heartbeat' );
+		} elseif ( 'allow_posts' === $whippet_options['disable_heartbeat'] ) {
+			global $pagenow;
+			if ( 'post.php' !== $pagenow && 'post-new.php' !== $pagenow ) {
 				wp_deregister_script( 'heartbeat' );
-			} elseif ( $whippet_options['disable_heartbeat'] === 'allow_posts' ) {
-				global $pagenow;
-				if ( $pagenow != 'post.php' && $pagenow != 'post-new.php' ) {
-					wp_deregister_script( 'heartbeat' );
-				}
 			}
 		}
 	}
@@ -948,7 +946,7 @@ class Functions {
 		 * @return IXR_Error object
 		 */
 		public function xmlrpc_placeholder_method() {
-			return new IXR_Error(
+			return new \IXR_Error(
 				403,
 				esc_attr__( 'Comments are disabled on this site.', 'whippet' )
 			);
@@ -1031,6 +1029,77 @@ class Functions {
 			                       'moderated'      => 0
 			);
 		}
+
+	/**
+	 * Send browser cache headers for front-end HTML pages.
+	 */
+	public static function whippet_browser_cache_headers() {
+		if ( is_admin() || is_user_logged_in() ) {
+			return;
+		}
+
+		global $whippet_options;
+		$ttl_map = array(
+			'3600'   => 3600,
+			'86400'  => 86400,
+			'604800' => 604800,
+			'2592000'=> 2592000,
+		);
+		$key = ! empty( $whippet_options['browser_cache_ttl'] ) ? $whippet_options['browser_cache_ttl'] : '86400';
+		$ttl = isset( $ttl_map[ $key ] ) ? $ttl_map[ $key ] : 86400;
+
+		header( 'Cache-Control: public, max-age=' . $ttl );
+		header( 'Expires: ' . gmdate( 'D, d M Y H:i:s', time() + $ttl ) . ' GMT' );
+	}
+
+	/**
+	 * Enable PHP gzip output compression if the server has not already done so.
+	 */
+	public static function whippet_enable_gzip() {
+		if ( is_admin() ) {
+			return;
+		}
+		if ( ! headers_sent() && function_exists( 'ob_gzhandler' ) && ! ini_get( 'zlib.output_compression' ) ) {
+			ob_start( 'ob_gzhandler' );
+		}
+	}
+
+	/**
+	 * Apply the configured JPEG/image quality to all WordPress image operations.
+	 *
+	 * @return int Quality value (1–100).
+	 */
+	public static function whippet_image_quality() {
+		global $whippet_options;
+		$quality = ! empty( $whippet_options['image_quality'] ) ? (int) $whippet_options['image_quality'] : 82;
+		return max( 1, min( 100, $quality ) );
+	}
+
+	/**
+	 * Inject <link rel="preload"> tags for user-specified font URLs.
+	 */
+	public static function whippet_preload_fonts() {
+		global $whippet_options;
+		if ( empty( $whippet_options['preload_fonts'] ) || ! is_array( $whippet_options['preload_fonts'] ) ) {
+			return;
+		}
+		foreach ( $whippet_options['preload_fonts'] as $url ) {
+			$url = trim( $url );
+			if ( empty( $url ) ) {
+				continue;
+			}
+			// Detect font type from extension for the type attribute.
+			$ext       = strtolower( pathinfo( strtok( $url, '?' ), PATHINFO_EXTENSION ) );
+			$type_map  = array(
+				'woff2' => 'font/woff2',
+				'woff'  => 'font/woff',
+				'ttf'   => 'font/ttf',
+				'otf'   => 'font/otf',
+			);
+			$font_type = isset( $type_map[ $ext ] ) ? ' type="' . $type_map[ $ext ] . '"' : '';
+			echo '<link rel="preload" href="' . esc_url( $url ) . '" as="font"' . $font_type . ' crossorigin>' . "\n";
+		}
+	}
 
 }
 

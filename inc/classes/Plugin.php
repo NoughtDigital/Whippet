@@ -101,12 +101,15 @@ class Plugin {
 	private function load_dependencies() {
 		require_once WHIPPET_PATH . 'inc/settings.php';
 		require_once WHIPPET_PATH . 'inc/functions.php';
+		require_once WHIPPET_PATH . 'inc/cache.php';
+		require_once WHIPPET_PATH . 'inc/db-cleanup.php';
+		require_once WHIPPET_PATH . 'inc/image-optimizer.php';
 		require_once WHIPPET_PATH . 'inc/script-manager.php';
 		require_once WHIPPET_PATH . 'inc/import-export.php';
 		require_once WHIPPET_PATH . 'inc/tutorials.php';
 		require_once WHIPPET_PATH . 'analytics/load.php';
 		require_once WHIPPET_PATH . 'fonts/load.php';
-		require_once WHIPPET_PATH . 'nazy-load/load.php';
+		require_once WHIPPET_PATH . 'lazy-load/load.php';
 		require_once WHIPPET_PATH . 'pages/load.php';
 		require_once WHIPPET_PATH . 'scripts/load.php';
 	}
@@ -135,9 +138,21 @@ class Plugin {
 	}
 
 	/**
-	 * Plugin deactivation
+	 * Plugin deactivation — remove cron events and .htaccess rules.
 	 */
 	public function deactivate() {
+		wp_clear_scheduled_hook( 'whippet_cache_preload_event' );
+		wp_clear_scheduled_hook( 'whippet_db_cleanup_cron' );
+
+		// Remove .htaccess cache rules.
+		if ( function_exists( 'insert_with_markers' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/misc.php';
+		}
+		if ( function_exists( 'insert_with_markers' ) ) {
+			$htaccess = get_home_path() . '.htaccess';
+			insert_with_markers( $htaccess, 'Whippet Cache', array() );
+			insert_with_markers( $htaccess, 'Whippet WebP', array() );
+		}
 	}
 }
 

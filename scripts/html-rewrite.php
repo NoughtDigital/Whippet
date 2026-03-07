@@ -1,7 +1,8 @@
 <?php
-include('lib/dom-parser.php');
+if ( ! defined( 'ABSPATH' ) ) { exit; }
+require_once __DIR__ . '/lib/dom-parser.php';
 
-function flying_scripts_is_keyword_included($content, $keywords)
+function whippet_scripts_is_keyword_included($content, $keywords)
 {
     foreach ($keywords as $keyword) {
         if (strpos($content, $keyword) !== false) {
@@ -11,11 +12,11 @@ function flying_scripts_is_keyword_included($content, $keywords)
     return false;
 }
 
-function flying_scripts_rewrite_html($html)
+function whippet_scripts_rewrite_html($html)
 {
     try {
         // Process only GET requests
-		if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
+		if ( ! isset( $_SERVER['REQUEST_METHOD'] ) || $_SERVER['REQUEST_METHOD'] !== 'GET' ) {
 		  return $html;
 		}
         
@@ -24,10 +25,9 @@ function flying_scripts_rewrite_html($html)
             return $html;
         }
 
-        // Exclude on pages
-        $disabled_pages = get_option('flying_scripts_disabled_pages');
-        $current_url = home_url($_SERVER['REQUEST_URI']);
-        if (flying_scripts_is_keyword_included($current_url, $disabled_pages)) {
+        $disabled_pages = get_option('whippet_scripts_disabled_pages');
+        $current_url = home_url( esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ) ) );
+        if (whippet_scripts_is_keyword_included($current_url, $disabled_pages)) {
             return $html;
         }
 
@@ -40,10 +40,10 @@ function flying_scripts_rewrite_html($html)
             return $html;
         }
 
-        $include_list = get_option('flying_scripts_include_list');
+        $include_list = get_option('whippet_scripts_include_list');
 
         foreach ($newHtml->find("script[!type],script[type='text/javascript']") as $script) {
-            if (flying_scripts_is_keyword_included($script->outertext, $include_list)) {
+            if (whippet_scripts_is_keyword_included($script->outertext, $include_list)) {
                 $script->setAttribute("data-type", "lazy");
                 if ($script->getAttribute("src")) {
                     $script->setAttribute("data-src", $script->getAttribute("src"));
@@ -62,11 +62,11 @@ function flying_scripts_rewrite_html($html)
 }
 
 if (!is_admin()) {
-    ob_start("flying_scripts_rewrite_html");
+    ob_start("whippet_scripts_rewrite_html");
 }
 
 // W3TC HTML rewrite
 add_filter('w3tc_process_content', function ($buffer) {
     if ( is_admin() ) return $buffer;
-    return flying_scripts_rewrite_html($buffer);
+    return whippet_scripts_rewrite_html($buffer);
 });

@@ -1,10 +1,17 @@
 <?php
-function flying_pages_compatibility() {
+if ( ! defined( 'ABSPATH' ) ) { exit; }
+
+function whippet_pages_compatibility() {
 
   $url = home_url();
-  $url_protocol = parse_url($url)['scheme'];
-  $headers = get_headers($url, 1);
-  $cache_control_header = isset($headers["Cache-Control"]) ? $headers["Cache-Control"] : "";
+  $parsed = wp_parse_url( $url );
+  $url_protocol = isset( $parsed['scheme'] ) ? $parsed['scheme'] : '';
+
+  $response = wp_remote_get( $url, array( 'timeout' => 10, 'sslverify' => false ) );
+  $cache_control_header = '';
+  if ( ! is_wp_error( $response ) ) {
+      $cache_control_header = wp_remote_retrieve_header( $response, 'cache-control' );
+  }
 
   ?>
 
