@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 <div class="wrap whippet-admin" x-data="{
 	activeTab: (function() {
 		var h = window.location.hash.slice(1) || localStorage.getItem('whippet_tab') || 'dashboard';
-		var valid = ['dashboard','performance','analytics','fonts','lazyload','pages','scripts','tools','import-export','docs'];
+		var valid = ['dashboard','performance','analytics','fonts','lazyload','pages','scripts','tools','import-export','docs','premium'];
 		return valid.indexOf(h) !== -1 ? h : 'dashboard';
 	})(),
 	isDragging: false,
@@ -121,6 +121,15 @@ if ( ! defined( 'ABSPATH' ) ) {
 					<path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/>
 				</svg>
 				<span><?php esc_html_e( 'Docs', 'whippet' ); ?></span>
+			</button>
+
+			<div class="wa-nav-divider"></div>
+
+			<button class="wa-nav-btn wa-nav-btn--premium" :class="activeTab === 'premium' ? 'active' : ''" @click="setTab('premium')">
+				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+					<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+				</svg>
+				<span><?php esc_html_e( 'Premium', 'whippet' ); ?></span>
 			</button>
 
 		</nav>
@@ -535,6 +544,732 @@ if ( ! defined( 'ABSPATH' ) ) {
 			}
 			?>
 		</div>
+
+		<!-- ============================================================
+		     PREMIUM TAB
+		     ============================================================ -->
+		<div class="wa-panel" x-show="activeTab === 'premium'" style="display:none"
+			 x-transition:enter="wa-fade-in" x-transition:enter-start="wa-fade-start" x-transition:enter-end="wa-fade-end">
+
+			<div class="wa-panel-hd">
+				<h2>
+					<?php esc_html_e( 'Premium', 'whippet' ); ?>
+					<span class="wa-premium-badge"><?php esc_html_e( 'Premium', 'whippet' ); ?></span>
+				</h2>
+		<p><?php esc_html_e( 'Premium features for advanced performance — image optimisation, delivery, and critical CSS generation.', 'whippet' ); ?></p>
+			</div>
+
+		<?php
+		$whippet_ptab = isset( $_GET['whippet_ptab'] ) ? sanitize_text_field( $_GET['whippet_ptab'] ) : 'image-engine';
+		$premium_tabs = [
+			'image-engine' => __( 'Image Engine', 'whippet' ),
+			'critical-css' => __( 'Critical CSS', 'whippet' ),
+		];
+		?>
+		<div class="wa-subtabs">
+			<?php foreach ( $premium_tabs as $key => $label ) : ?>
+				<a href="<?php echo esc_url( add_query_arg( [ 'page' => 'whippet', 'whippet_ptab' => $key ], admin_url( 'tools.php' ) ) . '#premium' ); ?>"
+				   class="wa-subtab-btn <?php echo $whippet_ptab === $key ? 'active' : ''; ?>">
+					<?php echo esc_html( $label ); ?>
+				</a>
+			<?php endforeach; ?>
+		</div>
+
+	<?php if ( 'image-engine' === $whippet_ptab ) : ?>
+
+		<?php
+		$ie            = class_exists( 'Whippet_Image_Engine' ) ? Whippet_Image_Engine::get_instance() : null;
+		$ie_configured = $ie && $ie->is_configured();
+
+		$ie_stats       = $ie_configured ? $ie->get_last_run_stats() : null;
+		$total_images   = ( ! is_wp_error( $ie_stats ) && $ie_stats ) ? absint( $ie_stats['total_images'] ?? 0 ) : 0;
+		$ie_processed   = ( ! is_wp_error( $ie_stats ) && $ie_stats ) ? absint( $ie_stats['processed_images'] ?? 0 ) : 0;
+		$original_bytes = ( ! is_wp_error( $ie_stats ) && $ie_stats ) ? absint( $ie_stats['original_bytes'] ?? 0 ) : 0;
+		$saved_bytes    = ( ! is_wp_error( $ie_stats ) && $ie_stats ) ? absint( $ie_stats['saved_bytes'] ?? 0 ) : 0;
+
+		if ( ! function_exists( 'ie_format_bytes' ) ) {
+			function ie_format_bytes( int $bytes ): string {
+				if ( $bytes >= 1073741824 ) return number_format( $bytes / 1073741824, 1 ) . ' GB';
+				if ( $bytes >= 1048576 )    return number_format( $bytes / 1048576, 1 ) . ' MB';
+				if ( $bytes >= 1024 )       return number_format( $bytes / 1024, 1 ) . ' KB';
+				return $bytes . ' B';
+			}
+		}
+		?>
+
+		<!-- ── Image Optimization card ──────────────────────────────────── -->
+		<div class="wa-card wa-ie-stats-card" style="margin-bottom:1rem;">
+			<div class="wa-ie-stats-hd">
+				<div class="wa-ie-stats-hd-left">
+					<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+						<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>
+					</svg>
+					<span><?php esc_html_e( 'Image Optimization', 'whippet' ); ?></span>
+				</div>
+				<a href="<?php echo esc_url( add_query_arg( [ 'page' => 'whippet', 'whippet_ptab' => 'image-engine' ], admin_url( 'tools.php' ) ) . '#premium' ); ?>" class="wa-ie-refresh" title="<?php esc_attr_e( 'Refresh stats', 'whippet' ); ?>">
+					<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+						<polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/>
+					</svg>
+				</a>
+			</div>
+			<div class="wa-ie-stat-row">
+				<div class="wa-ie-stat-label">
+					<span class="wa-ie-stat-dot wa-ie-stat-dot--green"></span>
+					<?php esc_html_e( 'Images Processed', 'whippet' ); ?>
+				</div>
+				<div class="wa-ie-stat-value">
+					<?php if ( $ie_configured ) : ?>
+						<?php echo $total_images ? esc_html( $ie_processed . ' / ' . $total_images ) : esc_html( (string) $ie_processed ); ?>
+					<?php else : ?>
+						<span style="color:#94a3b8"><?php esc_html_e( 'Not connected', 'whippet' ); ?></span>
+					<?php endif; ?>
+				</div>
+			</div>
+			<div class="wa-ie-stat-row">
+				<div class="wa-ie-stat-label">
+					<span class="wa-ie-stat-dot wa-ie-stat-dot--amber"></span>
+					<?php esc_html_e( 'Total Image Size', 'whippet' ); ?>
+				</div>
+				<div class="wa-ie-stat-value">
+					<?php if ( $ie_configured && $original_bytes ) : ?>
+						<?php echo esc_html( ie_format_bytes( $original_bytes ) . ' / ' . ie_format_bytes( $saved_bytes ) . ' saved' ); ?>
+					<?php elseif ( $ie_configured ) : ?>
+						<span style="color:#94a3b8">&mdash;</span>
+					<?php else : ?>
+						<span style="color:#94a3b8"><?php esc_html_e( 'Not connected', 'whippet' ); ?></span>
+					<?php endif; ?>
+				</div>
+			</div>
+			<div class="wa-ie-stats-footer">
+				<button type="button" id="ie-sync-btn" class="wa-ie-optimize-btn"
+				        <?php echo $ie_configured ? '' : 'disabled title="' . esc_attr__( 'Enter your API key first.', 'whippet' ) . '"'; ?>>
+					<?php esc_html_e( 'Optimise Images', 'whippet' ); ?>
+				</button>
+				<span id="ie-sync-msg" class="wa-ie-sync-msg"></span>
+			</div>
+		</div>
+
+		<!-- ── Image Settings + API Connection ──────────────────────────── -->
+		<form method="post" action="options.php">
+			<?php settings_fields( 'image_engine' ); ?>
+
+			<div class="wa-card" style="margin-bottom:1rem;">
+				<div class="wa-card-section-title"><?php esc_html_e( 'Image Settings', 'whippet' ); ?></div>
+
+				<div class="wa-ie-setting-row">
+					<div class="wa-ie-setting-info">
+						<div class="wa-ie-setting-label"><?php esc_html_e( 'Image Format', 'whippet' ); ?></div>
+						<div class="wa-ie-setting-desc"><?php esc_html_e( 'Auto lets Image Engine pick the best format per image — e.g. AVIF where it saves more, WebP elsewhere', 'whippet' ); ?></div>
+					</div>
+					<div class="wa-ie-toggle-group">
+						<?php
+						$cur_fmt = get_option( 'ie_format_filter', '' );
+						foreach ( [ '' => 'Auto', 'webp' => 'WebP', 'avif' => 'AVIF' ] as $val => $label ) :
+						?>
+						<label class="wa-ie-toggle-opt <?php echo $cur_fmt === $val ? 'active' : ''; ?>">
+							<input type="radio" name="ie_format_filter" value="<?php echo esc_attr( $val ); ?>" <?php checked( $cur_fmt, $val ); ?> />
+							<?php echo esc_html( $label ); ?>
+						</label>
+						<?php endforeach; ?>
+					</div>
+				</div>
+
+				<div class="wa-ie-setting-row">
+					<div class="wa-ie-setting-info">
+						<div class="wa-ie-setting-label"><?php esc_html_e( 'Compression Type', 'whippet' ); ?></div>
+						<div class="wa-ie-setting-desc"><?php esc_html_e( 'Control the balance between image quality and file size', 'whippet' ); ?></div>
+					</div>
+					<div class="wa-ie-toggle-group">
+						<?php
+						$cur_loss = get_option( 'ie_lossless', 'false' );
+						foreach ( [ 'true' => 'Lossless', 'false' => 'Lossy' ] as $val => $label ) :
+						?>
+						<label class="wa-ie-toggle-opt <?php echo $cur_loss === $val ? 'active' : ''; ?>">
+							<input type="radio" name="ie_lossless" value="<?php echo esc_attr( $val ); ?>" <?php checked( $cur_loss, $val ); ?> />
+							<?php echo esc_html( $label ); ?>
+						</label>
+						<?php endforeach; ?>
+					</div>
+				</div>
+
+			</div>
+
+		<div class="wa-card" style="margin-bottom:1rem;">
+			<div class="wa-card-section-title"><?php esc_html_e( 'API Connection', 'whippet' ); ?></div>
+			<div class="wa-ie-setting-row" style="border-bottom:none;">
+				<div class="wa-ie-setting-info">
+					<div class="wa-ie-setting-label"><label for="ie_api_key"><?php esc_html_e( 'API Key', 'whippet' ); ?></label></div>
+					<?php $ie_api_key = get_option( 'ie_api_key', '' ); ?>
+					<?php if ( $ie_api_key ) : ?>
+						<div class="wa-ie-setting-desc" style="color:#10b981;">&#10003; <?php esc_html_e( 'API key is saved.', 'whippet' ); ?></div>
+					<?php else : ?>
+						<div class="wa-ie-setting-desc" style="color:#ef4444;">&#9888; <?php esc_html_e( 'No API key saved — requests will be rejected with 401.', 'whippet' ); ?></div>
+					<?php endif; ?>
+				</div>
+				<div style="display:flex;align-items:center;gap:.5rem;">
+					<input type="password" name="ie_api_key" id="ie_api_key"
+					       value="<?php echo esc_attr( $ie_api_key ); ?>"
+					       class="regular-text" autocomplete="off" />
+					<button type="button" style="background:none;border:none;cursor:pointer;padding:0;color:#64748b;"
+					        onclick="var f=document.getElementById('ie_api_key');f.type=f.type==='password'?'text':'password';"
+					        title="<?php esc_attr_e( 'Show / hide', 'whippet' ); ?>">
+						<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+					</button>
+				</div>
+			</div>
+		</div>
+
+			<div class="wa-actions">
+				<?php submit_button( __( 'Save Settings', 'whippet' ), 'primary', 'submit', false ); ?>
+			</div>
+		</form>
+
+		<!-- ── Danger Zone ──────────────────────────────────────────────── -->
+		<div class="wa-ie-danger-zone" style="margin-top:1rem;">
+			<div class="wa-ie-danger-hd">
+				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+					<polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/>
+				</svg>
+				<?php esc_html_e( 'Danger Zone', 'whippet' ); ?>
+			</div>
+
+			<div class="wa-ie-danger-row">
+				<div class="wa-ie-danger-info">
+					<div class="wa-ie-danger-label"><?php esc_html_e( 'Restore Original Images', 'whippet' ); ?></div>
+					<div class="wa-ie-danger-desc"><?php esc_html_e( 'Reverts images with preserved originals back to their original files by deleting optimised variants', 'whippet' ); ?></div>
+				</div>
+				<button type="button" id="ie-restore-btn" class="wa-ie-danger-btn"
+				        <?php echo $ie_configured ? '' : 'disabled'; ?>
+				        data-nonce="<?php echo esc_attr( wp_create_nonce( 'ie_bulk_action' ) ); ?>">
+					<?php esc_html_e( 'Restore Originals', 'whippet' ); ?>
+				</button>
+			</div>
+
+			<div class="wa-ie-danger-row" style="border-bottom:none;">
+				<div class="wa-ie-danger-info">
+					<div class="wa-ie-danger-label"><?php esc_html_e( 'Remove Original Images Permanently', 'whippet' ); ?></div>
+					<div class="wa-ie-danger-desc"><?php esc_html_e( 'Permanently deletes original files and keeps only optimised images to save disk space. Deleted originals cannot be restored later.', 'whippet' ); ?></div>
+				</div>
+				<button type="button" id="ie-delete-originals-btn" class="wa-ie-danger-btn"
+				        <?php echo $ie_configured ? '' : 'disabled'; ?>
+				        data-nonce="<?php echo esc_attr( wp_create_nonce( 'ie_bulk_action' ) ); ?>">
+					<?php esc_html_e( 'Delete Originals', 'whippet' ); ?>
+				</button>
+			</div>
+
+			<div id="ie-danger-msg" style="padding:.75rem 1.25rem;font-size:.8125rem;color:#64748b;display:none;"></div>
+		</div>
+
+		<script>
+		(function () {
+			document.querySelectorAll('.wa-ie-toggle-group input[type="radio"]').forEach(function(radio) {
+				radio.addEventListener('change', function() {
+					var group = this.closest('.wa-ie-toggle-group');
+					group.querySelectorAll('.wa-ie-toggle-opt').forEach(function(opt) { opt.classList.remove('active'); });
+					this.closest('.wa-ie-toggle-opt').classList.add('active');
+				});
+			});
+
+			var syncBtn = document.getElementById('ie-sync-btn');
+			var syncMsg = document.getElementById('ie-sync-msg');
+			if (syncBtn && !syncBtn.disabled) {
+				syncBtn.addEventListener('click', function() {
+					syncBtn.disabled = true;
+					syncMsg.textContent = 'Working\u2026';
+					fetch(window.ajaxurl, {
+						method: 'POST',
+						headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+						body: new URLSearchParams({ action: 'ie_sync_all', _wpnonce: '<?php echo esc_js( wp_create_nonce( 'ie_sync_all' ) ); ?>' })
+					})
+					.then(function(r) { return r.json(); })
+					.then(function(d) { syncMsg.textContent = d.data && d.data.message ? d.data.message : 'Done.'; syncBtn.disabled = false; })
+					.catch(function() { syncMsg.textContent = 'Request failed.'; syncBtn.disabled = false; });
+				});
+			}
+
+			function dangerAction(action, btn, confirmMsg) {
+				if (!confirm(confirmMsg)) return;
+				var nonce = btn.dataset.nonce;
+				var msgEl = document.getElementById('ie-danger-msg');
+				btn.disabled = true;
+				msgEl.style.display = 'block';
+				msgEl.textContent = 'Working\u2026';
+				fetch(window.ajaxurl, {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+					body: new URLSearchParams({ action: action, _wpnonce: nonce })
+				})
+				.then(function(r) { return r.json(); })
+				.then(function(d) { msgEl.textContent = d.data && d.data.message ? d.data.message : 'Done.'; btn.disabled = false; })
+				.catch(function() { msgEl.textContent = 'Request failed.'; btn.disabled = false; });
+			}
+
+			var restoreBtn = document.getElementById('ie-restore-btn');
+			if (restoreBtn && !restoreBtn.disabled) {
+				restoreBtn.addEventListener('click', function() {
+					dangerAction('ie_bulk_restore', this, 'Restore all eligible optimised images to their original files? Optimised variants will be removed.');
+				});
+			}
+
+			var deleteBtn = document.getElementById('ie-delete-originals-btn');
+			if (deleteBtn && !deleteBtn.disabled) {
+				deleteBtn.addEventListener('click', function() {
+					dangerAction('ie_bulk_delete_originals', this, 'Permanently delete all original files? This cannot be undone.');
+				});
+			}
+		})();
+		</script>
+
+		<?php elseif ( 'critical-css' === $whippet_ptab ) :
+
+		$cce_enabled    = get_option( 'cce_enabled', 1 );
+		$cce_api_url    = get_option( 'cce_api_url', 'http://localhost:3000' );
+		$cce_api_key    = get_option( 'cce_api_key', '' );
+		$cce_healthy    = CCE_API::health();
+		$cce_site_id    = get_option( 'cce_site_id', '' );
+		$cce_scan_id    = get_option( 'cce_scan_id', '' );
+		$cce_scan_status = get_option( 'cce_scan_status', '' );
+		$cce_post_types = get_option( 'cce_post_types', [ 'post', 'page' ] );
+		$cce_cluster_ids = get_option( 'cce_cluster_ids', [] );
+		$all_public_types = get_post_types( [ 'public' => true ], 'objects' );
+	?>
+
+		<!-- Critical CSS feature header -->
+		<div class="wa-premium-feature-hd">
+			<div class="wa-premium-feature-icon">
+				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+					<path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+				</svg>
+			</div>
+			<div>
+				<h3><?php esc_html_e( 'Critical CSS Engine', 'whippet' ); ?></h3>
+				<p><?php esc_html_e( 'Generates and injects above-the-fold CSS for every post/page template, served via your self-hosted Critical CSS Engine service.', 'whippet' ); ?></p>
+			</div>
+		</div>
+
+		<div style="margin-bottom:1rem;padding:10px 14px;background:<?php echo $cce_healthy ? '#d1fae5' : '#fee2e2'; ?>;border-left:4px solid <?php echo $cce_healthy ? '#10b981' : '#ef4444'; ?>;border-radius:4px;font-size:.8125rem;">
+			<strong><?php esc_html_e( 'Service status:', 'whippet' ); ?></strong>
+			<?php echo $cce_healthy ? esc_html__( 'Connected', 'whippet' ) : esc_html__( 'Unreachable — check API URL and that the service is running', 'whippet' ); ?>
+		</div>
+
+		<div class="wa-card" style="margin-bottom:1rem;">
+			<div class="wa-card-section-title"><?php esc_html_e( 'Settings', 'whippet' ); ?></div>
+			<form method="post" action="options.php">
+				<?php settings_fields( 'cce_settings' ); ?>
+				<table class="form-table" role="presentation">
+					<tbody>
+					<tr>
+						<th scope="row"><?php esc_html_e( 'Enable Critical CSS', 'whippet' ); ?></th>
+						<td>
+							<label>
+								<input type="checkbox" name="cce_enabled" value="1" <?php checked( $cce_enabled ); ?>>
+								<?php esc_html_e( 'Inject critical CSS on the front end', 'whippet' ); ?>
+							</label>
+						</td>
+					</tr>
+					<tr>
+						<th scope="row"><label for="cce_api_url"><?php esc_html_e( 'API URL', 'whippet' ); ?></label></th>
+						<td>
+							<input id="cce_api_url" name="cce_api_url" type="url" class="regular-text"
+							       value="<?php echo esc_attr( $cce_api_url ); ?>" placeholder="http://localhost:3000">
+						</td>
+					</tr>
+				<tr>
+					<th scope="row"><label for="cce_api_key"><?php esc_html_e( 'API Key', 'whippet' ); ?></label></th>
+					<td>
+						<div style="display:flex;align-items:center;gap:.5rem;">
+						<input id="cce_api_key" name="cce_api_key" type="password" class="regular-text"
+						       value="<?php echo esc_attr( $cce_api_key ); ?>" autocomplete="off">
+							<button type="button" style="background:none;border:none;cursor:pointer;padding:0;color:#64748b;"
+							        onclick="var f=document.getElementById('cce_api_key');f.type=f.type==='password'?'text':'password';"
+							        title="<?php esc_attr_e( 'Show / hide', 'whippet' ); ?>">
+								<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+							</button>
+						</div>
+						<?php if ( $cce_api_key ) : ?>
+							<p class="description" style="color:#10b981;">&#10003; <?php esc_html_e( 'API key is saved.', 'whippet' ); ?></p>
+						<?php else : ?>
+							<p class="description" style="color:#ef4444;">&#9888; <?php esc_html_e( 'No API key saved — requests will be rejected with 401.', 'whippet' ); ?></p>
+						<?php endif; ?>
+					</td>
+				</tr>
+				<tr>
+					<th scope="row"><?php esc_html_e( 'Post Types', 'whippet' ); ?></th>
+					<td>
+						<fieldset>
+							<?php foreach ( $all_public_types as $pt_slug => $pt_obj ) : ?>
+							<label style="display:inline-flex;align-items:center;gap:.35rem;margin-right:1rem;">
+								<input type="checkbox" name="cce_post_types[]"
+								       value="<?php echo esc_attr( $pt_slug ); ?>"
+								       <?php checked( in_array( $pt_slug, (array) $cce_post_types, true ) ); ?>>
+								<?php echo esc_html( $pt_obj->labels->singular_name ); ?>
+							</label>
+							<?php endforeach; ?>
+						</fieldset>
+						<p class="description"><?php esc_html_e( 'Critical CSS will only be auto-generated on save for the checked post types.', 'whippet' ); ?></p>
+					</td>
+				</tr>
+				</tbody>
+			</table>
+				<div class="wa-actions" style="display:flex;align-items:center;gap:.75rem;">
+					<?php submit_button( __( 'Save Settings', 'whippet' ), 'primary', 'submit', false ); ?>
+					<button type="button" id="cce-test-btn" class="button button-secondary">
+						<?php esc_html_e( 'Test Connection', 'whippet' ); ?>
+					</button>
+				</div>
+			</form>
+
+			<div id="cce-test-result" style="display:none;margin:0 1.25rem 1.25rem;padding:.75rem 1rem;background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;font-size:.8125rem;font-family:monospace;white-space:pre-wrap;"></div>
+
+			<script>
+			(function(){
+				var btn = document.getElementById('cce-test-btn');
+				var out = document.getElementById('cce-test-result');
+				if (!btn) return;
+				btn.addEventListener('click', function(){
+					btn.disabled = true;
+					btn.textContent = 'Testing\u2026';
+					out.style.display = 'none';
+					fetch(window.ajaxurl, {
+						method: 'POST',
+						headers: {'Content-Type':'application/x-www-form-urlencoded'},
+						body: new URLSearchParams({
+							action: 'cce_test',
+							nonce:  '<?php echo esc_js( wp_create_nonce( 'cce_nonce' ) ); ?>'
+						})
+					})
+					.then(function(r){ return r.json(); })
+					.then(function(res){
+						btn.disabled = false;
+						btn.textContent = 'Test Connection';
+						if (!res.success){ out.style.display='block'; out.style.color='#333'; out.textContent='Error: '+res.data; return; }
+						var d = res.data;
+						function fmt(p, label) {
+							var ok = (typeof p.code === 'number' && p.code >= 200 && p.code < 300);
+							return (ok ? '\u2705' : '\u274c') + ' ' + label + '\n   Status : ' + p.code + '\n   Body   : ' + (p.body || '(empty)');
+						}
+						var anyOk = [d.bearer, d.rawAuth, d.xApiKey].some(function(p){ return typeof p.code === 'number' && p.code >= 200 && p.code < 300; });
+						var lines = [
+							'API URL : ' + d.apiUrl,
+							'API Key : ' + d.apiKeyDisplay + (d.apiKeySet ? '  (' + d.apiKeyLength + ' chars)' : '  \u26a0 not saved yet'),
+							d.looksMasked ? 'Warning : Saved key looks masked. Paste the full key from the Critical CSS Engine and save again.' : '',
+							'',
+							'\u2014 GET /health (no auth) \u2014',
+							'Status  : ' + d.healthCode + '  Body: ' + (d.healthBody || '(empty)'),
+							'',
+							'\u2014 POST /v1/scan auth probes \u2014',
+							fmt(d.bearer,   'Authorization: Bearer <key>'),
+							fmt(d.rawAuth,  'Authorization: <key>       '),
+							fmt(d.xApiKey,  'X-API-Key: <key>           '),
+						];
+						out.style.display = 'block';
+						out.style.color = '#333';
+						out.textContent = lines.filter(Boolean).join('\n');
+					})
+					.catch(function(e){ btn.disabled=false; btn.textContent='Test Connection'; out.style.display='block'; out.style.color='#ef4444'; out.textContent='Request failed: '+e; });
+				});
+			})();
+			</script>
+		</div>
+
+		<div class="wa-card" style="margin-bottom:1rem;">
+			<div class="wa-card-section-title"><?php esc_html_e( 'Full Site Scan', 'whippet' ); ?></div>
+			<p style="padding:0 1.25rem;font-size:.8125rem;color:#64748b;">
+				<?php esc_html_e( 'Crawls every page, clusters templates, and generates critical CSS in bulk — one file per template cluster.', 'whippet' ); ?>
+				<?php if ( $cce_scan_id ) : ?>
+					<br><?php esc_html_e( 'Last scan ID:', 'whippet' ); ?> <code><?php echo esc_html( $cce_scan_id ); ?></code>
+					<?php if ( $cce_scan_status ) : ?>
+						&nbsp;<span style="color:<?php echo $cce_scan_status === 'completed' ? '#10b981' : '#f59e0b'; ?>;">(<?php echo esc_html( $cce_scan_status ); ?>)</span>
+					<?php endif; ?>
+				<?php endif; ?>
+			</p>
+			<div style="padding:0 1.25rem 1.25rem;display:flex;align-items:center;gap:.75rem;">
+				<button type="button" id="cce-scan-btn" class="button button-secondary" <?php echo $cce_healthy ? '' : 'disabled title="' . esc_attr__( 'Service unreachable. Check API URL.', 'whippet' ) . '"'; ?>>
+					<?php esc_html_e( 'Start Full Scan', 'whippet' ); ?>
+				</button>
+				<span id="cce-scan-status" style="font-size:.8125rem;color:#64748b;"></span>
+			</div>
+
+			<div id="cce-clusters-section" style="padding:0 1.25rem 1.25rem;<?php echo empty( $cce_cluster_ids ) ? 'display:none;' : ''; ?>">
+				<div style="font-size:.75rem;font-weight:600;color:#475569;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.5rem;"><?php esc_html_e( 'Template Clusters', 'whippet' ); ?></div>
+				<table style="width:100%;border-collapse:collapse;font-size:.8125rem;">
+					<thead>
+						<tr style="border-bottom:1px solid #e2e8f0;">
+							<th style="text-align:left;padding:.35rem .5rem;color:#64748b;font-weight:500;"><?php esc_html_e( 'Cluster', 'whippet' ); ?></th>
+							<th style="text-align:right;padding:.35rem .5rem;color:#64748b;font-weight:500;"><?php esc_html_e( 'Posts', 'whippet' ); ?></th>
+							<th style="text-align:right;padding:.35rem .5rem;color:#64748b;font-weight:500;"><?php esc_html_e( 'Size', 'whippet' ); ?></th>
+							<th style="text-align:right;padding:.35rem .5rem;color:#64748b;font-weight:500;"><?php esc_html_e( 'Reduction', 'whippet' ); ?></th>
+							<th style="text-align:center;padding:.35rem .5rem;color:#64748b;font-weight:500;"><?php esc_html_e( 'Status', 'whippet' ); ?></th>
+						</tr>
+					</thead>
+					<tbody id="cce-clusters-body">
+					<?php foreach ( $cce_cluster_ids as $cid ) :
+						$ckey    = md5( $cid );
+						$cmeta   = get_option( 'cce_cluster_meta_'    . $ckey, [] );
+						$cstatus = get_option( 'cce_cluster_status_'  . $ckey, 'pending' );
+						$cbytes  = (int) get_option( 'cce_cluster_bytes_'   . $ckey, 0 );
+						$csavings = (float) get_option( 'cce_cluster_savings_' . $ckey, 0 );
+						$color   = $cstatus === 'completed' ? '#10b981' : ( $cstatus === 'failed' ? '#ef4444' : '#f59e0b' );
+					?>
+					<tr style="border-bottom:1px solid #f1f5f9;">
+						<td style="padding:.4rem .5rem;font-family:monospace;"><?php echo esc_html( $cid ); ?></td>
+						<td style="padding:.4rem .5rem;text-align:right;color:#64748b;"><?php echo esc_html( $cmeta['post_count'] ?? '—' ); ?></td>
+						<td style="padding:.4rem .5rem;text-align:right;color:#64748b;"><?php echo $cbytes ? esc_html( number_format( $cbytes ) . ' B' ) : '—'; ?></td>
+						<td style="padding:.4rem .5rem;text-align:right;color:#64748b;"><?php echo $csavings ? esc_html( $csavings . '%' ) : '—'; ?></td>
+						<td style="padding:.4rem .5rem;text-align:center;"><span style="color:<?php echo esc_attr( $color ); ?>;font-weight:500;"><?php echo esc_html( $cstatus ); ?></span></td>
+					</tr>
+					<?php endforeach; ?>
+					</tbody>
+				</table>
+			</div>
+		</div>
+
+		<div class="wa-card" style="margin-bottom:1rem;">
+			<div class="wa-card-section-title"><?php esc_html_e( 'Regenerate All', 'whippet' ); ?></div>
+			<p style="padding:0 1.25rem;font-size:.8125rem;color:#64748b;">
+				<?php esc_html_e( 'Re-queue a fresh critical CSS job for every published post and page. Use after a theme update or major layout change.', 'whippet' ); ?>
+			</p>
+			<div style="padding:0 1.25rem 1.25rem;display:flex;align-items:center;gap:.75rem;">
+				<button type="button" id="cce-regen-all-btn" class="button button-secondary" <?php echo $cce_healthy ? '' : 'disabled title="' . esc_attr__( 'Service unreachable. Check API URL.', 'whippet' ) . '"'; ?>>
+					<?php esc_html_e( 'Regenerate All Posts', 'whippet' ); ?>
+				</button>
+				<span id="cce-regen-all-status" style="font-size:.8125rem;color:#64748b;"></span>
+			</div>
+		</div>
+
+		<?php if ( $cce_site_id ) : ?>
+		<div class="wa-card" style="margin-bottom:1rem;">
+			<div class="wa-card-section-title"><?php esc_html_e( 'Purge CSS Cache', 'whippet' ); ?></div>
+			<p style="padding:0 1.25rem;font-size:.8125rem;color:#64748b;">
+				<?php esc_html_e( 'Site ID:', 'whippet' ); ?> <code><?php echo esc_html( $cce_site_id ); ?></code>
+			</p>
+			<div style="padding:0 1.25rem 1.25rem;display:flex;align-items:center;gap:.75rem;">
+				<button type="button" id="cce-purge-btn" class="button button-secondary"
+				        data-site-id="<?php echo esc_attr( $cce_site_id ); ?>">
+					<?php esc_html_e( 'Purge Cache', 'whippet' ); ?>
+				</button>
+				<span id="cce-purge-status" style="font-size:.8125rem;color:#64748b;"></span>
+			</div>
+		</div>
+		<?php endif; ?>
+
+		<script>
+		(function() {
+			var ajaxUrl = window.ajaxurl;
+			var nonce   = '<?php echo esc_js( wp_create_nonce( 'cce_nonce' ) ); ?>';
+
+		var scanBtn         = document.getElementById('cce-scan-btn');
+		var scanStatus      = document.getElementById('cce-scan-status');
+		var clustersSection = document.getElementById('cce-clusters-section');
+		var clustersBody    = document.getElementById('cce-clusters-body');
+		var clusterPollTimer = null;
+
+		function cceFormatBytes(bytes) {
+			if (!bytes) return '\u2014';
+			return Number(bytes).toLocaleString() + ' B';
+		}
+
+		function cceRenderClusters(data) {
+			if (!clustersSection || !clustersBody) return;
+			if (!data || !data.hasClusters) {
+				clustersSection.style.display = 'none';
+				clustersBody.innerHTML = '';
+				return;
+			}
+
+			clustersSection.style.display = '';
+			clustersBody.innerHTML = data.clusters.map(function(cluster) {
+				var savings = cluster.savings ? cluster.savings + '%' : '\u2014';
+				var count = cluster.postCount || '\u2014';
+				return '<tr style="border-bottom:1px solid #f1f5f9;">'
+					+ '<td style="padding:.4rem .5rem;font-family:monospace;">' + cluster.id + '</td>'
+					+ '<td style="padding:.4rem .5rem;text-align:right;color:#64748b;">' + count + '</td>'
+					+ '<td style="padding:.4rem .5rem;text-align:right;color:#64748b;">' + cceFormatBytes(cluster.bytes) + '</td>'
+					+ '<td style="padding:.4rem .5rem;text-align:right;color:#64748b;">' + savings + '</td>'
+					+ '<td style="padding:.4rem .5rem;text-align:center;"><span style="color:' + cluster.statusColor + ';font-weight:500;">' + cluster.status + '</span></td>'
+					+ '</tr>';
+			}).join('');
+		}
+
+		function cceRefreshClusterStatuses(keepPolling) {
+			fetch(ajaxUrl, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+				body: new URLSearchParams({ action: 'cce_cluster_status', nonce: nonce })
+			})
+			.then(function(r) { return r.json(); })
+			.then(function(res) {
+				if (!res.success) return;
+				cceRenderClusters(res.data);
+				if (keepPolling && res.data.hasPendingClusters) {
+					clusterPollTimer = setTimeout(function() {
+						cceRefreshClusterStatuses(true);
+					}, 5000);
+				} else if (keepPolling) {
+					clusterPollTimer = null;
+				}
+			})
+			.catch(function() {
+				if (keepPolling) {
+					clusterPollTimer = setTimeout(function() {
+						cceRefreshClusterStatuses(true);
+					}, 5000);
+				}
+			});
+		}
+
+		function cceStartClusterPolling() {
+			if (clusterPollTimer) return;
+			cceRefreshClusterStatuses(true);
+		}
+
+		function ccePollScanUntilDone(jobId, scanId, attempts) {
+			if (attempts > 60) {
+				scanStatus.style.color = '#f59e0b';
+				scanStatus.textContent = 'Scan is taking longer than expected \u2014 it will continue in the background.';
+				scanBtn.disabled = false;
+				scanBtn.textContent = '<?php echo esc_js( __( 'Start Full Scan', 'whippet' ) ); ?>';
+				return;
+			}
+			setTimeout(function () {
+				fetch(ajaxUrl, {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+					body: new URLSearchParams({ action: 'cce_poll_scan', nonce: nonce, job_id: jobId, scan_id: scanId })
+				})
+				.then(function(r) { return r.json(); })
+				.then(function(res) {
+					if (!res.success) {
+						scanStatus.style.color = '#ef4444';
+						scanStatus.textContent = 'Poll error: ' + res.data;
+						scanBtn.disabled = false;
+						scanBtn.textContent = '<?php echo esc_js( __( 'Start Full Scan', 'whippet' ) ); ?>';
+						return;
+					}
+					var s = res.data.status || '';
+					if (s === 'completed') {
+						scanStatus.style.color = '#10b981';
+						scanStatus.textContent = 'Scan complete \u2014 cluster CSS generation queued.';
+						scanBtn.disabled = false;
+						scanBtn.textContent = '<?php echo esc_js( __( 'Start Full Scan', 'whippet' ) ); ?>';
+						cceStartClusterPolling();
+					} else if (s === 'failed') {
+						scanStatus.style.color = '#ef4444';
+						scanStatus.textContent = 'Scan failed.';
+						scanBtn.disabled = false;
+						scanBtn.textContent = '<?php echo esc_js( __( 'Retry Scan', 'whippet' ) ); ?>';
+					} else {
+						var pct = res.data.progress ? ' (' + res.data.progress + '%)' : '';
+						scanStatus.style.color = '#f59e0b';
+						scanStatus.textContent = 'Scanning\u2026 ' + s + pct;
+						ccePollScanUntilDone(jobId, scanId, attempts + 1);
+					}
+				})
+				.catch(function() { ccePollScanUntilDone(jobId, scanId, attempts + 1); });
+			}, 5000);
+		}
+
+		if (scanBtn && !scanBtn.disabled) {
+			scanBtn.addEventListener('click', function () {
+				scanBtn.disabled = true;
+				scanBtn.textContent = '<?php echo esc_js( __( 'Scanning\u2026', 'whippet' ) ); ?>';
+				scanStatus.style.color = '#64748b';
+				scanStatus.textContent = '';
+				fetch(ajaxUrl, {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+					body: new URLSearchParams({ action: 'cce_scan', nonce: nonce })
+				})
+				.then(function(r) { return r.json(); })
+				.then(function(res) {
+					if (!res.success) {
+						scanStatus.style.color = '#ef4444';
+						scanStatus.textContent = 'Error: ' + res.data;
+						scanBtn.disabled = false;
+						scanBtn.textContent = '<?php echo esc_js( __( 'Retry Scan', 'whippet' ) ); ?>';
+						return;
+					}
+					scanStatus.style.color = '#f59e0b';
+					scanStatus.textContent = 'Scan started \u2014 polling for completion\u2026';
+					ccePollScanUntilDone(res.data.jobId, res.data.scanId || '', 0);
+				})
+				.catch(function() {
+					scanStatus.style.color = '#ef4444';
+					scanStatus.textContent = '<?php echo esc_js( __( 'Request failed.', 'whippet' ) ); ?>';
+					scanBtn.disabled = false;
+					scanBtn.textContent = '<?php echo esc_js( __( 'Start Full Scan', 'whippet' ) ); ?>';
+				});
+			});
+		}
+
+		if (clustersBody && clustersBody.textContent.indexOf('pending') !== -1) {
+			cceStartClusterPolling();
+		}
+
+		var regenAllBtn    = document.getElementById('cce-regen-all-btn');
+		var regenAllStatus = document.getElementById('cce-regen-all-status');
+		if (regenAllBtn && !regenAllBtn.disabled) {
+			regenAllBtn.addEventListener('click', function () {
+				if (!confirm('<?php echo esc_js( __( 'Re-queue critical CSS for every published post? This will start background jobs for all posts.', 'whippet' ) ); ?>')) return;
+				regenAllBtn.disabled = true;
+				regenAllBtn.textContent = '<?php echo esc_js( __( 'Queueing\u2026', 'whippet' ) ); ?>';
+				regenAllStatus.style.color = '#64748b';
+				regenAllStatus.textContent = '';
+				fetch(ajaxUrl, {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+					body: new URLSearchParams({ action: 'cce_regenerate_all', nonce: nonce })
+				})
+				.then(function(r) { return r.json(); })
+				.then(function(res) {
+					regenAllBtn.disabled = false;
+					regenAllBtn.textContent = '<?php echo esc_js( __( 'Regenerate All Posts', 'whippet' ) ); ?>';
+					if (res.success) {
+						regenAllStatus.style.color = '#10b981';
+						regenAllStatus.textContent = res.data.queued + ' jobs queued.';
+					} else {
+						regenAllStatus.style.color = '#ef4444';
+						regenAllStatus.textContent = 'Error: ' + res.data;
+					}
+				})
+				.catch(function() {
+					regenAllBtn.disabled = false;
+					regenAllBtn.textContent = '<?php echo esc_js( __( 'Regenerate All Posts', 'whippet' ) ); ?>';
+					regenAllStatus.style.color = '#ef4444';
+					regenAllStatus.textContent = '<?php echo esc_js( __( 'Request failed.', 'whippet' ) ); ?>';
+				});
+			});
+		}
+
+			var purgeBtn    = document.getElementById('cce-purge-btn');
+			var purgeStatus = document.getElementById('cce-purge-status');
+			if (purgeBtn) {
+				purgeBtn.addEventListener('click', function () {
+					var siteId = purgeBtn.getAttribute('data-site-id');
+					purgeBtn.disabled = true;
+					purgeBtn.textContent = '<?php echo esc_js( __( 'Purging\u2026', 'whippet' ) ); ?>';
+					fetch(ajaxUrl, {
+						method: 'POST',
+						headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+						body: new URLSearchParams({ action: 'cce_purge', nonce: nonce, site_id: siteId })
+					})
+					.then(function(r) { return r.json(); })
+					.then(function(res) {
+						purgeStatus.style.color = res.success ? '#10b981' : '#ef4444';
+						purgeStatus.textContent = res.success
+							? 'Cache purged \u2014 ' + (res.data.entriesDeleted || 0) + ' entries deleted.'
+							: 'Error: ' + res.data;
+						purgeBtn.disabled = false;
+						purgeBtn.textContent = '<?php echo esc_js( __( 'Purge Cache', 'whippet' ) ); ?>';
+					});
+				});
+			}
+		})();
+		</script>
+
+		<?php endif; // $whippet_ptab ?>
+
+	</div>
 
 	</div>
 	<!-- /wa-content -->

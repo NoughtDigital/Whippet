@@ -107,6 +107,8 @@ class Plugin {
 		require_once WHIPPET_PATH . 'inc/script-manager.php';
 		require_once WHIPPET_PATH . 'inc/import-export.php';
 		require_once WHIPPET_PATH . 'inc/tutorials.php';
+		require_once WHIPPET_PATH . 'inc/image-engine.php';
+		require_once WHIPPET_PATH . 'inc/critical-css.php';
 		require_once WHIPPET_PATH . 'analytics/load.php';
 		require_once WHIPPET_PATH . 'fonts/load.php';
 		require_once WHIPPET_PATH . 'lazy-load/load.php';
@@ -143,6 +145,7 @@ class Plugin {
 	public function deactivate() {
 		wp_clear_scheduled_hook( 'whippet_cache_preload_event' );
 		wp_clear_scheduled_hook( 'whippet_db_cleanup_cron' );
+		wp_clear_scheduled_hook( 'cce_poll_job' );
 
 		// Remove .htaccess cache rules.
 		if ( function_exists( 'insert_with_markers' ) ) {

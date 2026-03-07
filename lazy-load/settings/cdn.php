@@ -33,7 +33,7 @@ function whippet_images_settings_cdn() {
                 <th scope="row"><label>Enable CDN</label></th>
                 <td>
                     <input name="enable_cdn" type="checkbox" value="1" <?php if ($enable_cdn) {echo "checked";} ?>>
-                    <p class="description">Use <a href="https://statically.io" target="_blank">Statically</a> CDN to deliver images</p>
+                    <p class="description">Use <a href="https://wsrv.nl" target="_blank">wsrv.nl</a> CDN to deliver images</p>
                 </td>
             </tr>
             <tr>
@@ -47,7 +47,7 @@ function whippet_images_settings_cdn() {
         </table>
         <p class="submit">
             <input type="submit" name="submit" id="submit" class="button button-primary" value="Save Changes">
-            <a href="https://statically.io/purge" target="_blank" class="button">Purge files from CDN</a>
+            <a href="https://wsrv.nl" target="_blank" class="button">wsrv.nl CDN Info</a>
         </p>
     </form>
 <?php

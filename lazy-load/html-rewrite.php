@@ -5,12 +5,47 @@ require_once __DIR__ . '/lib/w3tc-bridge.php';
 require_once __DIR__ . '/lib/wpfc-bridge.php';
 
 if ( ! defined( 'WHIPPET_IMAGES_CDN_URL' ) ) {
-	define( 'WHIPPET_IMAGES_CDN_URL', 'https://cdn.statically.io/img/' );
+	define( 'WHIPPET_IMAGES_CDN_URL', 'https://wsrv.nl/' );
+}
+
+/**
+ * Returns true when the site is on a local/private hostname that external
+ * CDN proxies (like wsrv.nl) cannot reach from the public internet.
+ */
+function whippet_images_is_local_env(): bool {
+	$host = wp_parse_url( site_url(), PHP_URL_HOST );
+	if ( ! $host ) {
+		return false;
+	}
+	// localhost, 127.x.x.x, 192.168.x.x, 10.x.x.x, or local-only TLDs
+	return (
+		$host === 'localhost' ||
+		preg_match( '/^127\./', $host ) ||
+		preg_match( '/^192\.168\./', $host ) ||
+		preg_match( '/^10\./', $host ) ||
+		preg_match( '/\.(local|localhost|test|example|invalid|internal)$/', $host )
+	);
+}
+
+/**
+ * Converts an image URL to a wsrv.nl CDN URL.
+ * wsrv.nl expects the url= param without a protocol prefix.
+ */
+function whippet_images_to_cdn_url( string $url ): string {
+	$stripped = preg_replace( '/^(\w+:)?\/\//', '', $url );
+	return 'https://wsrv.nl/?url=' . $stripped;
 }
 
 function whippet_images_get_attachment_width($url) {
     try {
-        // Extract width if found the the url. For example something-100x100.jpg
+        // For wsrv.nl URLs, extract the original image URL before any lookups
+        if ( strpos( $url, 'wsrv.nl/?url=' ) !== false ) {
+            if ( preg_match( '/wsrv\.nl\/\?url=([^&]+)/', $url, $cdn_match ) ) {
+                $url = 'https://' . $cdn_match[1];
+            }
+        }
+
+        // Extract width if found in the url. For example something-100x100.jpg
         preg_match('/(.+)-([0-9]+)x([0-9]+)\.(jpg|jpeg|png|gif|webp)$/', $url, $matches);
         if(!empty($matches) && $matches[2] && is_numeric($matches[2])) 
             return $matches[2];
@@ -64,8 +99,7 @@ function whippet_images_add_compression($images, $quality) {
         // Exclude base64 images
         if (strpos($image->src, "data:image") !== false) continue;
         
-        // Add quality as ? or & based on width query inserted before
-        $image->src = whippet_images_add_query_string($image->src, "quality", $quality);
+        $image->src = whippet_images_add_query_string($image->src, "q", $quality);
 
         // Similarly to srcset
         if($image->srcset) {
@@ -74,7 +108,7 @@ function whippet_images_add_compression($images, $quality) {
             $images_urls = $matches[1];
             $sizes = $matches[2];
             foreach($images_urls as $index=>$image_url) {
-                $image_url = whippet_images_add_query_string($image_url, "quality", $quality);
+                $image_url = whippet_images_add_query_string($image_url, "q", $quality);
                 $srcset .= "{$image_url} {$sizes[$index]},\n";
             }
             $image->srcset = $srcset;
@@ -87,10 +121,10 @@ function whippet_images_add_webp($images) {
         // Exclude base64 images
         if (strpos($image->src, "data:image") !== false) continue;
 
-        // Include Statically images only
-        if (strpos($image->src, "statically.io") === false) continue;
+        // Only process wsrv.nl CDN images
+        if (strpos($image->src, "wsrv.nl") === false) continue;
         
-        $image->src = whippet_images_add_query_string($image->src, "f", "auto");
+        $image->src = whippet_images_add_query_string($image->src, "output", "webp");
 
         // Similarly to srcset
         if($image->srcset) {
@@ -99,7 +133,7 @@ function whippet_images_add_webp($images) {
             $images_urls = $matches[1];
             $sizes = $matches[2];
             foreach($images_urls as $index=>$image_url) {
-                $image_url = whippet_images_add_query_string($image_url, "f", "auto");
+                $image_url = whippet_images_add_query_string($image_url, "output", "webp");
                 $srcset .= "{$image_url} {$sizes[$index]},\n";
             }
             $image->srcset = $srcset;
@@ -109,13 +143,8 @@ function whippet_images_add_webp($images) {
 
 
 function whippet_images_add_cdn($images) {
-    // Get options
     $exclude_keywords = get_option('whippet_images_cdn_exclude_keywords');
-
-    // Exclude base64 images
-    array_push($exclude_keywords, "data:image", "brizy_post", "https://cdn.statically.io/");
-
-    $statically_url = WHIPPET_IMAGES_CDN_URL;
+    array_push($exclude_keywords, "data:image", "brizy_post", "wsrv.nl");
 
     foreach ($images as $image) {
 
@@ -128,15 +157,22 @@ function whippet_images_add_cdn($images) {
         $image->src = preg_replace("/(?:^|\s)(\/)(?!\/)/", site_url()."/", $image->src);
         if($image->srcset) $image->srcset = preg_replace("/(?:^|\s)(\/)(?!\/)/im", site_url()."/", $image->srcset);
 
-        // Add Statically CDN to src and srcset
-        $image->src = preg_replace("/(^\w+:|^)\/\//", $statically_url, $image->src);
-        if($image->srcset) $image->srcset = preg_replace("/(\w+:|^)\/\//im", $statically_url, $image->srcset);
+        // Add wsrv.nl CDN to src
+        $image->src = whippet_images_to_cdn_url($image->src);
+
+        // Add wsrv.nl CDN to each URL in srcset
+        if($image->srcset) {
+            $new_srcset = '';
+            preg_match_all('/((?:https?:)?\/\/\S+)\s(\d+w)/', $image->srcset, $matches);
+            foreach($matches[1] as $idx => $src_url) {
+                $new_srcset .= whippet_images_to_cdn_url($src_url) . ' ' . $matches[2][$idx] . ",\n";
+            }
+            $image->srcset = $new_srcset;
+        }
     }
 }
 
 function whippet_images_add_cdn_to_styles($styles, $compression_enabled, $quality) {
-
-    $statically_url = WHIPPET_IMAGES_CDN_URL;
 
     $exclude_keywords = get_option('whippet_images_cdn_exclude_keywords');
 
@@ -146,8 +182,8 @@ function whippet_images_add_cdn_to_styles($styles, $compression_enabled, $qualit
 
         if(preg_match($regex, $style->innertext, $matches)) {
             
-            // Add Statically CDN if enabled
-            $image_url = preg_replace("/(^\w+:|^)\/\//", $statically_url, $matches[2]);
+            // Add wsrv.nl CDN
+            $image_url = whippet_images_to_cdn_url($matches[2]);
 
             // Exclude image if needed
             foreach ($exclude_keywords as $keyword) {
@@ -156,7 +192,7 @@ function whippet_images_add_cdn_to_styles($styles, $compression_enabled, $qualit
             
             // Add compression if enabled and images are not svg
             if($compression_enabled && strpos($image_url, '.svg') === false)
-                $image_url = whippet_images_add_query_string($image_url, "quality", $quality);
+                $image_url = whippet_images_add_query_string($image_url, "q", $quality);
 
             // Update style
             $style->innertext = "{$matches[1]}{$image_url}{$matches[3]}";
@@ -253,20 +289,18 @@ function whippet_images_lazy_load_elementor_bg_images($divs) {
 
 function whippet_images_process_background_images($images, $cdn_enabled, $compression_enabled, $quality, $lazy_loading_enabled) {
 
-    $statically_url = WHIPPET_IMAGES_CDN_URL;
-
     foreach ($images as $image) {
         // Split inline style to 3 parts, before background image, image url, after background image
         $regex = '/(.*background.*:\s*url\((?:\'|")*)(.*(?:\.(?:jpg|jpeg|png|gif|svg|webp)))((?:\'|")*\).*)/';
 
         if(preg_match($regex, $image->style, $matches)) {
             
-            // Add Statically CDN if enabled
-            $image_url = $cdn_enabled ? preg_replace("/(^\w+:|^)\/\//", $statically_url, $matches[2]) : $matches[2];
+            // Add wsrv.nl CDN if enabled
+            $image_url = $cdn_enabled ? whippet_images_to_cdn_url($matches[2]) : $matches[2];
             
             // Add compression if enabled and images are not svg
             if($compression_enabled && strpos($image_url, '.svg') === false)
-                $image_url = whippet_images_add_query_string($image_url, "quality", $quality);
+                $image_url = whippet_images_add_query_string($image_url, "q", $quality);
             
             // Add lazy loading if enabled
             if($lazy_loading_enabled) {
@@ -285,20 +319,18 @@ function whippet_images_process_background_images($images, $cdn_enabled, $compre
 
 function whippet_images_process_woocommerce_thumbnails($images, $compression_enabled, $quality) {
 
-    $statically_url = WHIPPET_IMAGES_CDN_URL;
-
     foreach ($images as $image) {
         $src = $image->getAttribute("data-thumb");
 
         // Remove relative URLs
         $src = preg_replace("/(?:^|\s)(\/)/", site_url()."/", $src);
 
-        // Add Statically CDN
-        $src = preg_replace("/(^\w+:|^)\/\//", $statically_url, $src);
+        // Add wsrv.nl CDN
+        $src = whippet_images_to_cdn_url($src);
 
         // Append quality if compression is enabled
         if($compression_enabled)
-            $src = whippet_images_add_query_string($src, "quality", $quality);
+            $src = whippet_images_add_query_string($src, "q", $quality);
 
         $image->setAttribute("data-thumb", $src);
     }
@@ -335,7 +367,8 @@ function whippet_images_rewrite_html($html) {
         }
 
         // Get options
-        $cdn_enabled = get_option('whippet_images_enable_cdn');
+        // External CDN proxies cannot reach local/private hostnames.
+        $cdn_enabled = get_option('whippet_images_enable_cdn') && ! whippet_images_is_local_env();
         $lazy_loading_enabled = get_option('whippet_images_enable_lazyloading');
         $responsiveness_enabled = get_option('whippet_images_enable_responsive_images') && $cdn_enabled;
         $compression_enabled = get_option('whippet_images_enable_compression') && $cdn_enabled;
@@ -349,10 +382,8 @@ function whippet_images_rewrite_html($html) {
         // Process normal images with img tag
         $images = $newHtml->find('img');
 
-        if($responsiveness_enabled) whippet_images_add_responsiveness($images);
-
-        if($compression_enabled) whippet_images_add_compression($images, $quality);
-
+        // CDN rewriting must run first so subsequent params are appended as
+        // top-level wsrv.nl query params rather than embedded in the url= value.
         if($cdn_enabled) {
             whippet_images_add_cdn($images);
 
@@ -362,8 +393,12 @@ function whippet_images_rewrite_html($html) {
 
             // Process background images in style tags
             $styles = $newHtml->find('style');
-            if($cdn_enabled) whippet_images_add_cdn_to_styles($styles, $compression_enabled, $quality);
+            whippet_images_add_cdn_to_styles($styles, $compression_enabled, $quality);
         }
+
+        if($responsiveness_enabled) whippet_images_add_responsiveness($images);
+
+        if($compression_enabled) whippet_images_add_compression($images, $quality);
 
         if($cdn_enabled) whippet_images_add_webp($images);
 
