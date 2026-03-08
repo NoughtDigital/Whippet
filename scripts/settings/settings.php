@@ -7,6 +7,23 @@ function whippet_scripts_format_list( $list ) {
     return $list ? array_map( 'trim', explode( "\n", str_replace( "\r", "", $list ) ) ) : array();
 }
 
+function whippet_scripts_list_to_textarea( $value ) {
+    if ( ! is_array( $value ) ) {
+        return '';
+    }
+
+    $value = array_filter(
+        array_map(
+            static function( $item ) {
+                return trim( (string) $item );
+            },
+            $value
+        )
+    );
+
+    return esc_textarea( implode( "\n", $value ) );
+}
+
 function whippet_scripts_view_settings() {
 
     if ( isset( $_POST['submit'] ) ) {
@@ -19,17 +36,30 @@ function whippet_scripts_view_settings() {
         update_option( 'whippet_scripts_timeout', absint( $_POST['whippet_scripts_timeout'] ?? 5 ) );
         update_option( 'whippet_scripts_include_list', whippet_scripts_format_list( $_POST['whippet_scripts_include_list'] ?? '' ) );
         update_option( 'whippet_scripts_disabled_pages', whippet_scripts_format_list( $_POST['whippet_scripts_disabled_pages'] ?? '' ) );
+        update_option( 'whippet_scripts_regex_rules', whippet_scripts_format_list( $_POST['whippet_scripts_regex_rules'] ?? '' ) );
+        update_option( 'whippet_scripts_disabled_pages_regex', whippet_scripts_format_list( $_POST['whippet_scripts_disabled_pages_regex'] ?? '' ) );
+
+        $regex_operator = sanitize_text_field( wp_unslash( $_POST['whippet_scripts_regex_operator'] ?? 'any' ) );
+        if ( ! in_array( $regex_operator, array( 'any', 'all' ), true ) ) {
+            $regex_operator = 'any';
+        }
+        update_option( 'whippet_scripts_regex_operator', $regex_operator );
+
+        update_option( 'whippet_scripts_mu_mode', ! empty( $_POST['whippet_scripts_mu_mode'] ) ? 1 : 0 );
+        update_option( 'whippet_scripts_testing_mode', ! empty( $_POST['whippet_scripts_testing_mode'] ) ? 1 : 0 );
     }
 
-    $timeout = esc_attr(get_option('whippet_scripts_timeout'));
+    $timeout = esc_attr( get_option( 'whippet_scripts_timeout', 5 ) );
 
-    $include_list = get_option('whippet_scripts_include_list');
-    $include_list = implode("\n", $include_list);
-    $include_list = esc_textarea($include_list);
+    $include_list = whippet_scripts_list_to_textarea( get_option( 'whippet_scripts_include_list', array() ) );
+    $regex_rules = whippet_scripts_list_to_textarea( get_option( 'whippet_scripts_regex_rules', array() ) );
+    $disabled_pages = whippet_scripts_list_to_textarea( get_option( 'whippet_scripts_disabled_pages', array() ) );
+    $disabled_pages_regex = whippet_scripts_list_to_textarea( get_option( 'whippet_scripts_disabled_pages_regex', array() ) );
+    $regex_operator = get_option( 'whippet_scripts_regex_operator', 'any' );
+    $mu_mode = (bool) get_option( 'whippet_scripts_mu_mode', 0 );
+    $testing_mode = (bool) get_option( 'whippet_scripts_testing_mode', 0 );
+    $testing_preview_url = add_query_arg( 'whippet_preview_scripts', '1', home_url( '/' ) );
 
-    $disabled_pages = get_option('whippet_scripts_disabled_pages');
-    $disabled_pages = implode("\n", $disabled_pages);
-    $disabled_pages = esc_textarea($disabled_pages);
 
     ?>
 <form method="POST">
@@ -41,6 +71,23 @@ function whippet_scripts_view_settings() {
             <td>
                 <textarea name="whippet_scripts_include_list" rows="4" cols="50"><?php echo $include_list ?></textarea>
                 <p class="description">Keywords that identify scripts that should load on user interaction. One keyword per line.</p>
+            </td>
+        </tr>
+        <tr>
+            <th scope="row"><label>Regex Script Rules</label></th>
+            <td>
+                <textarea name="whippet_scripts_regex_rules" rows="4" cols="50"><?php echo $regex_rules; ?></textarea>
+                <p class="description">Disable any combination of scripts using regex. One pattern per line. Supports either plain text (auto-converted to regex) or full patterns like <code>/gtag|analytics/i</code>.</p>
+            </td>
+        </tr>
+        <tr>
+            <th scope="row"><label>Regex Combination Mode</label></th>
+            <td>
+                <select name="whippet_scripts_regex_operator">
+                    <option value="any" <?php selected( $regex_operator, 'any' ); ?>>Any pattern matches</option>
+                    <option value="all" <?php selected( $regex_operator, 'all' ); ?>>All patterns must match</option>
+                </select>
+                <p class="description">Choose how multiple regex rules are combined when matching scripts or URLs.</p>
             </td>
         </tr>
         <tr>
@@ -67,6 +114,30 @@ function whippet_scripts_view_settings() {
             <td>
                 <textarea name="whippet_scripts_disabled_pages" rows="4" cols="50"><?php echo $disabled_pages; ?></textarea>
                 <p class="description">Keywords of URLs where Whippet Scripts should be disabled</p>
+            </td>
+        </tr>
+        <tr>
+            <th scope="row"><label>Disable URLs (Regex)</label></th>
+            <td>
+                <textarea name="whippet_scripts_disabled_pages_regex" rows="4" cols="50"><?php echo $disabled_pages_regex; ?></textarea>
+                <p class="description">Regex URL rules where Script Manager should not run (for example: <code>/checkout|cart|my-account/i</code>).</p>
+            </td>
+        </tr>
+        <tr>
+            <th scope="row"><label for="whippet_scripts_mu_mode">MU Mode</label></th>
+            <td>
+                <input type="checkbox" name="whippet_scripts_mu_mode" id="whippet_scripts_mu_mode" value="1" <?php checked( $mu_mode ); ?> />
+                <p class="description">MU mode prepares Script Manager for must-use integrations so advanced logic can also control inline code, plugin execution and query-level behaviour.</p>
+            </td>
+        </tr>
+        <tr>
+            <th scope="row"><label for="whippet_scripts_testing_mode">Testing Mode (New)</label></th>
+            <td>
+                <input type="checkbox" name="whippet_scripts_testing_mode" id="whippet_scripts_testing_mode" value="1" <?php checked( $testing_mode ); ?> />
+                <p class="description">
+                    Safely preview your configuration before applying it to visitors. While enabled, Script Manager runs only for admins using:
+                    <br><code><?php echo esc_url( $testing_preview_url ); ?></code>
+                </p>
             </td>
         </tr>
     </tbody>

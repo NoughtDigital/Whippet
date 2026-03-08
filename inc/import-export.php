@@ -110,9 +110,14 @@ function whippet_process_settings_export() {
 	);
 
 	$whippet_scripts = array(
-		'whippet_scripts_timeout'        => get_option( 'whippet_scripts_timeout' ),
-		'whippet_scripts_include_list'   => get_option( 'whippet_scripts_include_list' ),
-		'whippet_scripts_disabled_pages' => get_option( 'whippet_scripts_disabled_pages' ),
+		'whippet_scripts_timeout'              => get_option( 'whippet_scripts_timeout' ),
+		'whippet_scripts_include_list'         => get_option( 'whippet_scripts_include_list' ),
+		'whippet_scripts_disabled_pages'       => get_option( 'whippet_scripts_disabled_pages' ),
+		'whippet_scripts_regex_rules'          => get_option( 'whippet_scripts_regex_rules' ),
+		'whippet_scripts_disabled_pages_regex' => get_option( 'whippet_scripts_disabled_pages_regex' ),
+		'whippet_scripts_regex_operator'       => get_option( 'whippet_scripts_regex_operator' ),
+		'whippet_scripts_mu_mode'              => get_option( 'whippet_scripts_mu_mode' ),
+		'whippet_scripts_testing_mode'         => get_option( 'whippet_scripts_testing_mode' ),
 	);
 
 	$whippet_options = array(
@@ -123,6 +128,10 @@ function whippet_process_settings_export() {
 		'whippet_pages'     => $whippet_pages,
 		'whippet_scripts'   => $whippet_scripts,
 	);
+
+	if ( class_exists( '\Whippet\SnippetManager' ) ) {
+		$whippet_options['whippet_snippets'] = \Whippet\SnippetManager::instance()->export_snippets();
+	}
 
 	ignore_user_abort( true );
 
@@ -196,6 +205,8 @@ function whippet_process_settings_import() {
 	foreach ( $settings as $key => $value ) {
 		if ( 'whippet_core' === $key ) {
 			add_option( 'whippet_options', $value );
+		} elseif ( 'whippet_snippets' === $key && class_exists( '\Whippet\SnippetManager' ) && is_array( $value ) ) {
+			\Whippet\SnippetManager::instance()->import_snippets( $value );
 		} elseif ( in_array( $key, $valid_groups, true ) && is_array( $value ) ) {
 			foreach ( $value as $setting => $setting_value ) {
 				update_option( $setting, $setting_value );

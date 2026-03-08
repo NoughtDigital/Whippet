@@ -107,6 +107,8 @@ class Plugin {
 		require_once WHIPPET_PATH . 'inc/script-manager.php';
 		require_once WHIPPET_PATH . 'inc/import-export.php';
 		require_once WHIPPET_PATH . 'inc/tutorials.php';
+		require_once WHIPPET_PATH . 'inc/snippets.php';
+		require_once WHIPPET_PATH . 'inc/advanced-features.php';
 		require_once WHIPPET_PATH . 'inc/image-engine.php';
 		require_once WHIPPET_PATH . 'inc/critical-css.php';
 		require_once WHIPPET_PATH . 'analytics/load.php';

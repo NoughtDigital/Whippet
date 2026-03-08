@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 <div class="wrap whippet-admin" x-data="{
 	activeTab: (function() {
 		var h = window.location.hash.slice(1) || localStorage.getItem('whippet_tab') || 'dashboard';
-		var valid = ['dashboard','performance','analytics','fonts','lazyload','pages','scripts','tools','import-export','docs','premium'];
+		var valid = ['dashboard','performance','analytics','fonts','lazyload','pages','scripts','snippets','extras','tools','import-export','docs','premium'];
 		return valid.indexOf(h) !== -1 ? h : 'dashboard';
 	})(),
 	isDragging: false,
@@ -97,7 +97,21 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 					<polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
 				</svg>
-				<span><?php esc_html_e( 'Scripts', 'whippet' ); ?></span>
+				<span><?php esc_html_e( 'Script Manager', 'whippet' ); ?></span>
+			</button>
+
+			<button class="wa-nav-btn" :class="activeTab === 'snippets' ? 'active' : ''" @click="setTab('snippets')">
+				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+					<path d="M20 7l-8 8-4-4"/><path d="M14 7h7v7"/><path d="M4 4h7v7"/>
+				</svg>
+				<span><?php esc_html_e( 'Snippets', 'whippet' ); ?></span>
+			</button>
+
+			<button class="wa-nav-btn" :class="activeTab === 'extras' ? 'active' : ''" @click="setTab('extras')">
+				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+					<path d="M12 2v20M2 12h20"/>
+				</svg>
+				<span><?php esc_html_e( 'Extras', 'whippet' ); ?></span>
 			</button>
 
 			<button class="wa-nav-btn" :class="activeTab === 'tools' ? 'active' : ''" @click="setTab('tools')">
@@ -334,12 +348,56 @@ if ( ! defined( 'ABSPATH' ) ) {
 			 x-transition:enter="wa-fade-in" x-transition:enter-start="wa-fade-start" x-transition:enter-end="wa-fade-end">
 
 			<div class="wa-panel-hd">
-				<h2><?php esc_html_e( 'Scripts', 'whippet' ); ?></h2>
-				<p><?php esc_html_e( 'Delay JavaScript to reduce render-blocking.', 'whippet' ); ?></p>
+				<h2><?php esc_html_e( 'Script Manager', 'whippet' ); ?></h2>
+				<p><?php esc_html_e( 'Delay JavaScript, combine matching rules with regex, and safely test changes before going live.', 'whippet' ); ?></p>
 			</div>
 
 			<div class="wa-card">
 				<?php whippet_scripts_view_settings(); ?>
+			</div>
+		</div>
+
+		<!-- ============================================================
+		     SNIPPETS TAB
+		     ============================================================ -->
+		<div class="wa-panel" x-show="activeTab === 'snippets'" style="display:none"
+			 x-transition:enter="wa-fade-in" x-transition:enter-start="wa-fade-start" x-transition:enter-end="wa-fade-end">
+
+			<div class="wa-panel-hd">
+				<h2><?php esc_html_e( 'Code Snippets', 'whippet' ); ?></h2>
+				<p><?php esc_html_e( 'Add and manage PHP, CSS, JS, and HTML snippets with file or inline delivery, optimization flags, conditions, and safe mode.', 'whippet' ); ?></p>
+			</div>
+
+			<div class="wa-card">
+				<?php
+				if ( function_exists( '\Whippet\whippet_render_snippets_manager' ) ) {
+					\Whippet\whippet_render_snippets_manager();
+				} else {
+					echo '<div style="padding:1.25rem;"><p style="color:#64748b;font-size:.875rem;">' . esc_html__( 'Snippet manager module not loaded.', 'whippet' ) . '</p></div>';
+				}
+				?>
+			</div>
+		</div>
+
+		<!-- ============================================================
+		     EXTRAS TAB
+		     ============================================================ -->
+		<div class="wa-panel" x-show="activeTab === 'extras'" style="display:none"
+			 x-transition:enter="wa-fade-in" x-transition:enter-start="wa-fade-start" x-transition:enter-end="wa-fade-end">
+
+			<div class="wa-panel-hd">
+				<h2><?php esc_html_e( 'Extras', 'whippet' ); ?></h2>
+				<p><?php esc_html_e( 'Header/body/footer code, cookie warning bar, maintenance mode, post and page cloner, social sharing, and WooCommerce utility toggles.', 'whippet' ); ?></p>
+			</div>
+
+			<div class="wa-card">
+				<?php
+				if ( function_exists( '\Whippet\whippet_render_extras_settings' ) ) {
+					\Whippet\whippet_render_extras_settings();
+				} else {
+					echo '<div style="padding:1.25rem;"><p style="color:#64748b;font-size:.875rem;">' . esc_html__( 'Extras module not loaded.', 'whippet' ) . '</p></div>';
+				}
+				?>
 			</div>
 		</div>
 
@@ -689,6 +747,72 @@ if ( ! defined( 'ABSPATH' ) ) {
 							<?php echo esc_html( $label ); ?>
 						</label>
 						<?php endforeach; ?>
+					</div>
+				</div>
+
+				<div class="wa-ie-setting-row">
+					<div class="wa-ie-setting-info">
+						<div class="wa-ie-setting-label"><?php esc_html_e( 'Auto-optimise Media Library Uploads', 'whippet' ); ?></div>
+						<div class="wa-ie-setting-desc"><?php esc_html_e( 'Automatically send new media library image uploads to Image Engine after WordPress finishes generating their attachment metadata.', 'whippet' ); ?></div>
+					</div>
+					<div class="wa-ie-toggle-group">
+						<?php
+						$ie_auto_optimize = (int) get_option( 'ie_auto_optimize', 1 );
+						foreach ( [ 1 => 'Enabled', 0 => 'Disabled' ] as $val => $label ) :
+						?>
+						<label class="wa-ie-toggle-opt <?php echo $ie_auto_optimize === $val ? 'active' : ''; ?>">
+							<input type="radio" name="ie_auto_optimize" value="<?php echo esc_attr( (string) $val ); ?>" <?php checked( $ie_auto_optimize, $val ); ?> />
+							<?php echo esc_html( $label ); ?>
+						</label>
+						<?php endforeach; ?>
+					</div>
+				</div>
+
+				<div class="wa-ie-setting-row">
+					<div class="wa-ie-setting-info">
+						<div class="wa-ie-setting-label"><?php esc_html_e( 'Front-end Rewriting', 'whippet' ); ?></div>
+						<div class="wa-ie-setting-desc"><?php esc_html_e( 'Rewrites full page HTML so Elementor output, theme markup, and inline background images can be matched by URL instead of only standard wp-image classes.', 'whippet' ); ?></div>
+					</div>
+					<div class="wa-ie-toggle-group">
+						<?php
+						$ie_frontend_rewrite = (int) get_option( 'ie_frontend_rewrite', 1 );
+						foreach ( [ 1 => 'Enabled', 0 => 'Disabled' ] as $val => $label ) :
+						?>
+						<label class="wa-ie-toggle-opt <?php echo $ie_frontend_rewrite === $val ? 'active' : ''; ?>">
+							<input type="radio" name="ie_frontend_rewrite" value="<?php echo esc_attr( (string) $val ); ?>" <?php checked( $ie_frontend_rewrite, $val ); ?> />
+							<?php echo esc_html( $label ); ?>
+						</label>
+						<?php endforeach; ?>
+					</div>
+				</div>
+
+				<div class="wa-ie-setting-row" style="display:block;">
+					<div class="wa-ie-setting-info">
+						<div class="wa-ie-setting-label"><label for="ie_rewrite_source_patterns"><?php esc_html_e( 'Selected Directories or URLs', 'whippet' ); ?></label></div>
+						<div class="wa-ie-setting-desc"><?php esc_html_e( 'Only attempt broad front-end rewrites for image URLs that contain one of these values. Leave blank to use uploads plus the active theme directories.', 'whippet' ); ?></div>
+					</div>
+					<div style="margin-top:.75rem;max-width:720px;">
+						<?php
+						$ie_rewrite_source_patterns = get_option( 'ie_rewrite_source_patterns', [] );
+						$ie_rewrite_source_patterns = is_array( $ie_rewrite_source_patterns ) ? implode( "\n", $ie_rewrite_source_patterns ) : (string) $ie_rewrite_source_patterns;
+						?>
+						<textarea name="ie_rewrite_source_patterns" id="ie_rewrite_source_patterns" rows="5" class="large-text code"><?php echo esc_textarea( $ie_rewrite_source_patterns ); ?></textarea>
+						<p class="description"><?php esc_html_e( 'Examples: /wp-content/uploads/, /wp-content/themes/your-theme/assets/, https://example.com/wp-content/uploads/hero/', 'whippet' ); ?></p>
+					</div>
+				</div>
+
+				<div class="wa-ie-setting-row" style="display:block;border-bottom:none;">
+					<div class="wa-ie-setting-info">
+						<div class="wa-ie-setting-label"><label for="ie_rewrite_page_patterns"><?php esc_html_e( 'Rewrite Only On Page URLs', 'whippet' ); ?></label></div>
+						<div class="wa-ie-setting-desc"><?php esc_html_e( 'Optional request URL filters for the full-page rewrite pass. Add one path or URL fragment per line to limit where broader detection runs.', 'whippet' ); ?></div>
+					</div>
+					<div style="margin-top:.75rem;max-width:720px;">
+						<?php
+						$ie_rewrite_page_patterns = get_option( 'ie_rewrite_page_patterns', [] );
+						$ie_rewrite_page_patterns = is_array( $ie_rewrite_page_patterns ) ? implode( "\n", $ie_rewrite_page_patterns ) : (string) $ie_rewrite_page_patterns;
+						?>
+						<textarea name="ie_rewrite_page_patterns" id="ie_rewrite_page_patterns" rows="5" class="large-text code"><?php echo esc_textarea( $ie_rewrite_page_patterns ); ?></textarea>
+						<p class="description"><?php esc_html_e( 'Examples: /shop/, /landing-pages/, https://example.com/pricing', 'whippet' ); ?></p>
 					</div>
 				</div>
 

@@ -1,27 +1,12 @@
-@import "tailwindcss";
-
-@theme {
-	/* Font Family */
-	--font-sans: "Figtree", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-}
-
 @layer base {
-	/* Apply Figtree to all plugin elements (exclude admin bar so it keeps WP alignment) */
+	/* Apply Figtree only inside Script Manager panel. */
 	body #whippet,
-	body .whippet-panel,
-	body .whippet-form,
-	body .whippet-wrapper,
-	body [class*="whippet"]:not(.whippet-object),
-	body [id="whippet"] {
+	body .whippet-panel {
 		font-family: "Figtree", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji" !important;
 	}
 
 	body #whippet *,
-	body .whippet-panel *,
-	body .whippet-form *,
-	body .whippet-wrapper *,
-	body [class*="whippet"]:not(.whippet-object) *,
-	body [id="whippet"] * {
+	body .whippet-panel * {
 		font-family: "Figtree", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji" !important;
 	}
 	
@@ -35,62 +20,12 @@
 	}
 }
 
-// $color_1: #000;
-// $color_2: #444;
-// $color_3: #fff;
-// $color_4: red;
-// $color_5: #222;
-// $color_6: #0073aa;
-// $background_color_1: rgba(238, 238, 238, 0.1);
-// $border_color_1: #0073aa #006799 #006799;
-
 /**
- * Restore WordPress admin bar after Tailwind preflight.
- * Preflight resets margin/padding/list-style globally and breaks the admin bar layout.
+ * Keep the frontend admin bar visible above the overlay.
  */
-#wpadminbar,
-#wpadminbar * {
-	box-sizing: border-box;
-}
-
 #wpadminbar {
-	position: relative;
-	height: 32px;
-	line-height: 32px;
-	margin: 0;
-	padding: 0;
-}
-
-#wpadminbar .ab-item,
-#wpadminbar a.ab-item {
-	display: inline-block;
-	padding: 0 12px;
-	height: 32px;
-	line-height: 32px;
-	text-decoration: none;
-}
-
-#wpadminbar > #wp-toolbar {
-	margin: 0;
-	padding: 0;
-}
-
-#wpadminbar ul {
-	list-style: none;
-	margin: 0;
-	padding: 0;
-}
-
-#wpadminbar ul li {
-	display: inline-block;
-	margin: 0;
-	padding: 0;
-}
-
-#wpadminbar .ab-icon::before,
-#wpadminbar .ab-item::before {
-	display: inline-block;
-	margin-right: 6px;
+	position: fixed !important;
+	z-index: 99999 !important;
 }
 
 // .font-xs {
@@ -378,31 +313,25 @@
 }
 
 #wp-admin-bar-whippet .ab-item {
-	display: inline-flex;
-	align-items: center;
 	cursor: pointer;
-	padding: 0 12px;
-	height: 32px;
-	line-height: 32px;
-	white-space: nowrap;
 }
 
 /**
  * BEGIN RESET STYLE
  */
 #whippet div, #whippet span, #whippet applet, #whippet object, #whippet iframe,
-h1, #whippet h2, #whippet h3, #whippet h4, #whippet h5, #whippet h6, #whippet p, #whippet blockquote, #whippet pre,
-a, #whippet abbr, #whippet acronym, #whippet address, #whippet big, #whippet cite, #whippet code,
-del, #whippet dfn, #whippet em, #whippet img, #whippet ins, #whippet kbd, #whippet q, #whippet s, #whippet samp,
-small, #whippet strike, #whippet strong, #whippet sub, #whippet sup, #whippet tt, #whippet var,
-b, #whippet u, #whippet i, #whippet center,
-dl, #whippet dt, #whippet dd, #whippet ol, #whippet ul, #whippet li,
-fieldset, #whippet form, #whippet label, #whippet legend,
-table, #whippet caption, #whippet tbody, #whippet tfoot, #whippet thead, #whippet tr, #whippet th, #whippet td,
-article, #whippet aside, #whippet canvas, #whippet details, #whippet embed, #whippet
-figure, #whippet figcaption, #whippet footer, #whippet header, #whippet hgroup, #whippet
-menu, #whippet nav, #whippet output, #whippet ruby, #whippet section, #whippet summary,
-time, #whippet mark, #whippet audio, #whippet video {
+#whippet h1, #whippet h2, #whippet h3, #whippet h4, #whippet h5, #whippet h6, #whippet p, #whippet blockquote, #whippet pre,
+#whippet a, #whippet abbr, #whippet acronym, #whippet address, #whippet big, #whippet cite, #whippet code,
+#whippet del, #whippet dfn, #whippet em, #whippet img, #whippet ins, #whippet kbd, #whippet q, #whippet s, #whippet samp,
+#whippet small, #whippet strike, #whippet strong, #whippet sub, #whippet sup, #whippet tt, #whippet var,
+#whippet b, #whippet u, #whippet i, #whippet center,
+#whippet dl, #whippet dt, #whippet dd, #whippet ol, #whippet ul, #whippet li,
+#whippet fieldset, #whippet form, #whippet label, #whippet legend,
+#whippet table, #whippet caption, #whippet tbody, #whippet tfoot, #whippet thead, #whippet tr, #whippet th, #whippet td,
+#whippet article, #whippet aside, #whippet canvas, #whippet details, #whippet embed, #whippet
+#whippet figure, #whippet figcaption, #whippet footer, #whippet header, #whippet hgroup, #whippet
+#whippet menu, #whippet nav, #whippet output, #whippet ruby, #whippet section, #whippet summary,
+#whippet time, #whippet mark, #whippet audio, #whippet video {
     margin: 0;
     padding: 0;
     border: 0;
@@ -462,7 +391,7 @@ time, #whippet mark, #whippet audio, #whippet video {
     font-family: "Figtree", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
     font-size: 14px;
     line-height: 1.6842;
-    z-index: 1000000;
+    z-index: 99998;
     max-width: 100%;
 }
 
@@ -801,4 +730,297 @@ time, #whippet mark, #whippet audio, #whippet video {
 #whippet .plugin-wrapper .gonz.empty {
     background: #fff;
     padding: 1em;
+}
+
+/**
+ * Frontend panel refresh.
+ * Matches updated backend visual language without changing markup.
+ */
+#whippet.whippet-panel {
+	--wa-accent: #6366f1;
+	--wa-accent-hover: #4f46e5;
+	--wa-bg: #f1f5f9;
+	--wa-surface: #ffffff;
+	--wa-border: #e2e8f0;
+	--wa-border-light: #f1f5f9;
+	--wa-text: #0f172a;
+	--wa-text-sm: #334155;
+	--wa-text-muted: #64748b;
+	--wa-radius: 10px;
+	--wa-radius-sm: 8px;
+	--wa-shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.08);
+	--wa-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+	background: var(--wa-bg);
+	color: var(--wa-text);
+	padding: 1.25rem 1.25rem 3rem;
+}
+
+#whippet h1 {
+	font-size: 1.5rem;
+	font-weight: 700;
+	color: var(--wa-text);
+	letter-spacing: -0.01em;
+	margin-bottom: 0.625rem;
+}
+
+#whippet h1 span {
+	background: linear-gradient(135deg, var(--wa-accent), #818cf8);
+	color: #fff;
+	padding: 0.25rem 0.5rem;
+	border-radius: 8px;
+	font-size: 1rem;
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+	box-shadow: 0 2px 10px rgba(99, 102, 241, 0.35);
+}
+
+#whippet > h2,
+#whippet .plugin-wrapper > h2 {
+	font-size: 0.75rem;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 0.07em;
+	color: var(--wa-text-muted);
+	margin: 1.125rem 0 0.625rem;
+	border: 0;
+	padding: 0;
+	float: none;
+}
+
+#whippet .plugin-wrapper {
+	float: none;
+	margin-bottom: 1.25rem;
+}
+
+#whippet .gonz {
+	background: var(--wa-surface);
+	border: 1px solid var(--wa-border);
+	border-radius: var(--wa-radius);
+	box-shadow: var(--wa-shadow-sm);
+	overflow: hidden;
+	margin: 0 0 1rem;
+}
+
+#whippet .gonz tr th,
+#whippet .gonz tr td {
+	padding: 0.75rem 0.875rem;
+	border-bottom: 1px solid var(--wa-border-light);
+	line-height: 1.35;
+	color: var(--wa-text-sm);
+}
+
+#whippet .gonz thead th {
+	background: #f8fafc;
+	color: var(--wa-text-muted);
+	font-size: 0.6875rem;
+	text-transform: uppercase;
+	letter-spacing: 0.06em;
+	font-weight: 700;
+}
+
+#whippet .gonz tbody tr:nth-child(even) {
+	background: #fcfdff;
+}
+
+#whippet .gonz tbody tr:hover td {
+	background: #f8fafc;
+}
+
+#whippet .gonz .overflow {
+	text-overflow: ellipsis;
+	overflow: hidden;
+	word-break: break-word;
+}
+
+#whippet .g-link {
+	color: var(--wa-accent);
+	font-size: 0.875rem;
+	font-weight: 500;
+	text-decoration: none;
+}
+
+#whippet .g-link:hover {
+	color: var(--wa-accent-hover);
+	text-decoration: underline;
+}
+
+#whippet .g-info {
+	font-size: 0.75rem;
+	color: var(--wa-text-muted);
+	margin-top: 0.5rem;
+}
+
+#whippet .g-info b {
+	color: var(--wa-text-sm);
+	font-weight: 600;
+}
+
+#whippet tr td .state-1,
+#whippet tr td .state-0 {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 56px;
+	padding: 0.3125rem 0.5rem;
+	border-radius: 999px;
+	color: #fff;
+	font-size: 0.6875rem;
+	font-weight: 700;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+}
+
+#whippet tr td .state-1 {
+	background: #10b981;
+}
+
+#whippet tr td .state-0 {
+	background: #ef4444;
+}
+
+#whippet select {
+	appearance: none;
+	-webkit-appearance: none;
+	background-color: var(--wa-surface);
+	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+	background-repeat: no-repeat;
+	background-position: right 0.625rem center;
+	border: 1px solid var(--wa-border);
+	border-radius: var(--wa-radius-sm);
+	padding: 0.4375rem 2.125rem 0.4375rem 0.625rem;
+	font-size: 0.8125rem;
+	color: var(--wa-text);
+	cursor: pointer;
+	min-width: 130px;
+	box-shadow: var(--wa-shadow-sm);
+}
+
+#whippet select:focus {
+	outline: none;
+	border-color: var(--wa-accent);
+	box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
+}
+
+#whippet input[type="checkbox"],
+#whippet input[type="radio"] {
+	accent-color: var(--wa-accent);
+}
+
+#whippet tr td label {
+	margin: 0.25rem 1rem 0.25rem 0;
+	font-size: 0.8125rem;
+	color: var(--wa-text-sm);
+}
+
+#whippet .g-cond,
+#whippet .g-excp {
+	float: none;
+	width: 100%;
+	padding: 0.625rem 0.75rem;
+	border: 1px solid var(--wa-border-light);
+	border-radius: var(--wa-radius-sm);
+	background: #f8fafc;
+}
+
+#whippet .g-excp {
+	margin-top: 0.5rem;
+}
+
+#whippet #submit-whippet {
+	background: var(--wa-accent);
+	border: 1px solid var(--wa-accent-hover);
+	border-radius: var(--wa-radius-sm);
+	color: #fff;
+	padding: 0.5625rem 1.125rem;
+	font-size: 0.8125rem;
+	font-weight: 600;
+	line-height: 1.4;
+	height: auto;
+	text-shadow: none;
+	box-shadow: 0 2px 8px rgba(99, 102, 241, 0.35);
+	margin: 1rem 0 2.5rem;
+}
+
+#whippet #submit-whippet:hover {
+	background: var(--wa-accent-hover);
+}
+
+#whippet #submit-whippet:focus {
+	outline: none;
+	box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.28);
+}
+
+/* Snippet actions: reduce visual clutter and improve grouping. */
+#whippet .whippet-snippet-editor-actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.5rem;
+	margin: 0.5rem 0 1rem;
+}
+
+#whippet .whippet-snippet-import-bar {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	flex-wrap: wrap;
+	gap: 0.75rem;
+	margin-bottom: 0.75rem;
+	padding: 0.75rem;
+	background: #fff;
+	border: 1px solid var(--wa-border, #e2e8f0);
+	border-radius: var(--wa-radius-sm, 8px);
+}
+
+#whippet .whippet-snippet-import-form {
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 0.5rem;
+}
+
+#whippet .whippet-snippets-file-name {
+	display: inline-block;
+	max-width: 260px;
+	padding: 0.375rem 0.625rem;
+	border: 1px dashed #cbd5e1;
+	border-radius: 999px;
+	background: #f8fafc;
+	color: #64748b;
+	font-size: 0.75rem;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+#whippet .whippet-snippet-export {
+	white-space: nowrap;
+}
+
+#whippet .whippet-snippet-bulk-actions {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	margin-bottom: 0.625rem;
+	padding: 0.625rem 0.75rem;
+	background: #fff;
+	border: 1px solid var(--wa-border, #e2e8f0);
+	border-radius: var(--wa-radius-sm, 8px);
+}
+
+#whippet .whippet-snippet-bulk-actions select {
+	min-width: 170px;
+}
+
+@media (max-width: 782px) {
+	#whippet .whippet-snippet-import-bar {
+		align-items: flex-start;
+	}
+
+	#whippet .whippet-snippets-file-name {
+		max-width: 100%;
+	}
+
+	#whippet .whippet-snippet-bulk-actions {
+		flex-wrap: wrap;
+	}
 }

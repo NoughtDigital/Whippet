@@ -740,6 +740,37 @@ public function whippet_default_options() {
 		'webp_quality'            => '80',
 		'preload_fonts'           => array(),
 		'db_cleanup_schedule'     => '',
+		'global_head_code'        => '',
+		'global_body_code'        => '',
+		'global_footer_code'      => '',
+		'cookie_bar_enabled'      => '0',
+		'cookie_bar_message'      => '',
+		'cookie_bar_required_button_text' => '',
+		'cookie_bar_button_text'  => '',
+		'cookie_bar_theme'        => 'modern_dark',
+		'cookie_bar_background_color' => '',
+		'cookie_bar_privacy_url'  => '',
+		'maintenance_mode_enabled'      => '0',
+		'maintenance_mode_status'       => 'online',
+		'maintenance_mode_heading'      => '',
+		'maintenance_mode_message'      => '',
+		'maintenance_mode_bypass_token' => '',
+		'maintenance_mode_content_page' => 0,
+		'social_share_enabled'          => '0',
+		'social_share_title'            => 'Share this %%post_type%%',
+		'social_share_buttons'          => array( 'x', 'facebook', 'linkedin', 'whatsapp', 'pinterest' ),
+		'social_share_pos_before'       => '0',
+		'social_share_pos_after'        => '1',
+		'social_share_pos_floating'     => '1',
+		'social_share_networks'         => 'facebook,x,linkedin,email',
+		'woo_fix_free_shipping'           => '0',
+		'woo_variable_price_from'         => '0',
+		'woo_hide_trailing_zeros'         => '0',
+		'woo_disable_unique_sku'          => '0',
+		'woo_disable_skus'                => '0',
+		'woo_redirect_checkout_after_add' => '0',
+		'woo_hide_related_products'       => '0',
+		'woo_hide_sku'                    => '0',
 	);
 	return apply_filters( 'whippet_default_options', $defaults );
 
@@ -827,6 +858,50 @@ public function whippet_print_input($args) {
 
 //sanitize extras
 public static function whippet_sanitize_extras($values) {
+	$existing = get_option( 'whippet_options', array() );
+	if ( ! is_array( $existing ) ) {
+		$existing = array();
+	}
+	// Preserve extras set via custom tabs when saving the standard Settings API forms.
+	$preserve_keys = array(
+		'global_head_code',
+		'global_body_code',
+		'global_footer_code',
+		'cookie_bar_enabled',
+		'cookie_bar_message',
+		'cookie_bar_required_button_text',
+		'cookie_bar_button_text',
+		'cookie_bar_theme',
+		'cookie_bar_background_color',
+		'cookie_bar_privacy_url',
+		'maintenance_mode_enabled',
+		'maintenance_mode_status',
+		'maintenance_mode_heading',
+		'maintenance_mode_message',
+		'maintenance_mode_bypass_token',
+		'maintenance_mode_content_page',
+		'social_share_enabled',
+		'social_share_title',
+		'social_share_buttons',
+		'social_share_pos_before',
+		'social_share_pos_after',
+		'social_share_pos_floating',
+		'social_share_networks',
+		'woo_fix_free_shipping',
+		'woo_variable_price_from',
+		'woo_hide_trailing_zeros',
+		'woo_disable_unique_sku',
+		'woo_disable_skus',
+		'woo_redirect_checkout_after_add',
+		'woo_hide_related_products',
+		'woo_hide_sku',
+	);
+	foreach ( $preserve_keys as $key ) {
+		if ( ! isset( $values[ $key ] ) && isset( $existing[ $key ] ) ) {
+			$values[ $key ] = $existing[ $key ];
+		}
+	}
+
 	if(!empty($values['dns_prefetch'])) {
 		$text = trim($values['dns_prefetch']);
 		$text_array = explode("\n", $text);
@@ -947,6 +1022,7 @@ public function whippet_render_db_cleanup_button() {
 			trashed_comments: '<?php echo esc_js( __( 'Trashed comments', 'whippet' ) ); ?>',
 			transients:       '<?php echo esc_js( __( 'Expired transients', 'whippet' ) ); ?>',
 			orphaned_meta:    '<?php echo esc_js( __( 'Orphaned post meta', 'whippet' ) ); ?>',
+			optimized_tables: '<?php echo esc_js( __( 'Optimized tables', 'whippet' ) ); ?>',
 		};
 
 		function renderDetails(data) {

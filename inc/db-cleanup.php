@@ -68,9 +68,9 @@ class DbCleanup {
 			array(
 				'counts'  => $counts,
 				'total'   => $total,
-				/* translators: %d: number of rows */
+				/* translators: %d: number of cleanup items */
 				'message' => sprintf(
-					_n( '%d row can be cleaned up.', '%d rows can be cleaned up.', $total, 'whippet' ),
+					_n( '%d item can be cleaned up.', '%d items can be cleaned up.', $total, 'whippet' ),
 					$total
 				),
 			)
@@ -100,9 +100,9 @@ class DbCleanup {
 			array(
 				'results' => $results,
 				'total'   => $total,
-				/* translators: %d: number of database rows deleted */
+				/* translators: %d: number of cleaned items */
 				'message' => sprintf(
-					_n( '%d database row deleted.', '%d database rows deleted.', $total, 'whippet' ),
+					_n( '%d cleanup item completed.', '%d cleanup items completed.', $total, 'whippet' ),
 					$total
 				),
 			)
@@ -127,6 +127,7 @@ class DbCleanup {
 			'trashed_comments' => $this->delete_trashed_comments(),
 			'transients'       => $this->delete_expired_transients(),
 			'orphaned_meta'    => $this->delete_orphaned_postmeta(),
+			'optimized_tables' => $this->optimize_tables(),
 		);
 
 		update_option( 'whippet_db_cleanup_last_run', array(
@@ -177,6 +178,7 @@ class DbCleanup {
 			'orphaned_meta'    => (int) $wpdb->get_var( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 				"SELECT COUNT(meta_id) FROM {$wpdb->postmeta} pm LEFT JOIN {$wpdb->posts} p ON p.ID = pm.post_id WHERE p.ID IS NULL"
 			),
+			'optimized_tables' => $this->count_optimizable_tables(),
 		);
 	}
 
@@ -248,6 +250,41 @@ class DbCleanup {
 			WHERE p.ID IS NULL"
 		);
 		return (int) $deleted;
+	}
+
+	private function count_optimizable_tables() {
+		global $wpdb;
+		$tables = $wpdb->get_results( 'SHOW TABLE STATUS LIKE "' . esc_sql( $wpdb->esc_like( $wpdb->prefix ) ) . '%"', ARRAY_A ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+		if ( ! is_array( $tables ) ) {
+			return 0;
+		}
+		$count = 0;
+		foreach ( $tables as $table ) {
+			if ( ! empty( $table['Data_free'] ) && (int) $table['Data_free'] > 0 ) {
+				$count++;
+			}
+		}
+		return $count;
+	}
+
+	private function optimize_tables() {
+		global $wpdb;
+		$tables = $wpdb->get_col( 'SHOW TABLES LIKE "' . esc_sql( $wpdb->esc_like( $wpdb->prefix ) ) . '%"' ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+		if ( ! is_array( $tables ) || empty( $tables ) ) {
+			return 0;
+		}
+		$optimized = 0;
+		foreach ( $tables as $table ) {
+			$table = sanitize_text_field( $table );
+			if ( '' === $table ) {
+				continue;
+			}
+			$success = $wpdb->query( "OPTIMIZE TABLE `{$table}`" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+			if ( false !== $success ) {
+				$optimized++;
+			}
+		}
+		return $optimized;
 	}
 
 	// -------------------------------------------------------------------------

@@ -32,15 +32,18 @@ class Whippet_Image_Engine {
 		add_action( 'admin_init',                                  [ $this, 'register_settings' ] );
 		add_action( 'admin_enqueue_scripts',                       [ $this, 'enqueue_admin_assets' ] );
 		add_action( 'wp_dashboard_setup',                          [ $this, 'register_dashboard_widget' ] );
+		add_filter( 'wp_generate_attachment_metadata',             [ $this, 'maybe_auto_optimize_upload' ], 20, 2 );
 		add_filter( 'manage_upload_columns',                       [ $this, 'add_media_column' ] );
 		add_action( 'manage_media_custom_column',                  [ $this, 'render_media_column' ], 10, 2 );
 		add_action( 'wp_ajax_ie_sync_all',                         [ $this, 'ajax_sync_all' ] );
+		add_action( 'wp_ajax_ie_send_attachment',                  [ $this, 'ajax_send_attachment' ] );
 		add_action( 'wp_ajax_ie_restore_attachment',               [ $this, 'ajax_restore_attachment' ] );
 		add_action( 'wp_ajax_ie_delete_original',                  [ $this, 'ajax_delete_original' ] );
 		add_action( 'wp_ajax_ie_bulk_restore',                     [ $this, 'ajax_bulk_restore' ] );
 		add_action( 'wp_ajax_ie_bulk_delete_originals',            [ $this, 'ajax_bulk_delete_originals' ] );
 		add_filter( 'wp_get_attachment_image_attributes',          [ $this, 'filter_image_attributes' ], 20, 2 );
 		add_filter( 'the_content',                                 [ $this, 'filter_content_images' ], 20 );
+		add_action( 'template_redirect',                           [ $this, 'maybe_start_output_buffer' ], 20 );
 		add_action( 'rest_api_init',                               [ $this, 'register_webhook_endpoint' ] );
 	}
 
@@ -80,6 +83,38 @@ class Whippet_Image_Engine {
 		return (bool) get_option( 'ie_auto_optimize', true );
 	}
 
+	private function frontend_rewrite_enabled(): bool {
+		return (bool) get_option( 'ie_frontend_rewrite', true );
+	}
+
+	/**
+	 * @return array<int,string>
+	 */
+	private function rewrite_source_patterns(): array {
+		$patterns = $this->get_line_list_option( 'ie_rewrite_source_patterns' );
+		if ( $patterns ) {
+			return $patterns;
+		}
+
+		$patterns = [];
+		$uploads  = wp_get_upload_dir();
+		if ( ! empty( $uploads['baseurl'] ) ) {
+			$patterns[] = trailingslashit( (string) $uploads['baseurl'] );
+		}
+
+		$patterns[] = trailingslashit( get_stylesheet_directory_uri() );
+		$patterns[] = trailingslashit( get_template_directory_uri() );
+
+		return array_values( array_unique( array_filter( array_map( 'trim', $patterns ) ) ) );
+	}
+
+	/**
+	 * @return array<int,string>
+	 */
+	private function rewrite_page_patterns(): array {
+		return $this->get_line_list_option( 'ie_rewrite_page_patterns' );
+	}
+
 	/**
 	 * Returns the webhook secret, generating and persisting one automatically
 	 * if it doesn't exist yet. Users never need to create or copy this value —
@@ -111,19 +146,88 @@ class Whippet_Image_Engine {
 		update_option( 'ie_last_run_attachment_ids', [], false );
 	}
 
+	/**
+	 * @return array<int,string>
+	 */
+	private function get_line_list_option( string $key ): array {
+		$value = get_option( $key, [] );
+		if ( is_array( $value ) ) {
+			return array_values( array_filter( array_map( 'trim', $value ) ) );
+		}
+		if ( ! is_string( $value ) ) {
+			return [];
+		}
+
+		$value = trim( str_replace( "\r", '', $value ) );
+		return $value ? array_values( array_filter( array_map( 'trim', explode( "\n", $value ) ) ) ) : [];
+	}
+
+	/**
+	 * @param mixed $value
+	 * @return array<int,string>
+	 */
+	public function sanitize_line_list( mixed $value ): array {
+		if ( is_array( $value ) ) {
+			$lines = $value;
+		} else {
+			$lines = explode( "\n", str_replace( "\r", '', sanitize_textarea_field( (string) $value ) ) );
+		}
+
+		return array_values( array_filter( array_map( 'trim', $lines ) ) );
+	}
+
+	/**
+	 * @return array<int,string>
+	 */
+	private function get_image_identifiers( int $attachment_id ): array {
+		$identifiers = [ (string) $attachment_id ];
+		$remote_id   = (string) get_post_meta( $attachment_id, '_ie_id', true );
+		if ( '' !== $remote_id ) {
+			$identifiers[] = $remote_id;
+		}
+		return array_values( array_unique( array_filter( $identifiers ) ) );
+	}
+
+	private function restore_remote_image( int $attachment_id ): array|WP_Error {
+		$last_error = null;
+		foreach ( $this->get_image_identifiers( $attachment_id ) as $identifier ) {
+			$result = $this->http_post( "/images/{$identifier}/restore" );
+			if ( ! is_wp_error( $result ) ) {
+				return $result;
+			}
+			$last_error = $result;
+		}
+		return $last_error ?: new WP_Error( 'ie_api', 'Unable to restore the original image.' );
+	}
+
+	private function delete_remote_original( int $attachment_id ): array|WP_Error {
+		$last_error = null;
+		foreach ( $this->get_image_identifiers( $attachment_id ) as $identifier ) {
+			$result = $this->http_delete( "/images/{$identifier}/original" );
+			if ( ! is_wp_error( $result ) ) {
+				return $result;
+			}
+			$last_error = $result;
+		}
+		return $last_error ?: new WP_Error( 'ie_api', 'Unable to delete the original image.' );
+	}
+
 	// =========================================================================
 	// Settings registration (WP options only — UI lives in the Premium tab)
 	// =========================================================================
 
 	public function register_settings(): void {
 		$options = [
-			'ie_api_url'         => 'sanitize_text_field',
-			'ie_api_key'         => 'sanitize_text_field',
-			'ie_preset'          => 'sanitize_text_field',
-			'ie_delivery_format' => 'sanitize_text_field',
-			'ie_format_filter'   => 'sanitize_text_field',
-			'ie_lossless'        => 'sanitize_text_field',
-			'ie_auto_optimize'   => 'absint',
+			'ie_api_url'                 => 'sanitize_text_field',
+			'ie_api_key'                 => 'sanitize_text_field',
+			'ie_preset'                  => 'sanitize_text_field',
+			'ie_delivery_format'         => 'sanitize_text_field',
+			'ie_format_filter'           => 'sanitize_text_field',
+			'ie_lossless'                => 'sanitize_text_field',
+			'ie_auto_optimize'           => 'absint',
+			'ie_frontend_rewrite'        => 'absint',
+			'ie_rewrite_source_patterns' => [ $this, 'sanitize_line_list' ],
+			'ie_rewrite_page_patterns'   => [ $this, 'sanitize_line_list' ],
 		];
 		foreach ( $options as $key => $sanitizer ) {
 			register_setting( 'image_engine', $key, [ 'sanitize_callback' => $sanitizer ] );
@@ -286,6 +390,33 @@ class Whippet_Image_Engine {
 		$this->upload_attachment( $attachment_id );
 	}
 
+	/**
+	 * Auto-send new uploads after WordPress has generated attachment metadata.
+	 *
+	 * @param array<string,mixed> $metadata
+	 * @return array<string,mixed>
+	 */
+	public function maybe_auto_optimize_upload( array $metadata, int $attachment_id ): array {
+		if ( ! $this->is_configured() || ! $this->auto_optimize() ) {
+			return $metadata;
+		}
+
+		$mime = (string) get_post_mime_type( $attachment_id );
+		if ( 0 !== strpos( $mime, 'image/' ) ) {
+			return $metadata;
+		}
+
+		$status    = (string) get_post_meta( $attachment_id, '_ie_status', true );
+		$remote_id = (string) get_post_meta( $attachment_id, '_ie_id', true );
+		if ( $remote_id || in_array( $status, [ 'queued', 'processing', 'completed', 'restored' ], true ) ) {
+			return $metadata;
+		}
+
+		$this->upload_attachment( $attachment_id );
+
+		return $metadata;
+	}
+
 	public function upload_attachment( int $attachment_id ): void {
 		$mime = (string) get_post_mime_type( $attachment_id );
 		if ( ! str_starts_with( $mime, 'image/' ) ) {
@@ -321,13 +452,402 @@ class Whippet_Image_Engine {
 		$this->clear_stats_cache();
 	}
 
+	private function get_current_request_url(): string {
+		$request_uri = isset( $_SERVER['REQUEST_URI'] ) ? wp_unslash( (string) $_SERVER['REQUEST_URI'] ) : '/';
+		return home_url( $request_uri );
+	}
+
+	/**
+	 * @param array<int,string> $patterns
+	 */
+	private function value_matches_patterns( string $value, array $patterns ): bool {
+		foreach ( $patterns as $pattern ) {
+			if ( '' !== $pattern && false !== stripos( $value, $pattern ) ) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private function should_rewrite_request(): bool {
+		$patterns = $this->rewrite_page_patterns();
+		if ( ! $patterns ) {
+			return true;
+		}
+
+		return $this->value_matches_patterns( $this->get_current_request_url(), $patterns );
+	}
+
+	private function normalize_source_url( string $url ): string {
+		$url = trim( html_entity_decode( $url, ENT_QUOTES ) );
+		if ( '' === $url ) {
+			return '';
+		}
+		if ( 0 === strpos( $url, '//' ) ) {
+			$scheme = is_ssl() ? 'https:' : 'http:';
+			return $scheme . $url;
+		}
+		if ( 0 === strpos( $url, '/' ) ) {
+			return home_url( $url );
+		}
+		return $url;
+	}
+
+	private function normalize_lookup_url( string $url ): string {
+		$url = $this->normalize_source_url( $url );
+		if ( '' === $url ) {
+			return '';
+		}
+
+		$parts = wp_parse_url( $url );
+		if ( ! is_array( $parts ) ) {
+			return $url;
+		}
+
+		$scheme = $parts['scheme'] ?? ( is_ssl() ? 'https' : 'http' );
+		$host   = $parts['host'] ?? '';
+		$path   = $parts['path'] ?? '';
+		if ( '' === $host ) {
+			return $url;
+		}
+
+		return $scheme . '://' . $host . $path;
+	}
+
+	private function should_rewrite_source_url( string $url ): bool {
+		if ( '' === $url || 0 === strpos( $url, 'data:' ) ) {
+			return false;
+		}
+
+		return $this->value_matches_patterns( $this->normalize_source_url( $url ), $this->rewrite_source_patterns() );
+	}
+
+	private function get_attachment_id_from_url( string $url ): int {
+		$url = $this->normalize_lookup_url( $url );
+		if ( '' === $url ) {
+			return 0;
+		}
+
+		$id = attachment_url_to_postid( $url );
+		if ( $id ) {
+			return (int) $id;
+		}
+
+		$uploads = wp_get_upload_dir();
+		if ( ! empty( $uploads['baseurl'] ) && false !== strpos( $url, (string) $uploads['baseurl'] ) ) {
+			$baseurl = preg_quote( (string) $uploads['baseurl'], '/' );
+			$url     = preg_replace( '/-\d+x\d+(?=\.(?:jpe?g|png|gif|webp|avif|bmp)$)/i', '', $url ) ?? $url;
+			$url     = preg_replace( '/^https?:/', '', $url ) ?? $url;
+			$base    = preg_replace( '/^https?:/', '', (string) $uploads['baseurl'] ) ?? (string) $uploads['baseurl'];
+			if ( 0 === strpos( $url, $base ) ) {
+				$id = attachment_url_to_postid( ( is_ssl() ? 'https:' : 'http:' ) . $url );
+			}
+			if ( $id ) {
+				return (int) $id;
+			}
+		}
+
+		return 0;
+	}
+
+	private function get_local_file_path_from_url( string $url ): string {
+		$url = $this->normalize_lookup_url( $url );
+		if ( '' === $url ) {
+			return '';
+		}
+
+		$uploads = wp_get_upload_dir();
+		if ( ! empty( $uploads['baseurl'] ) && ! empty( $uploads['basedir'] ) && 0 === strpos( $url, (string) $uploads['baseurl'] ) ) {
+			$relative = ltrim( substr( $url, strlen( (string) $uploads['baseurl'] ) ), '/' );
+			$path     = trailingslashit( (string) $uploads['basedir'] ) . $relative;
+			return file_exists( $path ) ? $path : '';
+		}
+
+		$locations = [
+			trailingslashit( get_stylesheet_directory_uri() ) => trailingslashit( get_stylesheet_directory() ),
+			trailingslashit( get_template_directory_uri() )   => trailingslashit( get_template_directory() ),
+		];
+
+		foreach ( $locations as $base_url => $base_dir ) {
+			if ( 0 === strpos( $url, $base_url ) ) {
+				$relative = ltrim( substr( $url, strlen( $base_url ) ), '/' );
+				$path     = $base_dir . $relative;
+				return file_exists( $path ) ? $path : '';
+			}
+		}
+
+		return '';
+	}
+
+	/**
+	 * @return array<string,mixed>
+	 */
+	private function get_asset_map(): array {
+		$map = get_option( 'ie_asset_map', [] );
+		return is_array( $map ) ? $map : [];
+	}
+
+	/**
+	 * @param array<string,mixed> $map
+	 */
+	private function save_asset_map( array $map ): void {
+		update_option( 'ie_asset_map', $map, false );
+	}
+
+	private function get_asset_map_key( string $url ): string {
+		return md5( $this->normalize_lookup_url( $url ) );
+	}
+
+	private function register_asset_source( string $url ): array|WP_Error {
+		$source_url = $this->normalize_lookup_url( $url );
+		if ( '' === $source_url ) {
+			return new WP_Error( 'ie_asset', 'Empty asset URL.' );
+		}
+
+		$local_path = $this->get_local_file_path_from_url( $source_url );
+		if ( '' === $local_path ) {
+			return new WP_Error( 'ie_asset', 'Local asset file could not be found.' );
+		}
+
+		$mime = wp_check_filetype( $local_path )['type'] ?? '';
+		if ( '' === $mime || 0 !== strpos( $mime, 'image/' ) ) {
+			return new WP_Error( 'ie_asset', 'Only local image assets can be sent to Image Engine.' );
+		}
+
+		$fields = [
+			'file'             => [ 'path' => $local_path, 'mime' => $mime ],
+			'wp_attachment_id' => '0',
+			'wp_sizes'         => 'defaults',
+			'preset'           => $this->preset(),
+		];
+		if ( '' !== $this->format_filter() ) {
+			$fields['format_filter'] = $this->format_filter();
+		}
+		if ( '' !== $this->lossless() ) {
+			$fields['lossless'] = $this->lossless();
+		}
+
+		$result = $this->http_post_multipart( '/images', $fields );
+		if ( is_wp_error( $result ) ) {
+			return $result;
+		}
+
+		$remote_id = (string) ( $result['id'] ?? '' );
+		if ( '' === $remote_id ) {
+			return new WP_Error( 'ie_asset', 'Image Engine did not return an asset ID.' );
+		}
+
+		$map                           = $this->get_asset_map();
+		$map[ $this->get_asset_map_key( $source_url ) ] = [
+			'remote_id'  => $remote_id,
+			'source_url' => $source_url,
+			'local_path' => $local_path,
+			'updated_at' => time(),
+		];
+		$this->save_asset_map( $map );
+
+		return $map[ $this->get_asset_map_key( $source_url ) ];
+	}
+
+	private function get_asset_srcset_cached( string $url ): array|WP_Error {
+		$source_url = $this->normalize_lookup_url( $url );
+		if ( '' === $source_url ) {
+			return [];
+		}
+
+		$cache_key = 'ie_asset_srcset_' . md5( $source_url ) . '_' . $this->delivery_format();
+		$cached    = get_transient( $cache_key );
+		if ( false !== $cached ) {
+			return (array) $cached;
+		}
+
+		$map   = $this->get_asset_map();
+		$key   = $this->get_asset_map_key( $source_url );
+		$entry = $map[ $key ] ?? null;
+
+		if ( ! is_array( $entry ) || empty( $entry['remote_id'] ) ) {
+			$entry = $this->register_asset_source( $source_url );
+			if ( is_wp_error( $entry ) ) {
+				return $entry;
+			}
+		}
+
+		$remote_id = (string) ( $entry['remote_id'] ?? '' );
+		if ( '' === $remote_id ) {
+			return new WP_Error( 'ie_asset', 'Asset mapping is missing a remote ID.' );
+		}
+
+		$formats = array_values( array_unique( array_filter( [
+			$this->delivery_format(),
+			'avif',
+			'webp',
+			'jpeg',
+			'png',
+		] ) ) );
+
+		$last_error = null;
+		foreach ( $formats as $format ) {
+			$data = $this->http_get( "/images/{$remote_id}/srcset?format={$format}" );
+			if ( ! is_wp_error( $data ) ) {
+				set_transient( $cache_key, $data, HOUR_IN_SECONDS );
+				return $data;
+			}
+
+			$status = (int) ( $data->get_error_data( 'ie_api' )['status'] ?? 0 );
+			if ( 409 !== $status ) {
+				return $data;
+			}
+			$last_error = $data;
+		}
+
+		return $last_error ?: [];
+	}
+
+	private function get_remote_image_data_by_url( string $url ): array|WP_Error {
+		if ( ! $this->should_rewrite_source_url( $url ) ) {
+			return [];
+		}
+
+		$attachment_id = $this->get_attachment_id_from_url( $url );
+		if ( $attachment_id ) {
+			if ( 'completed' !== get_post_meta( $attachment_id, '_ie_status', true ) ) {
+				return [];
+			}
+			return $this->get_srcset_cached( $attachment_id );
+		}
+
+		return $this->get_asset_srcset_cached( $url );
+	}
+
+	private function maybe_rewrite_image_url( string $url ): string {
+		$data = $this->get_remote_image_data_by_url( $url );
+		if ( is_wp_error( $data ) || empty( $data['src'] ) ) {
+			return $url;
+		}
+		return (string) $data['src'];
+	}
+
+	private function maybe_rewrite_css_urls( string $css ): string {
+		return preg_replace_callback(
+			'/url\((["\']?)([^)"\']+)\1\)/i',
+			function ( array $matches ): string {
+				$url = trim( $matches[2] );
+				if ( '' === $url || 0 === strpos( $url, 'data:' ) ) {
+					return $matches[0];
+				}
+
+				$rewritten = $this->maybe_rewrite_image_url( $url );
+				return $rewritten === $url ? $matches[0] : 'url("' . esc_url_raw( $rewritten ) . '")';
+			},
+			$css
+		) ?? $css;
+	}
+
+	private function rewrite_html_image_node( object $image ): void {
+		$candidate_urls = [];
+		foreach ( [ 'src', 'data-src', 'data-lazy-src' ] as $attr ) {
+			$value = (string) ( $image->getAttribute( $attr ) ?? '' );
+			if ( '' !== $value ) {
+				$candidate_urls[] = $value;
+			}
+		}
+		if ( ! empty( $image->srcset ) ) {
+			if ( preg_match( '/((?:https?:)?\/\/\S+|\/\S+)/', (string) $image->srcset, $match ) ) {
+				$candidate_urls[] = $match[1];
+			}
+		}
+
+		$candidate_urls = array_values( array_unique( array_filter( $candidate_urls ) ) );
+		foreach ( $candidate_urls as $url ) {
+			$data = $this->get_remote_image_data_by_url( $url );
+			if ( is_wp_error( $data ) || empty( $data['src'] ) ) {
+				continue;
+			}
+
+			$image->src = $data['src'];
+			if ( ! empty( $image->{'data-src'} ) ) {
+				$image->setAttribute( 'data-src', $data['src'] );
+			}
+			if ( ! empty( $data['srcset'] ) ) {
+				$image->setAttribute( 'srcset', $data['srcset'] );
+				if ( ! empty( $image->{'data-srcset'} ) ) {
+					$image->setAttribute( 'data-srcset', $data['srcset'] );
+				}
+			}
+			if ( ! empty( $data['sizes'] ) ) {
+				$image->setAttribute( 'sizes', $data['sizes'] );
+			}
+			if ( ! empty( $data['width'] ) ) {
+				$image->setAttribute( 'width', (string) $data['width'] );
+			}
+			if ( ! empty( $data['height'] ) ) {
+				$image->setAttribute( 'height', (string) $data['height'] );
+			}
+			return;
+		}
+	}
+
+	private function rewrite_page_html( string $html ): string {
+		try {
+			if ( ! isset( $_SERVER['REQUEST_METHOD'] ) || 'GET' !== $_SERVER['REQUEST_METHOD'] ) {
+				return $html;
+			}
+			if ( '' === trim( $html ) || '<' !== substr( ltrim( $html ), 0, 1 ) ) {
+				return $html;
+			}
+			if ( false === stripos( $html, '<html' ) && false === stripos( $html, '<body' ) ) {
+				return $html;
+			}
+
+			require_once WHIPPET_PATH . 'lazy-load/lib/dom-parser.php';
+			$dom = str_get_html( $html );
+			if ( ! is_object( $dom ) ) {
+				return $html;
+			}
+
+			foreach ( $dom->find( 'img' ) as $image ) {
+				$this->rewrite_html_image_node( $image );
+			}
+
+			foreach ( $dom->find( '[style*=background], [style*=url]' ) as $node ) {
+				$style = (string) ( $node->style ?? '' );
+				if ( '' !== $style ) {
+					$node->style = $this->maybe_rewrite_css_urls( $style );
+				}
+			}
+
+			foreach ( $dom->find( 'style' ) as $style_tag ) {
+				$style_tag->innertext = $this->maybe_rewrite_css_urls( (string) $style_tag->innertext );
+			}
+
+			return (string) $dom;
+		} catch ( Throwable $e ) {
+			return $html;
+		}
+	}
+
+	public function maybe_start_output_buffer(): void {
+		if ( is_admin() || ! $this->is_configured() || ! $this->frontend_rewrite_enabled() ) {
+			return;
+		}
+		if ( wp_doing_ajax() || ( defined( 'REST_REQUEST' ) && REST_REQUEST ) || is_feed() || is_embed() || is_preview() ) {
+			return;
+		}
+		if ( ! $this->should_rewrite_request() ) {
+			return;
+		}
+
+		ob_start( [ $this, 'rewrite_page_html' ] );
+	}
+
 	// =========================================================================
 	// Restore: reset to original without re-queueing
 	// =========================================================================
 
 	public function restore_attachment( int $attachment_id ): true|WP_Error {
-		$result = $this->http_post( "/images/{$attachment_id}/restore" );
+		$result = $this->restore_remote_image( $attachment_id );
 		if ( is_wp_error( $result ) ) {
+			update_post_meta( $attachment_id, '_ie_error', $result->get_error_message() );
 			return $result;
 		}
 
@@ -340,7 +860,7 @@ class Whippet_Image_Engine {
 			}
 		}
 
-		update_post_meta( $attachment_id, '_ie_status', 'pending' );
+		update_post_meta( $attachment_id, '_ie_status', 'restored' );
 		delete_post_meta( $attachment_id, '_ie_error' );
 		delete_post_meta( $attachment_id, '_ie_original_deleted' );
 		$this->clear_last_run_attachment_ids();
@@ -356,11 +876,13 @@ class Whippet_Image_Engine {
 	// =========================================================================
 
 	public function delete_original( int $attachment_id ): true|WP_Error {
-		$result = $this->http_delete( "/images/{$attachment_id}/original" );
+		$result = $this->delete_remote_original( $attachment_id );
 		if ( is_wp_error( $result ) ) {
+			update_post_meta( $attachment_id, '_ie_error', $result->get_error_message() );
 			return $result;
 		}
 		update_post_meta( $attachment_id, '_ie_original_deleted', '1' );
+		delete_post_meta( $attachment_id, '_ie_error' );
 		$this->clear_stats_cache();
 		return true;
 	}
@@ -519,7 +1041,7 @@ class Whippet_Image_Engine {
 		$skipped        = 0;
 		foreach ( (array) $ids as $id ) {
 			$status = get_post_meta( (int) $id, '_ie_status', true );
-			if ( in_array( $status, [ 'queued', 'completed' ], true ) ) {
+			if ( in_array( $status, [ 'queued', 'processing', 'completed', 'restored' ], true ) ) {
 				$skipped++;
 				continue;
 			}
@@ -547,6 +1069,34 @@ class Whippet_Image_Engine {
 			$message .= ' Error: ' . implode( '; ', array_slice( $errors, 0, 3 ) );
 		}
 		wp_send_json_success( [ 'message' => $message ] );
+	}
+
+	// =========================================================================
+	// AJAX: per-attachment send / re-send
+	// =========================================================================
+
+	public function ajax_send_attachment(): void {
+		check_ajax_referer( 'ie_attachment_action' );
+		if ( ! current_user_can( 'upload_files' ) ) {
+			wp_send_json_error( [ 'message' => 'Unauthorised.' ] );
+		}
+		if ( ! $this->is_configured() ) {
+			wp_send_json_error( [ 'message' => 'No API key configured. Enter your Image Engine API key and save settings first.' ] );
+		}
+
+		$id = (int) ( $_POST['attachment_id'] ?? 0 );
+		if ( ! $id ) {
+			wp_send_json_error( [ 'message' => 'Missing attachment_id.' ] );
+		}
+
+		$this->upload_attachment( $id );
+
+		if ( 'queued' !== get_post_meta( $id, '_ie_status', true ) ) {
+			$error = (string) get_post_meta( $id, '_ie_error', true );
+			wp_send_json_error( [ 'message' => $error ?: 'Could not queue this image for optimisation.' ] );
+		}
+
+		wp_send_json_success( [ 'message' => 'Image queued for optimisation.' ] );
 	}
 
 	// =========================================================================
@@ -621,12 +1171,28 @@ class Whippet_Image_Engine {
 			],
 			'fields'         => 'ids',
 		] );
+		if ( empty( $ids ) ) {
+			wp_send_json_success( [ 'message' => 'No eligible images with preserved originals were found.' ] );
+		}
 		$done = $failed = 0;
+		$errors = [];
 		foreach ( (array) $ids as $id ) {
 			$result = $this->restore_attachment( (int) $id );
-			is_wp_error( $result ) ? $failed++ : $done++;
+			if ( is_wp_error( $result ) ) {
+				$failed++;
+				$error = $result->get_error_message();
+				if ( $error && ! in_array( $error, $errors, true ) ) {
+					$errors[] = $error;
+				}
+			} else {
+				$done++;
+			}
 		}
-		wp_send_json_success( [ 'message' => "{$done} restored to originals, {$failed} failed." ] );
+		$message = "{$done} restored to originals, {$failed} failed.";
+		if ( $errors ) {
+			$message .= ' Error: ' . implode( '; ', array_slice( $errors, 0, 3 ) );
+		}
+		wp_send_json_success( [ 'message' => $message ] );
 	}
 
 	// =========================================================================
@@ -717,6 +1283,7 @@ class Whippet_Image_Engine {
 			'queued'     => '<span style="color:#b45309">&#9203; Queued</span>',
 			'processing' => '<span style="color:#1d4ed8">&#9881; Processing</span>',
 			'completed'  => '<span style="color:#15803d">&#10003; Optimised</span>',
+			'restored'   => '<span style="color:#6b7280">&#8635; Original restored</span>',
 			'pending'    => '<span style="color:#6b7280">&#9685; Pending</span>',
 			'error'      => sprintf( '<span style="color:#b91c1c" title="%s">&#10007; Error</span>', esc_attr( $error ) ),
 			default      => '<span style="color:#9ca3af">&mdash;</span>',
@@ -739,7 +1306,7 @@ class Whippet_Image_Engine {
 				} else {
 					echo '<span style="color:#9ca3af;font-size:11px;display:block">Original deleted</span>';
 				}
-			} elseif ( in_array( $status, [ '', 'error', 'pending' ], true ) ) {
+			} elseif ( in_array( $status, [ '', 'error', 'pending', 'restored' ], true ) ) {
 				printf(
 					'<a href="#" class="ie-action-link ie-send" data-id="%d" data-nonce="%s">&#8593; Send to Image Engine</a>',
 					$post_id, esc_attr( $nonce )
@@ -792,7 +1359,7 @@ class Whippet_Image_Engine {
 					} else if (btn.classList.contains('ie-delete-original')) {
 						ieRequest('ie_delete_original', id, nonce, btn, 'Permanently delete the original file? This cannot be undone.');
 					} else if (btn.classList.contains('ie-send')) {
-						ieRequest('ie_restore_attachment', id, nonce, btn, null);
+						ieRequest('ie_send_attachment', id, nonce, btn, null);
 					}
 				});
 			})();

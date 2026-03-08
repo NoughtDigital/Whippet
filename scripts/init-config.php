@@ -15,6 +15,21 @@ function whippet_scripts_set_default_config() {
         if (get_option('whippet_scripts_disabled_pages') === false)
             update_option('whippet_scripts_disabled_pages', []);
 
+        if (get_option('whippet_scripts_regex_rules') === false)
+            update_option('whippet_scripts_regex_rules', []);
+
+        if (get_option('whippet_scripts_disabled_pages_regex') === false)
+            update_option('whippet_scripts_disabled_pages_regex', []);
+
+        if (get_option('whippet_scripts_regex_operator') === false)
+            update_option('whippet_scripts_regex_operator', 'any');
+
+        if (get_option('whippet_scripts_mu_mode') === false)
+            update_option('whippet_scripts_mu_mode', 0);
+
+        if (get_option('whippet_scripts_testing_mode') === false)
+            update_option('whippet_scripts_testing_mode', 0);
+
         update_option('WHIPPET_SCRIPTS_VERSION', WHIPPET_SCRIPTS_VERSION);
     }
 }
