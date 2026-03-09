@@ -9,12 +9,19 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+$whippet_valid_tabs = array( 'dashboard', 'performance', 'analytics', 'fonts', 'lazyload', 'pages', 'scripts', 'snippets', 'extras', 'tools', 'import-export', 'docs', 'premium' );
+$whippet_active_tab = isset( $_GET['whippet_tab'] ) ? sanitize_key( wp_unslash( $_GET['whippet_tab'] ) ) : 'dashboard';
+if ( ! in_array( $whippet_active_tab, $whippet_valid_tabs, true ) ) {
+	$whippet_active_tab = 'dashboard';
+}
+
 ?>
 <div class="wrap whippet-admin" x-data="{
 	activeTab: (function() {
-		var h = window.location.hash.slice(1) || localStorage.getItem('whippet_tab') || 'dashboard';
+		var serverTab = '<?php echo esc_js( $whippet_active_tab ); ?>';
+		var h = window.location.hash.slice(1) || serverTab || localStorage.getItem('whippet_tab') || 'dashboard';
 		var valid = ['dashboard','performance','analytics','fonts','lazyload','pages','scripts','snippets','extras','tools','import-export','docs','premium'];
-		return valid.indexOf(h) !== -1 ? h : 'dashboard';
+		return valid.indexOf(h) !== -1 ? h : serverTab;
 	})(),
 	isDragging: false,
 	setTab(tab) {
@@ -156,7 +163,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<!-- ============================================================
 		     DASHBOARD TAB
 		     ============================================================ -->
-		<div class="wa-panel" x-show="activeTab === 'dashboard'" style="display:none"
+		<div class="wa-panel" x-show="activeTab === 'dashboard'" style="<?php echo 'dashboard' === $whippet_active_tab ? '' : 'display:none'; ?>"
 			 x-transition:enter="wa-fade-in" x-transition:enter-start="wa-fade-start" x-transition:enter-end="wa-fade-end">
 
 			<div class="wa-panel-hd">
@@ -182,7 +189,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<!-- ============================================================
 		     PERFORMANCE TAB
 		     ============================================================ -->
-		<div class="wa-panel" x-show="activeTab === 'performance'" style="display:none"
+		<div class="wa-panel" x-show="activeTab === 'performance'" style="<?php echo 'performance' === $whippet_active_tab ? '' : 'display:none'; ?>"
 			 x-transition:enter="wa-fade-in" x-transition:enter-start="wa-fade-start" x-transition:enter-end="wa-fade-end">
 
 			<div class="wa-panel-hd">
@@ -206,7 +213,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<!-- ============================================================
 		     ANALYTICS TAB
 		     ============================================================ -->
-		<div class="wa-panel" x-show="activeTab === 'analytics'" style="display:none"
+		<div class="wa-panel" x-show="activeTab === 'analytics'" style="<?php echo 'analytics' === $whippet_active_tab ? '' : 'display:none'; ?>"
 			 x-transition:enter="wa-fade-in" x-transition:enter-start="wa-fade-start" x-transition:enter-end="wa-fade-end">
 
 			<div class="wa-panel-hd">
@@ -228,7 +235,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<!-- ============================================================
 		     FONTS TAB
 		     ============================================================ -->
-		<div class="wa-panel" x-show="activeTab === 'fonts'" style="display:none"
+		<div class="wa-panel" x-show="activeTab === 'fonts'" style="<?php echo 'fonts' === $whippet_active_tab ? '' : 'display:none'; ?>"
 			 x-transition:enter="wa-fade-in" x-transition:enter-start="wa-fade-start" x-transition:enter-end="wa-fade-end">
 
 			<div class="wa-panel-hd">
@@ -277,7 +284,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<!-- ============================================================
 		     LAZY LOAD TAB
 		     ============================================================ -->
-		<div class="wa-panel" x-show="activeTab === 'lazyload'" style="display:none"
+		<div class="wa-panel" x-show="activeTab === 'lazyload'" style="<?php echo 'lazyload' === $whippet_active_tab ? '' : 'display:none'; ?>"
 			 x-transition:enter="wa-fade-in" x-transition:enter-start="wa-fade-start" x-transition:enter-end="wa-fade-end">
 
 			<div class="wa-panel-hd">
@@ -306,7 +313,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 			<div class="wa-card">
 				<?php
-				if ( isset( $_POST['submit'] ) ) {
+				if ( isset( $_POST['submit'] ) && isset( $_POST['whippet-images-settings-form'] ) ) {
 					echo '<div class="notice notice-success is-dismissible" style="margin:1rem 1.25rem 0;"><p>' . esc_html__( 'Settings saved. Clear cache if you use a cache plugin.', 'whippet' ) . '</p></div>';
 				}
 				switch ( $whippet_ltab ) {
@@ -323,7 +330,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<!-- ============================================================
 		     PRELOAD / PAGES TAB
 		     ============================================================ -->
-		<div class="wa-panel" x-show="activeTab === 'pages'" style="display:none"
+		<div class="wa-panel" x-show="activeTab === 'pages'" style="<?php echo 'pages' === $whippet_active_tab ? '' : 'display:none'; ?>"
 			 x-transition:enter="wa-fade-in" x-transition:enter-start="wa-fade-start" x-transition:enter-end="wa-fade-end">
 
 			<div class="wa-panel-hd">
@@ -333,7 +340,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 			<div class="wa-card">
 				<?php
-				if ( isset( $_POST['submit'] ) ) {
+				if ( isset( $_POST['submit'] ) && isset( $_POST['whippet_pages_settings_form'] ) ) {
 					echo '<div class="notice notice-success is-dismissible" style="margin:1rem 1.25rem 0;"><p>' . esc_html__( 'Settings saved.', 'whippet' ) . '</p></div>';
 				}
 				whippet_pages_settings();
@@ -344,7 +351,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<!-- ============================================================
 		     SCRIPTS TAB
 		     ============================================================ -->
-		<div class="wa-panel" x-show="activeTab === 'scripts'" style="display:none"
+		<div class="wa-panel" x-show="activeTab === 'scripts'" style="<?php echo 'scripts' === $whippet_active_tab ? '' : 'display:none'; ?>"
 			 x-transition:enter="wa-fade-in" x-transition:enter-start="wa-fade-start" x-transition:enter-end="wa-fade-end">
 
 			<div class="wa-panel-hd">
@@ -360,13 +367,36 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<!-- ============================================================
 		     SNIPPETS TAB
 		     ============================================================ -->
-		<div class="wa-panel" x-show="activeTab === 'snippets'" style="display:none"
+		<div class="wa-panel" x-show="activeTab === 'snippets'" style="<?php echo 'snippets' === $whippet_active_tab ? '' : 'display:none'; ?>"
 			 x-transition:enter="wa-fade-in" x-transition:enter-start="wa-fade-start" x-transition:enter-end="wa-fade-end">
 
 			<div class="wa-panel-hd">
 				<h2><?php esc_html_e( 'Code Snippets', 'whippet' ); ?></h2>
 				<p><?php esc_html_e( 'Add and manage PHP, CSS, JS, and HTML snippets with file or inline delivery, optimization flags, conditions, and safe mode.', 'whippet' ); ?></p>
 			</div>
+
+		<?php
+		$whippet_stab = isset( $_GET['whippet_stab'] ) ? sanitize_text_field( wp_unslash( $_GET['whippet_stab'] ) ) : 'editor';
+		$snippet_tabs = array(
+			'editor' => __( 'Add New Snippet', 'whippet' ),
+			'list'   => __( 'Snippets', 'whippet' ),
+		);
+		$snippet_count = 0;
+		if ( class_exists( '\Whippet\SnippetManager' ) ) {
+			$snippet_count = count( \Whippet\SnippetManager::instance()->load_snippets() );
+		}
+		?>
+		<div class="wa-subtabs">
+			<?php foreach ( $snippet_tabs as $key => $label ) : ?>
+				<a href="<?php echo esc_url( add_query_arg( array( 'page' => 'whippet', 'whippet_stab' => $key ), admin_url( 'tools.php' ) ) . '#snippets' ); ?>"
+				   class="wa-subtab-btn <?php echo $whippet_stab === $key ? 'active' : ''; ?>">
+					<?php echo esc_html( $label ); ?>
+					<?php if ( 'list' === $key && $snippet_count > 0 ) : ?>
+						<sup class="wa-subtab-badge"><?php echo esc_html( (string) $snippet_count ); ?></sup>
+					<?php endif; ?>
+				</a>
+			<?php endforeach; ?>
+		</div>
 
 			<div class="wa-card">
 				<?php
@@ -382,7 +412,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<!-- ============================================================
 		     EXTRAS TAB
 		     ============================================================ -->
-		<div class="wa-panel" x-show="activeTab === 'extras'" style="display:none"
+		<div class="wa-panel" x-show="activeTab === 'extras'" style="<?php echo 'extras' === $whippet_active_tab ? '' : 'display:none'; ?>"
 			 x-transition:enter="wa-fade-in" x-transition:enter-start="wa-fade-start" x-transition:enter-end="wa-fade-end">
 
 			<div class="wa-panel-hd">
@@ -404,7 +434,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<!-- ============================================================
 		     TOOLS TAB
 		     ============================================================ -->
-		<div class="wa-panel" x-show="activeTab === 'tools'" style="display:none"
+		<div class="wa-panel" x-show="activeTab === 'tools'" style="<?php echo 'tools' === $whippet_active_tab ? '' : 'display:none'; ?>"
 			 x-transition:enter="wa-fade-in" x-transition:enter-start="wa-fade-start" x-transition:enter-end="wa-fade-end">
 
 			<div class="wa-panel-hd">
@@ -505,7 +535,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<!-- ============================================================
 		     IMPORT / EXPORT TAB
 		     ============================================================ -->
-		<div class="wa-panel" x-show="activeTab === 'import-export'" style="display:none"
+		<div class="wa-panel" x-show="activeTab === 'import-export'" style="<?php echo 'import-export' === $whippet_active_tab ? '' : 'display:none'; ?>"
 			 x-transition:enter="wa-fade-in" x-transition:enter-start="wa-fade-start" x-transition:enter-end="wa-fade-end">
 
 			<div class="wa-panel-hd">
@@ -565,7 +595,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<!-- ============================================================
 		     DOCS TAB
 		     ============================================================ -->
-		<div class="wa-panel" x-show="activeTab === 'docs'" style="display:none"
+		<div class="wa-panel" x-show="activeTab === 'docs'" style="<?php echo 'docs' === $whippet_active_tab ? '' : 'display:none'; ?>"
 			 x-transition:enter="wa-fade-in" x-transition:enter-start="wa-fade-start" x-transition:enter-end="wa-fade-end">
 
 			<div class="wa-panel-hd">
@@ -606,7 +636,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<!-- ============================================================
 		     PREMIUM TAB
 		     ============================================================ -->
-		<div class="wa-panel" x-show="activeTab === 'premium'" style="display:none"
+		<div class="wa-panel" x-show="activeTab === 'premium'" style="<?php echo 'premium' === $whippet_active_tab ? '' : 'display:none'; ?>"
 			 x-transition:enter="wa-fade-in" x-transition:enter-start="wa-fade-start" x-transition:enter-end="wa-fade-end">
 
 			<div class="wa-panel-hd">
@@ -946,16 +976,15 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 		<?php elseif ( 'critical-css' === $whippet_ptab ) :
 
-		$cce_enabled    = get_option( 'cce_enabled', 1 );
-		$cce_api_url    = get_option( 'cce_api_url', 'http://localhost:3000' );
-		$cce_api_key    = get_option( 'cce_api_key', '' );
-		$cce_healthy    = CCE_API::health();
-		$cce_site_id    = get_option( 'cce_site_id', '' );
-		$cce_scan_id    = get_option( 'cce_scan_id', '' );
+		$cce_enabled     = get_option( 'cce_enabled', 1 );
+		$cce_api_key     = get_option( 'cce_api_key', '' );
+		$cce_healthy     = CCE_API::health();
+		$cce_site_id     = get_option( 'cce_site_id', '' );
+		$cce_scan_id     = get_option( 'cce_scan_id', '' );
 		$cce_scan_status = get_option( 'cce_scan_status', '' );
-		$cce_post_types = get_option( 'cce_post_types', [ 'post', 'page' ] );
+		$cce_post_types  = CCE_Admin::enabled_post_types();
 		$cce_cluster_ids = get_option( 'cce_cluster_ids', [] );
-		$all_public_types = get_post_types( [ 'public' => true ], 'objects' );
+		$all_public_types = CCE_Admin::available_post_type_objects();
 	?>
 
 		<!-- Critical CSS feature header -->
@@ -973,7 +1002,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 		<div style="margin-bottom:1rem;padding:10px 14px;background:<?php echo $cce_healthy ? '#d1fae5' : '#fee2e2'; ?>;border-left:4px solid <?php echo $cce_healthy ? '#10b981' : '#ef4444'; ?>;border-radius:4px;font-size:.8125rem;">
 			<strong><?php esc_html_e( 'Service status:', 'whippet' ); ?></strong>
-			<?php echo $cce_healthy ? esc_html__( 'Connected', 'whippet' ) : esc_html__( 'Unreachable — check API URL and that the service is running', 'whippet' ); ?>
+			<?php echo $cce_healthy ? esc_html__( 'Connected', 'whippet' ) : esc_html__( 'Unreachable — ensure the service is running', 'whippet' ); ?>
 		</div>
 
 		<div class="wa-card" style="margin-bottom:1rem;">
@@ -989,13 +1018,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 								<input type="checkbox" name="cce_enabled" value="1" <?php checked( $cce_enabled ); ?>>
 								<?php esc_html_e( 'Inject critical CSS on the front end', 'whippet' ); ?>
 							</label>
-						</td>
-					</tr>
-					<tr>
-						<th scope="row"><label for="cce_api_url"><?php esc_html_e( 'API URL', 'whippet' ); ?></label></th>
-						<td>
-							<input id="cce_api_url" name="cce_api_url" type="url" class="regular-text"
-							       value="<?php echo esc_attr( $cce_api_url ); ?>" placeholder="http://localhost:3000">
 						</td>
 					</tr>
 				<tr>
@@ -1074,7 +1096,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 						}
 						var anyOk = [d.bearer, d.rawAuth, d.xApiKey].some(function(p){ return typeof p.code === 'number' && p.code >= 200 && p.code < 300; });
 						var lines = [
-							'API URL : ' + d.apiUrl,
 							'API Key : ' + d.apiKeyDisplay + (d.apiKeySet ? '  (' + d.apiKeyLength + ' chars)' : '  \u26a0 not saved yet'),
 							d.looksMasked ? 'Warning : Saved key looks masked. Paste the full key from the Critical CSS Engine and save again.' : '',
 							'',
@@ -1108,7 +1129,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<?php endif; ?>
 			</p>
 			<div style="padding:0 1.25rem 1.25rem;display:flex;align-items:center;gap:.75rem;">
-				<button type="button" id="cce-scan-btn" class="button button-secondary" <?php echo $cce_healthy ? '' : 'disabled title="' . esc_attr__( 'Service unreachable. Check API URL.', 'whippet' ) . '"'; ?>>
+				<button type="button" id="cce-scan-btn" class="button button-secondary" <?php echo $cce_healthy ? '' : 'disabled title="' . esc_attr__( 'Service unreachable. Ensure the service is running.', 'whippet' ) . '"'; ?>>
 					<?php esc_html_e( 'Start Full Scan', 'whippet' ); ?>
 				</button>
 				<span id="cce-scan-status" style="font-size:.8125rem;color:#64748b;"></span>
@@ -1154,7 +1175,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<?php esc_html_e( 'Re-queue a fresh critical CSS job for every published post and page. Use after a theme update or major layout change.', 'whippet' ); ?>
 			</p>
 			<div style="padding:0 1.25rem 1.25rem;display:flex;align-items:center;gap:.75rem;">
-				<button type="button" id="cce-regen-all-btn" class="button button-secondary" <?php echo $cce_healthy ? '' : 'disabled title="' . esc_attr__( 'Service unreachable. Check API URL.', 'whippet' ) . '"'; ?>>
+				<button type="button" id="cce-regen-all-btn" class="button button-secondary" <?php echo $cce_healthy ? '' : 'disabled title="' . esc_attr__( 'Service unreachable. Ensure the service is running.', 'whippet' ) . '"'; ?>>
 					<?php esc_html_e( 'Regenerate All Posts', 'whippet' ); ?>
 				</button>
 				<span id="cce-regen-all-status" style="font-size:.8125rem;color:#64748b;"></span>

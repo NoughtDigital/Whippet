@@ -16,12 +16,17 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 class CCE_API {
 
+	private const DEFAULT_BASE_URL = 'http://localhost:3000';
+
 	private static function base_url(): string {
 		return self::base_url_public();
 	}
 
 	public static function base_url_public(): string {
-		return rtrim( get_option( 'cce_api_url', 'http://localhost:3000' ), '/' );
+		$legacy_url = trim( (string) get_option( 'cce_api_url', '' ) );
+		$base_url   = $legacy_url ?: self::DEFAULT_BASE_URL;
+
+		return rtrim( (string) apply_filters( 'whippet_cce_api_url', $base_url ), '/' );
 	}
 
 	public static function api_key(): string {
@@ -276,21 +281,43 @@ class CCE_Admin {
 	// ── Settings ─────────────────────────────────────────────────────────────
 
 	public static function register_settings(): void {
-		register_setting( 'cce_settings', 'cce_api_url', [ 'sanitize_callback' => 'esc_url_raw',  'default' => 'http://localhost:3000' ] );
 		register_setting( 'cce_settings', 'cce_api_key', [ 'sanitize_callback' => 'sanitize_text_field' ] );
 		register_setting( 'cce_settings', 'cce_enabled', [ 'sanitize_callback' => 'absint', 'default' => 1 ] );
 		register_setting( 'cce_settings', 'cce_post_types', [
 			'sanitize_callback' => function ( $val ) {
-				return is_array( $val ) ? array_values( array_map( 'sanitize_key', $val ) ) : [ 'post', 'page' ];
+				$post_types = is_array( $val ) ? array_values( array_map( 'sanitize_key', $val ) ) : [ 'post', 'page' ];
+
+				return self::normalise_enabled_post_types( $post_types );
 			},
 			'default' => [ 'post', 'page' ],
 		] );
 	}
 
+	public static function available_post_types(): array {
+		return array_values( array_diff( array_keys( get_post_types( [ 'public' => true ] ) ), [ 'attachment' ] ) );
+	}
+
+	public static function available_post_type_objects(): array {
+		$post_types = get_post_types( [ 'public' => true ], 'objects' );
+		unset( $post_types['attachment'] );
+
+		return $post_types;
+	}
+
+	public static function normalise_enabled_post_types( array $post_types ): array {
+		$enabled = array_values( array_intersect( $post_types, self::available_post_types() ) );
+
+		return ! empty( $enabled ) ? $enabled : [ 'post', 'page' ];
+	}
+
+	public static function enabled_post_types(): array {
+		return self::normalise_enabled_post_types( (array) get_option( 'cce_post_types', [ 'post', 'page' ] ) );
+	}
+
 	// ── Meta Box ─────────────────────────────────────────────────────────────
 
 	public static function add_meta_box(): void {
-		foreach ( array_keys( get_post_types( [ 'public' => true ] ) ) as $pt ) {
+		foreach ( self::available_post_types() as $pt ) {
 			add_meta_box(
 				'cce_meta_box',
 				'Critical CSS',
@@ -599,7 +626,6 @@ class CCE_Admin {
 		$x_api_key = $probe( [ 'X-API-Key' => $api_key ] );
 
 		wp_send_json_success( [
-			'apiUrl'        => $api_url,
 			'apiKeySet'     => $key_set,
 			'apiKeyDisplay' => $key_display,
 			'apiKeyLength'  => strlen( $api_key ),
@@ -620,7 +646,7 @@ class CCE_Admin {
 		if ( $post->post_status !== 'publish' ) return;
 		if ( ! get_option( 'cce_enabled', 1 ) ) return;
 
-		$enabled_types = get_option( 'cce_post_types', [ 'post', 'page' ] );
+		$enabled_types = self::enabled_post_types();
 		if ( ! in_array( $post->post_type, $enabled_types, true ) ) return;
 
 		$new_hash = md5( $post->post_content . $post->post_modified . $post->post_title );
@@ -919,7 +945,7 @@ function cce_regenerate_all_published_posts( array $logged_in_cookies = [] ): in
 		return 0;
 	}
 
-	$post_types = get_option( 'cce_post_types', [ 'post', 'page' ] );
+	$post_types = CCE_Admin::enabled_post_types();
 	$posts      = get_posts( [
 		'post_type'      => $post_types,
 		'post_status'    => 'publish',

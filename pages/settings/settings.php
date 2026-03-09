@@ -3,9 +3,8 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
 
 function whippet_pages_settings() {
 
-    if ( isset( $_POST['submit'] ) ) {
+    if ( isset( $_POST['submit'] ) && isset( $_POST['whippet_pages_settings_form'] ) ) {
         if ( ! current_user_can( 'manage_options' )
-            || ! isset( $_POST['whippet_pages_settings_form'] )
             || ! wp_verify_nonce( $_POST['whippet_pages_settings_form'], 'whippet_pages' ) ) {
             wp_die( esc_html__( 'Unauthorized request.', 'whippet' ) );
         }

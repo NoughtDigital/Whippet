@@ -1,11 +1,10 @@
 <?php
 function whippet_analytics_settings() {
 
-    if ( isset( $_POST['submit'] ) ) {
-        if ( ! isset( $_POST['whippet_analytics_settings_form'] )
+    if ( isset( $_POST['submit'] ) && isset( $_POST['whippet_analytics_settings_form'] ) ) {
+        if ( ! current_user_can( 'manage_options' )
             || ! wp_verify_nonce( $_POST['whippet_analytics_settings_form'], 'whippet_analytics' ) ) {
-            echo '<div class="notice notice-error"><p>' . esc_html__( 'Nonce verification failed', 'whippet' ) . '</p></div>';
-            return;
+            wp_die( esc_html__( 'Unauthorised request.', 'whippet' ) );
         }
 
         update_option( 'whippet_analytics_id', sanitize_text_field( wp_unslash( $_POST['id'] ?? '' ) ) );

@@ -30,6 +30,15 @@ function whippet_scripts_set_default_config() {
         if (get_option('whippet_scripts_testing_mode') === false)
             update_option('whippet_scripts_testing_mode', 0);
 
+        if (get_option('whippet_scripts_display_archives') === false)
+            update_option('whippet_scripts_display_archives', 0);
+
+        if (get_option('whippet_scripts_display_deps') === false)
+            update_option('whippet_scripts_display_deps', 1);
+
+        if (get_option('whippet_scripts_hide_disclaimer') === false)
+            update_option('whippet_scripts_hide_disclaimer', 0);
+
         update_option('WHIPPET_SCRIPTS_VERSION', WHIPPET_SCRIPTS_VERSION);
     }
 }

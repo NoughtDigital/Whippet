@@ -607,6 +607,106 @@ function whippet_render_extras_settings() {
 	$maintenance_pages = get_pages( array( 'sort_column' => 'post_title', 'post_status' => array( 'publish' ) ) );
 	settings_errors( 'whippet_extras' );
 	?>
+	<style>
+		.whippet-cookie-toggle-wrap {
+			display: inline-flex;
+			align-items: center;
+			gap: 0.625rem;
+			min-height: 24px;
+		}
+
+		.whippet-cookie-toggle {
+			position: relative;
+			display: inline-block;
+			width: 44px;
+			height: 24px;
+			cursor: pointer;
+			vertical-align: middle;
+		}
+
+		.whippet-cookie-toggle input[type="checkbox"] {
+			position: absolute;
+			opacity: 0;
+			width: 0;
+			height: 0;
+			margin: 0;
+		}
+
+		.whippet-cookie-toggle-slider {
+			position: absolute;
+			top: 0;
+			right: 0;
+			bottom: 0;
+			left: 0;
+			background: #c3c4c7;
+			border-radius: 999px;
+			transition: background-color 0.2s ease;
+		}
+
+		.whippet-cookie-toggle-slider::before {
+			content: "";
+			position: absolute;
+			left: 3px;
+			top: 3px;
+			width: 18px;
+			height: 18px;
+			background: #fff;
+			border-radius: 50%;
+			box-shadow: 0 1px 2px rgba( 0, 0, 0, 0.2 );
+			transition: transform 0.2s ease;
+		}
+
+		.whippet-cookie-toggle input[type="checkbox"]:checked + .whippet-cookie-toggle-slider {
+			background: #2271b1;
+		}
+
+		.whippet-cookie-toggle input[type="checkbox"]:checked + .whippet-cookie-toggle-slider::before {
+			transform: translateX( 20px );
+		}
+
+		.whippet-cookie-toggle input[type="checkbox"]:focus + .whippet-cookie-toggle-slider {
+			box-shadow: 0 0 0 2px rgba( 34, 113, 177, 0.2 );
+		}
+
+		.whippet-cookie-toggle-status {
+			display: inline-flex;
+			align-items: center;
+			min-height: 24px;
+			font-weight: 500;
+			line-height: 1;
+			color: #334155;
+		}
+
+		.whippet-cookie-choice-group {
+			display: inline-flex;
+			flex-wrap: wrap;
+			align-items: center;
+			gap: 1rem;
+			min-height: 24px;
+		}
+
+		.whippet-cookie-choice {
+			display: inline-flex;
+			align-items: center;
+			gap: 0.35rem;
+			margin: 0;
+			min-height: 24px;
+			line-height: 1;
+		}
+
+		.whippet-cookie-choice span {
+			display: inline-flex;
+			align-items: center;
+			min-height: 24px;
+		}
+
+		.whippet-cookie-choice input[type="radio"] {
+			margin: 0;
+			flex-shrink: 0;
+			align-self: center;
+			vertical-align: middle;
+		}
+	</style>
 	<div style="padding:1.25rem;">
 		<form method="post">
 			<?php wp_nonce_field( 'whippet_extras_nonce', 'whippet_extras_nonce' ); ?>
@@ -638,12 +738,14 @@ function whippet_render_extras_settings() {
 				<tr>
 					<th><?php esc_html_e( 'Cookie alert status', 'whippet' ); ?></th>
 					<td>
-						<label style="display:inline-flex;align-items:center;gap:.35rem;margin-right:1rem;">
-							<input type="radio" name="whippet_options[cookie_bar_enabled]" value="1" <?php checked( ! empty( $options['cookie_bar_enabled'] ) ); ?>> <?php esc_html_e( 'Enabled', 'whippet' ); ?>
-						</label>
-						<label style="display:inline-flex;align-items:center;gap:.35rem;">
-							<input type="radio" name="whippet_options[cookie_bar_enabled]" value="0" <?php checked( empty( $options['cookie_bar_enabled'] ) ); ?>> <?php esc_html_e( 'Disabled', 'whippet' ); ?>
-						</label>
+						<div class="whippet-cookie-toggle-wrap">
+							<label class="whippet-cookie-toggle" for="cookie_bar_enabled">
+								<input id="cookie_bar_enabled" type="checkbox" name="whippet_options[cookie_bar_enabled]" value="1" <?php checked( ! empty( $options['cookie_bar_enabled'] ) ); ?> aria-label="<?php esc_attr_e( 'Enable cookie alert', 'whippet' ); ?>">
+								<span class="whippet-cookie-toggle-slider" aria-hidden="true"></span>
+							</label>
+							<span id="whippet-cookie-toggle-status" class="whippet-cookie-toggle-status"><?php echo ! empty( $options['cookie_bar_enabled'] ) ? esc_html__( 'Enabled', 'whippet' ) : esc_html__( 'Disabled', 'whippet' ); ?></span>
+						</div>
+						<p class="description"><?php esc_html_e( 'Turn the cookie alert on or off.', 'whippet' ); ?></p>
 					</td>
 				</tr>
 				<tr>
@@ -666,12 +768,16 @@ function whippet_render_extras_settings() {
 				<tr>
 					<th><?php esc_html_e( 'Cookie bar theme', 'whippet' ); ?></th>
 					<td>
-						<label style="display:inline-flex;align-items:center;gap:.35rem;margin-right:1rem;">
-							<input type="radio" name="whippet_options[cookie_bar_theme]" value="modern_light" <?php checked( 'modern_light', $cookie_theme ); ?>> <?php esc_html_e( 'Modern Light', 'whippet' ); ?>
-						</label>
-						<label style="display:inline-flex;align-items:center;gap:.35rem;">
-							<input type="radio" name="whippet_options[cookie_bar_theme]" value="modern_dark" <?php checked( 'modern_dark', $cookie_theme ); ?>> <?php esc_html_e( 'Modern Dark', 'whippet' ); ?>
-						</label>
+						<div class="whippet-cookie-choice-group">
+							<label class="whippet-cookie-choice">
+								<input type="radio" name="whippet_options[cookie_bar_theme]" value="modern_light" <?php checked( 'modern_light', $cookie_theme ); ?>>
+								<span><?php esc_html_e( 'Modern Light', 'whippet' ); ?></span>
+							</label>
+							<label class="whippet-cookie-choice">
+								<input type="radio" name="whippet_options[cookie_bar_theme]" value="modern_dark" <?php checked( 'modern_dark', $cookie_theme ); ?>>
+								<span><?php esc_html_e( 'Modern Dark', 'whippet' ); ?></span>
+							</label>
+						</div>
 					</td>
 				</tr>
 				<tr>
@@ -701,6 +807,8 @@ function whippet_render_extras_settings() {
 			<script>
 			(function(){
 				var restore = document.getElementById('whippet-cookie-restore-default');
+				var toggleInput = document.getElementById('cookie_bar_enabled');
+				var toggleStatus = document.getElementById('whippet-cookie-toggle-status');
 				var message = document.getElementById('cookie_bar_message');
 				var requiredInput = document.getElementById('cookie_bar_required_button_text');
 				var acceptInput = document.getElementById('cookie_bar_button_text');
@@ -722,6 +830,13 @@ function whippet_render_extras_settings() {
 				function normalizeHex(v){
 					if(!v){ return ''; }
 					return /^#[0-9a-fA-F]{6}$/.test(v) ? v : '';
+				}
+				function syncToggleStatus(){
+					if(toggleInput && toggleStatus){
+						toggleStatus.textContent = toggleInput.checked
+							? '<?php echo esc_js( __( 'Enabled', 'whippet' ) ); ?>'
+							: '<?php echo esc_js( __( 'Disabled', 'whippet' ) ); ?>';
+					}
 				}
 				function syncPreview(){
 					if(!preview){ return; }
@@ -754,6 +869,9 @@ function whippet_render_extras_settings() {
 					}
 				}
 				if(!restore || !message){return;}
+				if(toggleInput){
+					toggleInput.addEventListener('change', syncToggleStatus);
+				}
 				restore.addEventListener('click', function(e){
 					e.preventDefault();
 					message.value = defaultText;
@@ -773,6 +891,7 @@ function whippet_render_extras_settings() {
 					}
 					themeInputs.forEach(function(input){ input.addEventListener(evt, syncPreview); });
 				});
+				syncToggleStatus();
 				syncPreview();
 			})();
 			</script>

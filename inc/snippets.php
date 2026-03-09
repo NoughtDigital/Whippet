@@ -542,6 +542,7 @@ function whippet_render_snippets_manager() {
 			break;
 		}
 	}
+	$is_editing = null !== $current;
 
 	if ( ! $current ) {
 		$current = array(
@@ -564,184 +565,237 @@ function whippet_render_snippets_manager() {
 			'condition_mode'    => 'all',
 		);
 	}
+	$snippet_tab  = isset( $_GET['whippet_stab'] ) ? sanitize_key( wp_unslash( $_GET['whippet_stab'] ) ) : 'editor';
+	if ( ! in_array( $snippet_tab, array( 'editor', 'list' ), true ) ) {
+		$snippet_tab = 'editor';
+	}
+	$new_url    = add_query_arg(
+		array(
+			'page'          => 'whippet',
+			'whippet_stab'  => 'editor',
+		),
+		admin_url( 'tools.php' )
+	);
 	?>
 	<div style="padding:1.25rem;">
 		<p style="font-size:.875rem;color:#64748b;">
 			<?php esc_html_e( 'Flat-file snippets stored in uploads/whippet-snippets for fast, zero-query frontend loading. On multisite, each site uses its own snippet file.', 'whippet' ); ?>
 		</p>
 
-		<div style="margin:.75rem 0 1rem;">
-			<a class="button button-secondary" href="<?php echo esc_url( add_query_arg( array( 'page' => 'whippet', 'whippet_safe_mode' => $safe_mode_on ? '0' : '1' ), admin_url( 'tools.php' ) ) . '#snippets' ); ?>">
-				<?php echo $safe_mode_on ? esc_html__( 'Disable Safe Mode', 'whippet' ) : esc_html__( 'Enable Safe Mode (1 hour)', 'whippet' ); ?>
-			</a>
-		</div>
-
-		<form method="post" style="margin-bottom:1.25rem;">
-			<?php wp_nonce_field( 'whippet_snippets_nonce', 'whippet_snippets_nonce' ); ?>
-			<input type="hidden" name="whippet_snippets_action" value="save_snippet">
-			<input type="hidden" name="snippet[id]" value="<?php echo esc_attr( $current['id'] ); ?>">
-			<table class="form-table" role="presentation">
-				<tbody>
-				<tr>
-					<th><label for="whippet-snippet-title"><?php esc_html_e( 'Title', 'whippet' ); ?></label></th>
-					<td><input id="whippet-snippet-title" name="snippet[title]" type="text" class="regular-text" value="<?php echo esc_attr( $current['title'] ); ?>"></td>
-				</tr>
-				<tr>
-					<th><label for="whippet-snippet-description"><?php esc_html_e( 'Description', 'whippet' ); ?></label></th>
-					<td><input id="whippet-snippet-description" name="snippet[description]" type="text" class="regular-text" value="<?php echo esc_attr( $current['description'] ); ?>"></td>
-				</tr>
-				<tr>
-					<th><label for="whippet-snippet-tags"><?php esc_html_e( 'Tags', 'whippet' ); ?></label></th>
-					<td><input id="whippet-snippet-tags" name="snippet[tags]" type="text" class="regular-text" value="<?php echo esc_attr( implode( ', ', (array) $current['tags'] ) ); ?>"><p class="description"><?php esc_html_e( 'Comma-separated.', 'whippet' ); ?></p></td>
-				</tr>
-				<tr>
-					<th><?php esc_html_e( 'Type', 'whippet' ); ?></th>
-					<td>
-						<select name="snippet[type]">
-							<?php foreach ( array( 'php' => 'PHP', 'css' => 'CSS', 'js' => 'JS', 'html' => 'HTML' ) as $key => $label ) : ?>
-								<option value="<?php echo esc_attr( $key ); ?>" <?php selected( $current['type'], $key ); ?>><?php echo esc_html( $label ); ?></option>
-							<?php endforeach; ?>
-						</select>
-					</td>
-				</tr>
-				<tr>
-					<th><?php esc_html_e( 'Location', 'whippet' ); ?></th>
-					<td>
-						<select name="snippet[location]">
-							<option value="head" <?php selected( $current['location'], 'head' ); ?>><?php esc_html_e( 'Head', 'whippet' ); ?></option>
-							<option value="body" <?php selected( $current['location'], 'body' ); ?>><?php esc_html_e( 'Body Open', 'whippet' ); ?></option>
-							<option value="footer" <?php selected( $current['location'], 'footer' ); ?>><?php esc_html_e( 'Footer', 'whippet' ); ?></option>
-						</select>
-					</td>
-				</tr>
-				<tr>
-					<th><?php esc_html_e( 'Priority', 'whippet' ); ?></th>
-					<td><input name="snippet[priority]" type="number" min="1" value="<?php echo esc_attr( (string) $current['priority'] ); ?>"></td>
-				</tr>
-				<tr>
-					<th><?php esc_html_e( 'Delivery', 'whippet' ); ?></th>
-					<td>
-						<select name="snippet[delivery]">
-							<option value="inline" <?php selected( $current['delivery'], 'inline' ); ?>><?php esc_html_e( 'Inline', 'whippet' ); ?></option>
-							<option value="file" <?php selected( $current['delivery'], 'file' ); ?>><?php esc_html_e( 'File', 'whippet' ); ?></option>
-						</select>
-					</td>
-				</tr>
-				<tr>
-					<th><?php esc_html_e( 'Conditions', 'whippet' ); ?></th>
-					<td>
-						<select name="snippet[condition_mode]">
-							<option value="all" <?php selected( $current['condition_mode'], 'all' ); ?>><?php esc_html_e( 'Match all rules', 'whippet' ); ?></option>
-							<option value="any" <?php selected( $current['condition_mode'], 'any' ); ?>><?php esc_html_e( 'Match any rule', 'whippet' ); ?></option>
-						</select>
-						<textarea name="snippet[conditions]" rows="5" class="large-text code" placeholder="is_front_page&#10;url_contains:/checkout"><?php echo esc_textarea( implode( "\n", (array) $current['conditions'] ) ); ?></textarea>
-						<p class="description"><?php esc_html_e( 'Rule examples: is_front_page, is_home, is_singular, is_page:contact, post_type:product, url_contains:/shop, user_logged_in, user_logged_out', 'whippet' ); ?></p>
-					</td>
-				</tr>
-				<tr>
-					<th><label for="whippet-snippet-code"><?php esc_html_e( 'Code', 'whippet' ); ?></label></th>
-					<td><textarea id="whippet-snippet-code" name="snippet[code]" rows="12" class="large-text code"><?php echo esc_textarea( $current['code'] ); ?></textarea></td>
-				</tr>
-				<tr>
-					<th><?php esc_html_e( 'Optimisations', 'whippet' ); ?></th>
-					<td>
-						<label style="margin-right:1rem;"><input type="checkbox" name="snippet[enabled]" value="1" <?php checked( ! empty( $current['enabled'] ) ); ?>> <?php esc_html_e( 'Enabled', 'whippet' ); ?></label>
-						<label style="margin-right:1rem;"><input type="checkbox" name="snippet[minify]" value="1" <?php checked( ! empty( $current['minify'] ) ); ?>> <?php esc_html_e( 'Minify', 'whippet' ); ?></label>
-						<label style="margin-right:1rem;"><input type="checkbox" name="snippet[defer]" value="1" <?php checked( ! empty( $current['defer'] ) ); ?>> <?php esc_html_e( 'Defer (JS)', 'whippet' ); ?></label>
-						<label style="margin-right:1rem;"><input type="checkbox" name="snippet[async]" value="1" <?php checked( ! empty( $current['async'] ) ); ?>> <?php esc_html_e( 'Async (JS)', 'whippet' ); ?></label>
-						<label style="margin-right:1rem;"><input type="checkbox" name="snippet[delay_interaction]" value="1" <?php checked( ! empty( $current['delay_interaction'] ) ); ?>> <?php esc_html_e( 'Delay until interaction (JS)', 'whippet' ); ?></label>
-						<label><input type="checkbox" name="snippet[preload]" value="1" <?php checked( ! empty( $current['preload'] ) ); ?>> <?php esc_html_e( 'Preload (CSS file)', 'whippet' ); ?></label>
-					</td>
-				</tr>
-				</tbody>
-			</table>
-			<p class="whippet-snippet-editor-actions">
-				<button type="submit" class="button button-primary"><?php esc_html_e( 'Save Snippet', 'whippet' ); ?></button>
-				<a class="button" href="<?php echo esc_url( admin_url( 'tools.php?page=whippet#snippets' ) ); ?>"><?php esc_html_e( 'New Snippet', 'whippet' ); ?></a>
-			</p>
-		</form>
-
-		<div class="whippet-snippet-import-bar">
-			<form method="post" enctype="multipart/form-data" class="whippet-snippet-import-form">
-				<?php wp_nonce_field( 'whippet_snippets_nonce', 'whippet_snippets_nonce' ); ?>
-				<input type="hidden" name="whippet_snippets_action" value="import_snippets">
-				<input id="whippet-snippets-file" type="file" name="snippets_file" accept=".json" required class="screen-reader-text">
-				<label for="whippet-snippets-file" class="button button-secondary"><?php esc_html_e( 'Choose file', 'whippet' ); ?></label>
-				<span id="whippet-snippets-file-name" class="whippet-snippets-file-name"><?php esc_html_e( 'No file chosen', 'whippet' ); ?></span>
-				<button class="button button-secondary" type="submit"><?php esc_html_e( 'Import JSON', 'whippet' ); ?></button>
-			</form>
-			<a class="button button-secondary whippet-snippet-export" href="<?php echo esc_url( add_query_arg( array( 'page' => 'whippet', 'whippet_snippets_export' => '1' ), admin_url( 'tools.php' ) ) ); ?>"><?php esc_html_e( 'Export All Snippets', 'whippet' ); ?></a>
-		</div>
-		<script>
-		(function(){
-			var input = document.getElementById('whippet-snippets-file');
-			var nameEl = document.getElementById('whippet-snippets-file-name');
-			if (!input || !nameEl) return;
-			input.addEventListener('change', function(){
-				var fileName = input.files && input.files.length ? input.files[0].name : '<?php echo esc_js( __( 'No file chosen', 'whippet' ) ); ?>';
-				nameEl.textContent = fileName;
-			});
-		})();
-		</script>
-
-		<form method="post">
-			<?php wp_nonce_field( 'whippet_snippets_nonce', 'whippet_snippets_nonce' ); ?>
-			<input type="hidden" name="whippet_snippets_action" value="bulk_action">
-			<div class="whippet-snippet-bulk-actions">
-				<select name="bulk_action">
-					<option value=""><?php esc_html_e( 'Bulk actions', 'whippet' ); ?></option>
-					<option value="enable"><?php esc_html_e( 'Enable', 'whippet' ); ?></option>
-					<option value="disable"><?php esc_html_e( 'Disable', 'whippet' ); ?></option>
-					<option value="export"><?php esc_html_e( 'Export', 'whippet' ); ?></option>
-					<option value="delete"><?php esc_html_e( 'Delete', 'whippet' ); ?></option>
-				</select>
-				<button class="button button-secondary" type="submit"><?php esc_html_e( 'Apply', 'whippet' ); ?></button>
+		<?php if ( 'editor' === $snippet_tab ) : ?>
+			<div class="whippet-snippet-overview" style="display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-end;gap:.75rem;margin:.75rem 0 1rem;">
+				<a class="button button-secondary" href="<?php echo esc_url( add_query_arg( array( 'page' => 'whippet', 'whippet_safe_mode' => $safe_mode_on ? '0' : '1' ), admin_url( 'tools.php' ) ) . '#snippets' ); ?>">
+					<?php echo $safe_mode_on ? esc_html__( 'Disable Safe Mode', 'whippet' ) : esc_html__( 'Enable Safe Mode (1 hour)', 'whippet' ); ?>
+				</a>
 			</div>
-			<table class="widefat striped">
-				<thead>
-					<tr>
-						<td style="width:24px;"><input type="checkbox" onclick="document.querySelectorAll('.whippet-snippet-check').forEach(cb=>cb.checked=this.checked);"></td>
-						<th><?php esc_html_e( 'Snippet', 'whippet' ); ?></th>
-						<th><?php esc_html_e( 'Type', 'whippet' ); ?></th>
-						<th><?php esc_html_e( 'Location', 'whippet' ); ?></th>
-						<th><?php esc_html_e( 'Priority', 'whippet' ); ?></th>
-						<th><?php esc_html_e( 'Status', 'whippet' ); ?></th>
-						<th><?php esc_html_e( 'Actions', 'whippet' ); ?></th>
-					</tr>
-				</thead>
-				<tbody>
-				<?php if ( empty( $snippets ) ) : ?>
-					<tr><td colspan="7"><?php esc_html_e( 'No snippets yet.', 'whippet' ); ?></td></tr>
-				<?php else : ?>
-					<?php foreach ( $snippets as $snippet ) : ?>
-						<tr>
-							<td><input class="whippet-snippet-check" type="checkbox" name="snippet_ids[]" value="<?php echo esc_attr( $snippet['id'] ); ?>"></td>
-							<td>
-								<strong><?php echo esc_html( $snippet['title'] ?: __( '(Untitled)', 'whippet' ) ); ?></strong>
-								<?php if ( ! empty( $snippet['description'] ) ) : ?>
-									<div style="color:#64748b;"><?php echo esc_html( $snippet['description'] ); ?></div>
-								<?php endif; ?>
-							</td>
-							<td><?php echo esc_html( strtoupper( $snippet['type'] ) ); ?></td>
-							<td><?php echo esc_html( ucfirst( $snippet['location'] ) ); ?></td>
-							<td><?php echo esc_html( (string) $snippet['priority'] ); ?></td>
-							<td><?php echo ! empty( $snippet['enabled'] ) ? esc_html__( 'Enabled', 'whippet' ) : esc_html__( 'Disabled', 'whippet' ); ?></td>
-							<td>
-								<a class="button button-small" href="<?php echo esc_url( add_query_arg( array( 'page' => 'whippet', 'snippet_edit' => $snippet['id'] ), admin_url( 'tools.php' ) ) . '#snippets' ); ?>"><?php esc_html_e( 'Edit', 'whippet' ); ?></a>
-								<a class="button button-small" href="<?php echo esc_url( add_query_arg( array( 'page' => 'whippet', 'whippet_snippet_export_id' => $snippet['id'] ), admin_url( 'tools.php' ) ) ); ?>"><?php esc_html_e( 'Export', 'whippet' ); ?></a>
-								<form method="post" style="display:inline;">
-									<?php wp_nonce_field( 'whippet_snippets_nonce', 'whippet_snippets_nonce' ); ?>
-									<input type="hidden" name="whippet_snippets_action" value="delete_snippet">
-									<input type="hidden" name="snippet_id" value="<?php echo esc_attr( $snippet['id'] ); ?>">
-									<button class="button button-small" type="submit" onclick="return confirm('<?php echo esc_js( __( 'Delete this snippet?', 'whippet' ) ); ?>');"><?php esc_html_e( 'Delete', 'whippet' ); ?></button>
-								</form>
-							</td>
-						</tr>
-					<?php endforeach; ?>
+		<?php endif; ?>
+
+		<?php if ( 'editor' === $snippet_tab ) : ?>
+			<div class="whippet-snippet-section-head" style="display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;margin:0 0 1rem;">
+				<div>
+					<h3 style="margin:0 0 .35rem;font-size:1rem;">
+						<?php echo $is_editing ? esc_html__( 'Edit Snippet', 'whippet' ) : esc_html__( 'Add New Snippet', 'whippet' ); ?>
+					</h3>
+					<p style="margin:0;color:#64748b;font-size:.8125rem;">
+						<?php echo $is_editing ? esc_html__( 'Update the snippet below, then save your changes.', 'whippet' ) : esc_html__( 'Create a new snippet and choose where and when it should run.', 'whippet' ); ?>
+					</p>
+				</div>
+				<?php if ( $is_editing ) : ?>
+					<a class="button" href="<?php echo esc_url( $new_url . '#snippets' ); ?>"><?php esc_html_e( 'Start New Snippet', 'whippet' ); ?></a>
 				<?php endif; ?>
-				</tbody>
-			</table>
-		</form>
+			</div>
+
+			<form method="post" class="whippet-snippet-editor-form" style="margin-bottom:1.25rem;">
+				<?php wp_nonce_field( 'whippet_snippets_nonce', 'whippet_snippets_nonce' ); ?>
+				<input type="hidden" name="whippet_snippets_action" value="save_snippet">
+				<input type="hidden" name="snippet[id]" value="<?php echo esc_attr( $current['id'] ); ?>">
+				<table class="form-table" role="presentation">
+					<tbody>
+					<tr>
+						<th><label for="whippet-snippet-title"><?php esc_html_e( 'Title', 'whippet' ); ?></label></th>
+						<td><input id="whippet-snippet-title" name="snippet[title]" type="text" class="regular-text" value="<?php echo esc_attr( $current['title'] ); ?>"></td>
+					</tr>
+					<tr>
+						<th><label for="whippet-snippet-description"><?php esc_html_e( 'Description', 'whippet' ); ?></label></th>
+						<td><input id="whippet-snippet-description" name="snippet[description]" type="text" class="regular-text" value="<?php echo esc_attr( $current['description'] ); ?>"></td>
+					</tr>
+					<tr>
+						<th><label for="whippet-snippet-tags"><?php esc_html_e( 'Tags', 'whippet' ); ?></label></th>
+						<td><input id="whippet-snippet-tags" name="snippet[tags]" type="text" class="regular-text" value="<?php echo esc_attr( implode( ', ', (array) $current['tags'] ) ); ?>"><p class="description"><?php esc_html_e( 'Comma-separated.', 'whippet' ); ?></p></td>
+					</tr>
+					<tr>
+						<th><?php esc_html_e( 'Type', 'whippet' ); ?></th>
+						<td>
+							<select name="snippet[type]">
+								<?php foreach ( array( 'php' => 'PHP', 'css' => 'CSS', 'js' => 'JS', 'html' => 'HTML' ) as $key => $label ) : ?>
+									<option value="<?php echo esc_attr( $key ); ?>" <?php selected( $current['type'], $key ); ?>><?php echo esc_html( $label ); ?></option>
+								<?php endforeach; ?>
+							</select>
+						</td>
+					</tr>
+					<tr>
+						<th><?php esc_html_e( 'Location', 'whippet' ); ?></th>
+						<td>
+							<select name="snippet[location]">
+								<option value="head" <?php selected( $current['location'], 'head' ); ?>><?php esc_html_e( 'Head', 'whippet' ); ?></option>
+								<option value="body" <?php selected( $current['location'], 'body' ); ?>><?php esc_html_e( 'Body Open', 'whippet' ); ?></option>
+								<option value="footer" <?php selected( $current['location'], 'footer' ); ?>><?php esc_html_e( 'Footer', 'whippet' ); ?></option>
+							</select>
+						</td>
+					</tr>
+					<tr>
+						<th><?php esc_html_e( 'Priority', 'whippet' ); ?></th>
+						<td><input name="snippet[priority]" type="number" min="1" value="<?php echo esc_attr( (string) $current['priority'] ); ?>"></td>
+					</tr>
+					<tr>
+						<th><?php esc_html_e( 'Delivery', 'whippet' ); ?></th>
+						<td>
+							<select name="snippet[delivery]">
+								<option value="inline" <?php selected( $current['delivery'], 'inline' ); ?>><?php esc_html_e( 'Inline', 'whippet' ); ?></option>
+								<option value="file" <?php selected( $current['delivery'], 'file' ); ?>><?php esc_html_e( 'File', 'whippet' ); ?></option>
+							</select>
+						</td>
+					</tr>
+					<tr>
+						<th><?php esc_html_e( 'Conditions', 'whippet' ); ?></th>
+						<td>
+							<select name="snippet[condition_mode]">
+								<option value="all" <?php selected( $current['condition_mode'], 'all' ); ?>><?php esc_html_e( 'Match all rules', 'whippet' ); ?></option>
+								<option value="any" <?php selected( $current['condition_mode'], 'any' ); ?>><?php esc_html_e( 'Match any rule', 'whippet' ); ?></option>
+							</select>
+							<textarea name="snippet[conditions]" rows="5" class="large-text code" placeholder="is_front_page&#10;url_contains:/checkout"><?php echo esc_textarea( implode( "\n", (array) $current['conditions'] ) ); ?></textarea>
+							<p class="description"><?php esc_html_e( 'Rule examples: is_front_page, is_home, is_singular, is_page:contact, post_type:product, url_contains:/shop, user_logged_in, user_logged_out', 'whippet' ); ?></p>
+						</td>
+					</tr>
+					<tr>
+						<th><label for="whippet-snippet-code"><?php esc_html_e( 'Code', 'whippet' ); ?></label></th>
+						<td><textarea id="whippet-snippet-code" name="snippet[code]" rows="12" class="large-text code"><?php echo esc_textarea( $current['code'] ); ?></textarea></td>
+					</tr>
+					<tr>
+						<th><?php esc_html_e( 'Optimisations', 'whippet' ); ?></th>
+						<td>
+							<label style="margin-right:1rem;"><input type="checkbox" name="snippet[enabled]" value="1" <?php checked( ! empty( $current['enabled'] ) ); ?>> <?php esc_html_e( 'Enabled', 'whippet' ); ?></label>
+							<label style="margin-right:1rem;"><input type="checkbox" name="snippet[minify]" value="1" <?php checked( ! empty( $current['minify'] ) ); ?>> <?php esc_html_e( 'Minify', 'whippet' ); ?></label>
+							<label style="margin-right:1rem;"><input type="checkbox" name="snippet[defer]" value="1" <?php checked( ! empty( $current['defer'] ) ); ?>> <?php esc_html_e( 'Defer (JS)', 'whippet' ); ?></label>
+							<label style="margin-right:1rem;"><input type="checkbox" name="snippet[async]" value="1" <?php checked( ! empty( $current['async'] ) ); ?>> <?php esc_html_e( 'Async (JS)', 'whippet' ); ?></label>
+							<label style="margin-right:1rem;"><input type="checkbox" name="snippet[delay_interaction]" value="1" <?php checked( ! empty( $current['delay_interaction'] ) ); ?>> <?php esc_html_e( 'Delay until interaction (JS)', 'whippet' ); ?></label>
+							<label><input type="checkbox" name="snippet[preload]" value="1" <?php checked( ! empty( $current['preload'] ) ); ?>> <?php esc_html_e( 'Preload (CSS file)', 'whippet' ); ?></label>
+						</td>
+					</tr>
+					</tbody>
+				</table>
+				<p class="whippet-snippet-editor-actions">
+					<button type="submit" class="button button-primary"><?php echo $is_editing ? esc_html__( 'Save Changes', 'whippet' ) : esc_html__( 'Save Snippet', 'whippet' ); ?></button>
+					<a class="button" href="<?php echo esc_url( add_query_arg( array( 'page' => 'whippet', 'whippet_stab' => 'list' ), admin_url( 'tools.php' ) ) . '#snippets' ); ?>"><?php esc_html_e( 'View Snippets', 'whippet' ); ?></a>
+				</p>
+			</form>
+		<?php else : ?>
+			<div class="whippet-snippet-section-head" style="display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;margin:0 0 1rem;">
+				<div>
+					<h3 style="margin:0 0 .35rem;font-size:1rem;"><?php esc_html_e( 'Saved Snippets', 'whippet' ); ?></h3>
+					<p style="margin:0;color:#64748b;font-size:.8125rem;"><?php esc_html_e( 'Manage your saved snippets, export them, or jump into editing from here.', 'whippet' ); ?></p>
+				</div>
+			</div>
+
+			<div class="whippet-snippet-toolbar-grid">
+				<div class="whippet-snippet-import-bar">
+					<div class="whippet-snippet-toolbar-copy">
+						<strong><?php esc_html_e( 'Import or export', 'whippet' ); ?></strong>
+						<span><?php esc_html_e( 'Bring in snippets from JSON or export your current library.', 'whippet' ); ?></span>
+					</div>
+					<form method="post" enctype="multipart/form-data" class="whippet-snippet-import-form">
+						<?php wp_nonce_field( 'whippet_snippets_nonce', 'whippet_snippets_nonce' ); ?>
+						<input type="hidden" name="whippet_snippets_action" value="import_snippets">
+						<input id="whippet-snippets-file" type="file" name="snippets_file" accept=".json" required class="screen-reader-text">
+						<label for="whippet-snippets-file" class="button button-secondary"><?php esc_html_e( 'Choose file', 'whippet' ); ?></label>
+						<span id="whippet-snippets-file-name" class="whippet-snippets-file-name"><?php esc_html_e( 'No file chosen', 'whippet' ); ?></span>
+						<button class="button button-secondary" type="submit"><?php esc_html_e( 'Import JSON', 'whippet' ); ?></button>
+					</form>
+					<a class="button button-secondary whippet-snippet-export" href="<?php echo esc_url( add_query_arg( array( 'page' => 'whippet', 'whippet_snippets_export' => '1' ), admin_url( 'tools.php' ) ) ); ?>"><?php esc_html_e( 'Export All Snippets', 'whippet' ); ?></a>
+				</div>
+			</div>
+			<script>
+			(function(){
+				var input = document.getElementById('whippet-snippets-file');
+				var nameEl = document.getElementById('whippet-snippets-file-name');
+				if (!input || !nameEl) return;
+				input.addEventListener('change', function(){
+					var fileName = input.files && input.files.length ? input.files[0].name : '<?php echo esc_js( __( 'No file chosen', 'whippet' ) ); ?>';
+					nameEl.textContent = fileName;
+				});
+			})();
+			</script>
+
+			<?php if ( empty( $snippets ) ) : ?>
+				<div class="whippet-snippet-empty-state">
+					<strong><?php esc_html_e( 'No snippets yet', 'whippet' ); ?></strong>
+					<p><?php esc_html_e( 'Create your first snippet with the button above, or import an existing JSON file to get started.', 'whippet' ); ?></p>
+				</div>
+			<?php else : ?>
+				<form method="post" class="whippet-snippet-bulk-panel">
+					<?php wp_nonce_field( 'whippet_snippets_nonce', 'whippet_snippets_nonce' ); ?>
+					<input type="hidden" name="whippet_snippets_action" value="bulk_action">
+					<div class="whippet-snippet-toolbar-copy">
+						<strong><?php esc_html_e( 'Bulk actions', 'whippet' ); ?></strong>
+						<span><?php esc_html_e( 'Select snippets below, then enable, disable, export, or delete them in one go.', 'whippet' ); ?></span>
+					</div>
+					<div class="whippet-snippet-bulk-actions">
+						<select name="bulk_action">
+							<option value=""><?php esc_html_e( 'Bulk actions', 'whippet' ); ?></option>
+							<option value="enable"><?php esc_html_e( 'Enable', 'whippet' ); ?></option>
+							<option value="disable"><?php esc_html_e( 'Disable', 'whippet' ); ?></option>
+							<option value="export"><?php esc_html_e( 'Export', 'whippet' ); ?></option>
+							<option value="delete"><?php esc_html_e( 'Delete', 'whippet' ); ?></option>
+						</select>
+						<button class="button button-secondary" type="submit"><?php esc_html_e( 'Apply', 'whippet' ); ?></button>
+					</div>
+					<div class="whippet-snippet-table-wrap">
+						<table class="widefat striped">
+							<thead>
+								<tr>
+									<td style="width:24px;"><input type="checkbox" onclick="document.querySelectorAll('.whippet-snippet-check').forEach(cb=>cb.checked=this.checked);"></td>
+									<th><?php esc_html_e( 'Snippet', 'whippet' ); ?></th>
+									<th><?php esc_html_e( 'Type', 'whippet' ); ?></th>
+									<th><?php esc_html_e( 'Location', 'whippet' ); ?></th>
+									<th><?php esc_html_e( 'Priority', 'whippet' ); ?></th>
+									<th><?php esc_html_e( 'Status', 'whippet' ); ?></th>
+									<th><?php esc_html_e( 'Actions', 'whippet' ); ?></th>
+								</tr>
+							</thead>
+							<tbody>
+							<?php foreach ( $snippets as $snippet ) : ?>
+								<tr>
+									<td><input class="whippet-snippet-check" type="checkbox" name="snippet_ids[]" value="<?php echo esc_attr( $snippet['id'] ); ?>"></td>
+									<td>
+										<strong><?php echo esc_html( $snippet['title'] ?: __( '(Untitled)', 'whippet' ) ); ?></strong>
+										<?php if ( ! empty( $snippet['description'] ) ) : ?>
+											<div style="color:#64748b;"><?php echo esc_html( $snippet['description'] ); ?></div>
+										<?php endif; ?>
+									</td>
+									<td><?php echo esc_html( strtoupper( $snippet['type'] ) ); ?></td>
+									<td><?php echo esc_html( ucfirst( $snippet['location'] ) ); ?></td>
+									<td><?php echo esc_html( (string) $snippet['priority'] ); ?></td>
+									<td><span class="whippet-snippet-status <?php echo ! empty( $snippet['enabled'] ) ? 'is-enabled' : 'is-disabled'; ?>"><?php echo ! empty( $snippet['enabled'] ) ? esc_html__( 'Enabled', 'whippet' ) : esc_html__( 'Disabled', 'whippet' ); ?></span></td>
+									<td>
+										<div class="whippet-snippet-row-actions">
+											<a class="button button-small" href="<?php echo esc_url( add_query_arg( array( 'page' => 'whippet', 'whippet_stab' => 'editor', 'snippet_edit' => $snippet['id'] ), admin_url( 'tools.php' ) ) . '#snippets' ); ?>"><?php esc_html_e( 'Edit', 'whippet' ); ?></a>
+											<a class="button button-small" href="<?php echo esc_url( add_query_arg( array( 'page' => 'whippet', 'whippet_snippet_export_id' => $snippet['id'] ), admin_url( 'tools.php' ) ) ); ?>"><?php esc_html_e( 'Export', 'whippet' ); ?></a>
+											<form method="post" class="whippet-snippet-inline-form">
+												<?php wp_nonce_field( 'whippet_snippets_nonce', 'whippet_snippets_nonce' ); ?>
+												<input type="hidden" name="whippet_snippets_action" value="delete_snippet">
+												<input type="hidden" name="snippet_id" value="<?php echo esc_attr( $snippet['id'] ); ?>">
+												<button class="button button-small" type="submit" onclick="return confirm('<?php echo esc_js( __( 'Delete this snippet?', 'whippet' ) ); ?>');"><?php esc_html_e( 'Delete', 'whippet' ); ?></button>
+											</form>
+										</div>
+									</td>
+								</tr>
+							<?php endforeach; ?>
+							</tbody>
+						</table>
+					</div>
+				</form>
+			<?php endif; ?>
+		<?php endif; ?>
 	</div>
 	<?php
 }

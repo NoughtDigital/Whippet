@@ -153,12 +153,12 @@
     box-sizing: border-box;
 }
 
-.plugin-wrapper .gonz.plugin .overflow a {
+.plugin-wrapper .whip.plugin .overflow a {
     text-decoration: none;
     color: #444;
 }
 
-.plugin-wrapper .gonz.plugin .overflow span {
+.plugin-wrapper .whip.plugin .overflow span {
     line-height: 1em;
     font-size: 1.5em;
     text-transform: uppercase;
@@ -166,12 +166,12 @@
     color: #444;
 }
 
-.gonz tr:nth-child(even) {
+.whip tr:nth-child(even) {
     background-color: rgba(238, 238, 238, 0.1);
 }
 
-.gonz tr th,
-.gonz tr td {
+.whip tr th,
+.whip tr td {
     padding: .75em;
     border-bottom: 1px solid #e5e5e5;
     border-width: 0 0 1px 0;
@@ -180,47 +180,103 @@
     text-align: left;
 }
 
-.gonz tr .overflow {
+.whip tr .overflow {
     text-overflow: ellipsis;
     overflow: hidden;
 }
 
-.gonz tr .options .ignore {
+.whip tr .options .ignore {
     margin-top: .5em;
 }
 
-.gonz tr td input[type=checkbox],
-.gonz tr td input[type=radio] {
+.whip tr td input[type=checkbox],
+.whip tr td input[type=radio] {
     outline: none;
     display: inline-block;
     margin: 0 0.5em 0 0;
     width: auto;
 }
 
-.gonz tr td > div > a {
+/* MU Mode toggle: hide native checkbox, show pill */
+#whippet .whippet-mu-cell input.whippet-mu-toggle-input {
+    position: absolute !important;
+    opacity: 0 !important;
+    width: 44px !important;
+    height: 24px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    clip: rect(0, 0, 0, 0) !important;
+    clip-path: inset(50%) !important;
+    overflow: hidden !important;
+    appearance: none !important;
+    -webkit-appearance: none !important;
+}
+#whippet .whippet-mu-cell .whippet-mu-toggle {
+    position: relative;
+    display: inline-block;
+    width: 44px;
+    height: 24px;
+    cursor: pointer;
+    vertical-align: middle;
+}
+#whippet .whippet-mu-cell .whippet-mu-toggle-slider {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #c3c4c7;
+    border-radius: 24px;
+    transition: 0.2s;
+    pointer-events: none;
+}
+#whippet .whippet-mu-cell .whippet-mu-toggle-slider::after {
+    content: "";
+    position: absolute;
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: #fff;
+    border-radius: 50%;
+    transition: 0.2s;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+#whippet .whippet-mu-cell .whippet-mu-toggle-input:checked + .whippet-mu-toggle-slider {
+    background-color: #2271b1;
+}
+#whippet .whippet-mu-cell .whippet-mu-toggle-input:checked + .whippet-mu-toggle-slider::after {
+    transform: translateX(20px);
+}
+#whippet .whippet-mu-cell .whippet-mu-toggle--disabled .whippet-mu-toggle-slider {
+    pointer-events: none;
+}
+
+.whip tr td > div > a {
     color: red;
 }
 
-.gonz .g-link {
+.whip .g-link {
     color: #007acc;
     text-decoration: none;
     font-size: 1.1em;
     white-space: nowrap;
 }
 
-.gonz .g-info {
+.whip .g-info {
     display: inline-block;
     width: 100%;
     font-size: 0.9em;
     margin-top: 0.5em;
 }
 
-.gonz .g-info a {
+.whip .g-info a {
     color: #ed6a67;
     text-decoration: none;
 }
 
-.gonz tr td label {
+.whip tr td label {
     margin: .25em 1em .25em 0em;
     font-size: 1em;
     display: inline-block;
@@ -228,99 +284,99 @@
     font-weight: initial;
 }
 
-.gonz tr td .state-1 {
+.whip tr td .state-1 {
     background: rgb(73, 207, 84);
     color: #fff;
     width: 100%;
     padding: .25em;
 }
 
-.gonz tr td .state-0 {
+.whip tr td .state-0 {
     background: rgb(232, 69, 69);
     color: #fff;
     width: 100%;
     padding: .25em;
 }
 
-.gonz tr th:nth-child(1),
-.gonz tr td:nth-child(1) {
+.whip tr th:nth-child(1),
+.whip tr td:nth-child(1) {
     text-align: center;
     width: 75px;
 }
 
-.gonz tr th:nth-child(3),
-.gonz tr td:nth-child(3) {
+.whip tr th:nth-child(3),
+.whip tr td:nth-child(3) {
     width: 100px;
 }
 
-.gonz tr th:nth-child(2),
-.gonz tr td:nth-child(2) {
+.whip tr th:nth-child(2),
+.whip tr td:nth-child(2) {
     width: auto;
 }
 
-.gonz tr th:nth-child(4),
-.gonz tr td:nth-child(4) {
+.whip tr th:nth-child(4),
+.whip tr td:nth-child(4) {
     width: 130px;
 }
 
-.gonz tr th:nth-child(5),
-.gonz tr td:nth-child(5) {
+.whip tr th:nth-child(5),
+.whip tr td:nth-child(5) {
     width: 35%;
 }
 
-.gonz.plugin tr th:nth-child(1),
-.gonz.plugin tr td:nth-child(1) {
+.whip.plugin tr th:nth-child(1),
+.whip.plugin tr td:nth-child(1) {
     text-align: center;
     width: 75px;
 }
 
-.gonz.plugin tr th:nth-child(2),
-.gonz.plugin tr td:nth-child(2) {
+.whip.plugin tr th:nth-child(2),
+.whip.plugin tr td:nth-child(2) {
     width: auto;
 }
 
-.gonz.plugin tr th:nth-child(3),
-.gonz.plugin tr td:nth-child(3) {
+.whip.plugin tr th:nth-child(3),
+.whip.plugin tr td:nth-child(3) {
     width: 130px;
 }
 
-.gonz.plugin tr th:nth-child(4),
-.gonz.plugin tr td:nth-child(4) {
+.whip.plugin tr th:nth-child(4),
+.whip.plugin tr td:nth-child(4) {
     width: 35%;
 }
 
-.gonz select {
+.whip select {
     font-family: inherit;
     font-size: 1em;
     height: auto;
 }
 
-.gonz select::before,
-.gonz select::after {
+.whip select::before,
+.whip select::after {
     content: ""!important;
 }
 
-.gonz:not(.plugin) {
+.whip:not(.plugin) {
     margin-bottom: 3em;
 }
 
-.gonz:not(.plugin) tr:hover td {
+.whip:not(.plugin) tr:hover td {
     background-color: #f7f5f5
 }
 
-.gonz .g-cond {
+.whip .g-cond {
     /*margin-top: .5em;*/
     float: left;
     width: 100%;
 }
 
-.gonz .g-excp {
+.whip .g-excp {
     margin-top: 1em;
     float: left;
     width: 100%;
 }
 
-.gonz .g-regex textarea {
+.whip .g-regex textarea {
     margin: 1em 0 0 0;
     float: left;
     width: 100%;
@@ -335,7 +391,7 @@
     padding: 5px;
 }
 
-.gonz .g-disabled {
+.whip .g-disabled {
     display: none;
 }
 
@@ -351,14 +407,14 @@
     text-transform: initial;
 }
 
-.gonz {
+.whip {
     border-left: 10px solid #ddd;
     margin: 0 0 1.6em;
     border: none;
     background: #fff;
 }
 
-.plugin-wrapper .gonz.empty {
+.plugin-wrapper .whip.empty {
     background: #fff;
     padding: 1em;
 }
