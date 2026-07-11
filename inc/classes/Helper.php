@@ -71,7 +71,7 @@ class Helper {
 	 * @return bool True if user has capability.
 	 */
 	public static function user_can_manage() {
-		return current_user_can( 'manage_options' );
+		return current_user_can( 'whippet_manage' ) || current_user_can( 'manage_options' );
 	}
 
 	/**
@@ -172,6 +172,111 @@ class Helper {
 			'whippet_scripts_mu_mode',
 			'whippet_scripts_testing_mode',
 		);
+	}
+
+	/**
+	 * Allowlisted keys inside the whippet_options blob for settings import.
+	 *
+	 * @return array<int,string>
+	 */
+	public static function allowed_core_option_keys() {
+		return array(
+			'disable_emojis',
+			'remove_query_strings',
+			'remove_comments',
+			'disable_embeds',
+			'disable_google_maps',
+			'remove_jquery_migrate',
+			'remove_rsd_link',
+			'remove_shortlink',
+			'remove_rest_api_links',
+			'remove_wlwmanifest_link',
+			'remove_feed_links',
+			'disable_xmlrpc',
+			'hide_wp_version',
+			'disable_rss_feeds',
+			'disable_self_pingbacks',
+			'disable_heartbeat',
+			'heartbeat_frequency',
+			'limit_post_revisions',
+			'autosave_interval',
+			'disable_woocommerce_scripts',
+			'disable_woocommerce_cart_fragmentation',
+			'disable_woocommerce_status',
+			'disable_woocommerce_widgets',
+			'enable_page_cache',
+			'page_cache_ttl',
+			'cache_mobile_separate',
+			'cache_preload',
+			'cache_htaccess',
+			'cache_exclude_urls',
+			'cache_exclude_cookies',
+			'enable_browser_cache',
+			'browser_cache_ttl',
+			'enable_gzip',
+			'image_quality',
+			'enable_webp_conversion',
+			'webp_quality',
+			'preload_fonts',
+			'db_cleanup_schedule',
+			'global_head_code',
+			'global_body_code',
+			'global_footer_code',
+			'cookie_bar_enabled',
+			'cookie_bar_message',
+			'cookie_bar_required_button_text',
+			'cookie_bar_button_text',
+			'cookie_bar_theme',
+			'cookie_bar_background_color',
+			'cookie_bar_privacy_url',
+			'maintenance_mode_enabled',
+			'maintenance_mode_status',
+			'maintenance_mode_heading',
+			'maintenance_mode_message',
+			'maintenance_mode_bypass_token',
+			'maintenance_mode_content_page',
+			'social_share_enabled',
+			'social_share_title',
+			'social_share_buttons',
+			'social_share_pos_before',
+			'social_share_pos_after',
+			'social_share_pos_floating',
+			'social_share_networks',
+			'woo_fix_free_shipping',
+			'woo_variable_price_from',
+			'woo_hide_trailing_zeros',
+			'woo_disable_unique_sku',
+			'woo_disable_skus',
+			'woo_redirect_checkout_after_add',
+			'woo_hide_related_products',
+			'woo_hide_sku',
+		);
+	}
+
+	/**
+	 * Filter an imported whippet_options array to allowlisted keys only.
+	 *
+	 * @param mixed $value Raw import value.
+	 * @return array<string,mixed>
+	 */
+	public static function sanitise_imported_core_options( $value ) {
+		if ( ! is_array( $value ) ) {
+			return array();
+		}
+		$allowed = array_fill_keys( self::allowed_core_option_keys(), true );
+		$clean   = array();
+		foreach ( $value as $key => $item ) {
+			$key = sanitize_key( (string) $key );
+			if ( ! isset( $allowed[ $key ] ) ) {
+				continue;
+			}
+			if ( is_array( $item ) ) {
+				$clean[ $key ] = self::sanitize_array( $item );
+			} else {
+				$clean[ $key ] = sanitize_text_field( (string) $item );
+			}
+		}
+		return $clean;
 	}
 
 	/**

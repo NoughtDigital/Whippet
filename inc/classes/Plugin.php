@@ -21,7 +21,7 @@ class Plugin {
 	 *
 	 * @var string
 	 */
-	const VERSION = '1.0.2';
+	const VERSION = '1.1.0';
 
 	/**
 	 * Singleton instance
@@ -88,9 +88,10 @@ class Plugin {
 	 */
 	public function init() {
 		$this->load_textdomain();
-		
+		Capabilities::register();
+
 		if ( is_admin() ) {
-			$this->admin = new Admin();
+			$this->admin  = new Admin();
 			$this->assets = new Assets();
 		}
 	}
@@ -111,6 +112,7 @@ class Plugin {
 		require_once WHIPPET_PATH . 'inc/advanced-features.php';
 		require_once WHIPPET_PATH . 'inc/image-engine.php';
 		require_once WHIPPET_PATH . 'inc/critical-css.php';
+		require_once WHIPPET_PATH . 'inc/platform.php';
 		require_once WHIPPET_PATH . 'analytics/load.php';
 		require_once WHIPPET_PATH . 'fonts/load.php';
 		require_once WHIPPET_PATH . 'lazy-load/load.php';
@@ -129,16 +131,17 @@ class Plugin {
 	 * Plugin activation
 	 */
 	public function activate() {
-		// Create necessary database tables or options
+		Capabilities::register();
+
 		if ( ! get_option( 'whippet_version' ) ) {
 			add_option( 'whippet_version', self::VERSION );
+		} else {
+			update_option( 'whippet_version', self::VERSION );
 		}
 
-		// Check and create database tables
 		if ( function_exists( 'whippet_check_db' ) ) {
 			whippet_check_db();
 		}
-
 	}
 
 	/**
@@ -148,8 +151,9 @@ class Plugin {
 		wp_clear_scheduled_hook( 'whippet_cache_preload_event' );
 		wp_clear_scheduled_hook( 'whippet_db_cleanup_cron' );
 		wp_clear_scheduled_hook( 'cce_poll_job' );
+		wp_clear_scheduled_hook( 'whippet_anomaly_check' );
+		wp_clear_scheduled_hook( 'whippet_telemetry_send' );
 
-		// Remove .htaccess cache rules.
 		if ( function_exists( 'insert_with_markers' ) ) {
 			require_once ABSPATH . 'wp-admin/includes/misc.php';
 		}
@@ -160,4 +164,3 @@ class Plugin {
 		}
 	}
 }
-

@@ -58,7 +58,7 @@ if ( ! in_array( $whippet_active_tab, $whippet_valid_tabs, true ) ) {
 
 		<nav class="wa-nav">
 
-			<button class="wa-nav-btn" :class="activeTab === 'dashboard' ? 'active' : ''" @click="setTab('dashboard')">
+			<button class="wa-nav-btn" :class="activeTab === 'dashboard' ? 'active' : ''" :aria-current="activeTab === 'dashboard' ? 'page' : null" @click="setTab('dashboard')">
 				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 					<rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
 				</svg>
@@ -184,6 +184,8 @@ if ( ! in_array( $whippet_active_tab, $whippet_valid_tabs, true ) ) {
 					</div>
 				</form>
 			</div>
+			<?php whippet_render_impact_panel(); ?>
+			<?php whippet_render_activity_log_panel(); ?>
 		</div>
 
 		<!-- ============================================================
@@ -362,6 +364,7 @@ if ( ! in_array( $whippet_active_tab, $whippet_valid_tabs, true ) ) {
 			<div class="wa-card">
 				<?php whippet_scripts_view_settings(); ?>
 			</div>
+			<?php whippet_render_advisor_panel(); ?>
 		</div>
 
 		<!-- ============================================================
@@ -530,6 +533,12 @@ if ( ! in_array( $whippet_active_tab, $whippet_valid_tabs, true ) ) {
 					</div>
 				<?php endif; ?>
 			</div>
+			<?php \Whippet\AssetIntegrity::render_ui(); ?>
+			<?php whippet_render_snapshots_panel(); ?>
+			<?php whippet_render_recovery_panel(); ?>
+			<?php whippet_render_cdn_panel(); ?>
+			<?php whippet_render_alerts_panel(); ?>
+			<?php whippet_render_telemetry_panel(); ?>
 
 		</div>
 
@@ -647,6 +656,7 @@ if ( ! in_array( $whippet_active_tab, $whippet_valid_tabs, true ) ) {
 				</h2>
 		<p><?php esc_html_e( 'Premium features for advanced performance — image optimisation, delivery, and critical CSS generation.', 'whippet' ); ?></p>
 			</div>
+		<?php whippet_render_cloud_panel(); ?>
 
 		<?php
 		$whippet_ptab = isset( $_GET['whippet_ptab'] ) ? sanitize_text_field( $_GET['whippet_ptab'] ) : 'image-engine';

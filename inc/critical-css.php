@@ -71,7 +71,7 @@ class CCE_API {
 
 		$response = wp_remote_post(
 			self::base_url() . '/v1/wordpress/critical-css',
-			[ 'headers' => self::headers(), 'body' => wp_json_encode( $body ), 'timeout' => 15 ]
+			[ 'headers' => self::headers(), 'body' => wp_json_encode( $body ), 'timeout' => 15, 'sslverify' => \Whippet\Helper::ssl_verify() ]
 		);
 
 		if ( is_wp_error( $response ) ) {
@@ -96,7 +96,7 @@ class CCE_API {
 	public static function status( string $job_id ): array|WP_Error {
 		$response = wp_remote_get(
 			self::base_url() . '/v1/status/' . rawurlencode( $job_id ),
-			[ 'headers' => self::headers(), 'timeout' => 10 ]
+			[ 'headers' => self::headers(), 'timeout' => 10, 'sslverify' => \Whippet\Helper::ssl_verify() ]
 		);
 
 		if ( is_wp_error( $response ) ) {
@@ -115,7 +115,7 @@ class CCE_API {
 
 		$response = wp_remote_post(
 			self::base_url() . '/v1/scan',
-			[ 'headers' => self::headers(), 'body' => $body, 'timeout' => 15 ]
+			[ 'headers' => self::headers(), 'body' => $body, 'timeout' => 15, 'sslverify' => \Whippet\Helper::ssl_verify() ]
 		);
 
 		if ( is_wp_error( $response ) ) {
@@ -140,7 +140,7 @@ class CCE_API {
 	public static function report( string $scan_id ): array|WP_Error {
 		$response = wp_remote_get(
 			self::base_url() . '/v1/report/' . rawurlencode( $scan_id ),
-			[ 'headers' => self::headers(), 'timeout' => 10 ]
+			[ 'headers' => self::headers(), 'timeout' => 10, 'sslverify' => \Whippet\Helper::ssl_verify() ]
 		);
 
 		if ( is_wp_error( $response ) ) {
@@ -154,7 +154,7 @@ class CCE_API {
 	public static function purge_cache( string $site_id ): array|WP_Error {
 		$response = wp_remote_request(
 			self::base_url() . '/v1/cache/' . rawurlencode( $site_id ),
-			[ 'method' => 'DELETE', 'headers' => self::headers(), 'timeout' => 10 ]
+			[ 'method' => 'DELETE', 'headers' => self::headers(), 'timeout' => 10, 'sslverify' => \Whippet\Helper::ssl_verify() ]
 		);
 
 		if ( is_wp_error( $response ) ) {
@@ -181,7 +181,7 @@ class CCE_API {
 
 		$response = wp_remote_post(
 			self::base_url() . '/v1/generate',
-			[ 'headers' => self::headers(), 'body' => wp_json_encode( $body ), 'timeout' => 15 ]
+			[ 'headers' => self::headers(), 'body' => wp_json_encode( $body ), 'timeout' => 15, 'sslverify' => \Whippet\Helper::ssl_verify() ]
 		);
 
 		if ( is_wp_error( $response ) ) {
@@ -204,7 +204,7 @@ class CCE_API {
 
 	/** GET /health */
 	public static function health(): bool {
-		$response = wp_remote_get( self::base_url() . '/health', [ 'timeout' => 5 ] );
+		$response = wp_remote_get( self::base_url() . '/health', [ 'timeout' => 5, 'sslverify' => \Whippet\Helper::ssl_verify() ] );
 		return ! is_wp_error( $response ) && wp_remote_retrieve_response_code( $response ) === 200;
 	}
 }
@@ -777,7 +777,7 @@ class CCE_Injector {
 	}
 
 	public static function maybe_defer_non_critical_css(): void {
-		if ( is_admin() || is_user_logged_in() || is_feed() || is_preview() ) {
+		if ( ! apply_filters( 'whippet_cce_inject_enabled', true ) || is_admin() || is_user_logged_in() || is_feed() || is_preview() ) {
 			return;
 		}
 
@@ -823,7 +823,7 @@ class CCE_Injector {
 	}
 
 	public static function inject(): void {
-		if ( ! get_option( 'cce_enabled', 1 ) ) {
+		if ( ! apply_filters( 'whippet_cce_inject_enabled', true ) || ! get_option( 'cce_enabled', 1 ) ) {
 			return;
 		}
 

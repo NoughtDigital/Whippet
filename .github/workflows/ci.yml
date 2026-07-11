@@ -22,7 +22,8 @@ jobs:
         run: npm ci
 
       - name: npm audit (production)
-        run: npm audit --omit=dev --audit-level=high || true
+        continue-on-error: true
+        run: npm audit --omit=dev --audit-level=high
 
       - name: Lint scripts
         run: npm run lint:scripts
@@ -36,8 +37,24 @@ jobs:
       - name: Install Composer dependencies
         run: composer install --prefer-dist --no-interaction --no-progress
 
+      - name: PHP CodeSniffer
+        continue-on-error: true
+        run: composer phpcs
+
       - name: Run PHPUnit
         run: composer test
 
+      - name: Verify required runtime assets
+        run: |
+          test -f analytics/js/gtag.js
+          test -f analytics/js/minimal-analytics.js
+          test -f pages/whippet-pages.min.js
+          test -f resources/js/vendor/alpine.min.js
+
       - name: Build assets
         run: npm run prod
+
+      - name: Verify built admin assets
+        run: |
+          test -f dist/css/admin.css
+          test -f dist/js/app.js

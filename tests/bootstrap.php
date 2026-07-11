@@ -67,8 +67,40 @@ if ( ! function_exists( 'get_current_user_id' ) ) {
 		return 1;
 	}
 }
-if ( ! function_exists( 'gmdate' ) ) {
-	// native
+if ( ! function_exists( 'is_multisite' ) ) {
+	function is_multisite() {
+		return false;
+	}
+}
+if ( ! function_exists( 'wp_unslash' ) ) {
+	function wp_unslash( $value ) {
+		return $value;
+	}
+}
+if ( ! function_exists( 'absint' ) ) {
+	function absint( $value ) {
+		return abs( (int) $value );
+	}
+}
+if ( ! function_exists( 'esc_url_raw' ) ) {
+	function esc_url_raw( $url ) {
+		return (string) $url;
+	}
+}
+if ( ! function_exists( 'apply_filters' ) ) {
+	function apply_filters( $tag, $value ) { // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
+		return $value;
+	}
+}
+if ( ! function_exists( 'current_user_can' ) ) {
+	function current_user_can( $cap ) { // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
+		return true;
+	}
 }
 
 require_once dirname( __DIR__ ) . '/inc/classes/Helper.php';
+require_once dirname( __DIR__ ) . '/inc/classes/Capabilities.php';
+require_once dirname( __DIR__ ) . '/inc/conflict-detector.php';
+require_once dirname( __DIR__ ) . '/inc/setup-wizard.php';
+require_once dirname( __DIR__ ) . '/inc/script-advisor.php';
+require_once dirname( __DIR__ ) . '/inc/recovery-mode.php';

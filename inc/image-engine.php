@@ -854,7 +854,7 @@ class Whippet_Image_Engine {
 	}
 
 	public function maybe_start_output_buffer(): void {
-		if ( is_admin() || ! $this->is_configured() || ! $this->frontend_rewrite_enabled() ) {
+		if ( is_admin() || ! apply_filters( 'whippet_ie_rewrite_enabled', true ) || ! $this->is_configured() || ! $this->frontend_rewrite_enabled() ) {
 			return;
 		}
 		if ( wp_doing_ajax() || ( defined( 'REST_REQUEST' ) && REST_REQUEST ) || is_feed() || is_embed() || is_preview() ) {
@@ -911,6 +911,7 @@ class Whippet_Image_Engine {
 		update_post_meta( $attachment_id, '_ie_original_deleted', '1' );
 		delete_post_meta( $attachment_id, '_ie_error' );
 		$this->clear_stats_cache();
+		\Whippet\Helper::audit_log( 'ie_delete_original', array( 'attachment_id' => $attachment_id ) );
 		return true;
 	}
 

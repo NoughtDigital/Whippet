@@ -23,9 +23,6 @@ class Assets {
 	 */
 	private $admin_pages = array(
 		'tools_page_whippet',
-		'tools_page_whippet-analytics',
-		'tools_page_whippet-import-export',
-		'tools_page_whippet-tutorials',
 	);
 
 	/**

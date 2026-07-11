@@ -1,91 +1,102 @@
 === Whippet ===
 
-Contributors: JaHe, noughtdigital
+Contributors: JaHe, noughtdigital, hashbangcode
 Plugin Name: Whippet
 Plugin URI: https://whippetwp.com/
-Tags: Speed, Optimisation, Google Analytics, Script Manager, Speed, Performance, Disable Emoji, Remove Querystrings, Reduce HTTP Requests, Disable Embeds, Disable Gravatars, Whippet
-Author URI: https://whippetwp.com/
+Tags: performance, cache, script manager, optimisation, speed, critical css, webp, lazy load, woocommerce
+Author URI: https://www.hashbangcode.com/
 Author: Jake Henshall
 Donate link: https://whippetwp.com/
-Requires at least: 4.8
-Tested up to: 5.2.3
-Requires PHP: 5.6
-Stable tag: 1.0.1
+Requires at least: 5.8
+Tested up to: 6.7
+Requires PHP: 7.4
+Stable tag: 1.1.0
 License: GPLv3
-License URI: http://www.gnu.org/licenses/gpl.html
+License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
-Improve your WordPress Speed: Easily remove unnecessary features from WordPress to help speed up your site.
+All-in-one WordPress performance: remove bloat, cache pages, control scripts, optimise images, and connect optional Cloud premium services.
 
 == Description ==
 
-Remove /xmlrpc.php from code if XML-RPC is disabled
-Remove WordPress API from code if WP-JSON is disabled
-Disable Google Maps
-Disable WooCommerce scripts and CSS on non-WooCommerce pages
-Disable WooCommerce Reviews
-Defer WooCommerce Cart Fragments
-Remove WordPress API from header
-Disable self-pingbacks
-Disable emojis
-Disable embeds
-Remove query strings
-Disable XML-RPC
-Remove jQuery migrate
-Remove WordPress version number
-Remove wlwmanifest link
-Remove RSD link
-Remove shortlink
-Disable RSS feeds
-Remove RSS feed links
-Disable WordPress heartbeat API
-Disable and Limit Post Revisions
-Change Heartbeat API frequency
-Change autosave interval
-Add Locally hosted Google Analytics Script
-CSS and JS Script Manager
-Import and Export feature
+Whippet helps you make WordPress faster with a guided setup, safe presets, and deep asset control.
+
+= Core features =
+
+* Dashboard toggles to disable unused WordPress features (emojis, embeds, XML-RPC, feeds, and more)
+* File-based page cache with optional Gzip/Brotli variants and exclusions
+* Browser cache headers and local WebP conversion
+* Script Manager with per-URL / per-post-type rules and optional MU-plugin mode
+* Lazy load, font optimisation, and link preload
+* Local analytics hosting helpers for Google Analytics
+* Code snippets (PHP snippets off by default)
+* Database cleanup, import/export, recovery mode, and settings snapshots
+* Tools diagnostics, activity log, conflict detection, and impact metrics
+* WooCommerce-aware cache exclusions and utilities
+
+= Premium / Cloud =
+
+Optional Image Engine and Critical CSS services can be connected from the Premium tab when you have an API key for Whippet Cloud.
+
+= Safe by design =
+
+* First-run setup wizard with a conservative Safe preset
+* Recovery mode to bypass front-end optimisations if something breaks
+* Settings snapshots for rollback
+* Hardened import allowlists and audit logging
 
 == Installation ==
 
-This section describes how to install the plugin and get it working.
-
-1. Upload the plugin files to the `/wp-content/plugins/plugin-name` directory, or install the plugin through the WordPress plugins screen directly.
-2. Activate the plugin through the 'Plugins' screen in WordPress
-3. Use the Tools->Whippet screen to configure the plugin
-
-=== From within WordPress ===
-1. Visit 'Plugins > Add New'
-1. Search for 'Whippet'
-1. Activate Whippet from your Plugins page.
-
-=== Manually ===
-1. Upload the `whippet` folder to the `/wp-content/plugins/` directory
-1. Activate the Whippet plugin through the 'Plugins' menu in WordPress
-
-== Screenshots ==
-
-1. Dashboard Options Page
-2. Analytics Options Page
-3. Import & Export Page
-4. Support Page
-
-== Changelog ==
-
-= 1.0.1 =
-* Completely Remove Comments
-* UX / UI Update
-* Script Manager Fix (WordPress 5.0+)
-* Disable the core-embed/wordpress block type (WordPress 5.0+)
-
-= 1.0.0 =
-* Initial Release of Whippet Speed Plugin.
+1. Upload the `whippet` folder to `/wp-content/plugins/` or install via Plugins → Add New
+2. Activate Whippet
+3. Open Tools → Whippet and complete the setup wizard
+4. Export a backup before making aggressive Script Manager changes
 
 == Frequently Asked Questions ==
 
-= I would like to contribute/I have an idea =
+= Will Whippet conflict with WP Rocket or LiteSpeed Cache? =
 
-We will be adding this shortly.
+Whippet detects common cache plugins and warns you. Prefer one page cache at a time.
 
-= What about my Image Compression =
+= Is the cookie notice a full GDPR consent manager? =
 
-This is the next feature to be added.
+No. It is a simple notice only. Use a dedicated CMP for regulatory consent.
+
+= Are PHP snippets enabled by default? =
+
+No. PHP snippet execution is opt-in and disabled until you explicitly enable it.
+
+= Where is the activity log? =
+
+Tools → Whippet → Dashboard shows recent audited actions. Destructive actions are also written to the PHP error log.
+
+== Screenshots ==
+
+1. Unified Tools → Whippet admin shell
+2. Performance and cache controls
+3. Script Manager
+4. Premium Image Engine and Critical CSS
+5. Setup wizard and Tools diagnostics
+
+== Changelog ==
+
+= 1.1.0 =
+* Setup wizard, Safe preset, conflict detection
+* Impact metrics, settings snapshots, recovery mode
+* Activity log UI, CDN purge hooks, anomaly alerts
+* Script Manager adviser, WooCommerce auto-excludes
+* Cloud connect UI, capabilities, WP-CLI, multisite helpers
+* Hardened Critical CSS TLS verification and settings import schema
+* Legacy Settings menus redirected to the unified shell
+* Updated WordPress.org listing metadata
+
+= 1.0.2 =
+* Security hardening, PHPUnit suite, CI workflow
+
+= 1.0.1 =
+* Completely remove comments
+* UX / UI update
+* Script Manager fix (WordPress 5.0+)
+* Disable the core-embed/wordpress block type
+
+= 1.0.0 =
+* Initial release

@@ -733,7 +733,8 @@ function whippet_render_extras_settings() {
 			</table>
 
 			<hr>
-			<h3><?php esc_html_e( 'Cookie & GDPR Warning', 'whippet' ); ?></h3>
+			<h3><?php esc_html_e( 'Simple cookie notice', 'whippet' ); ?></h3>
+			<p class="description"><?php esc_html_e( 'This is a basic notice only — not a full consent management platform. Use a dedicated CMP if you need regulatory consent logging.', 'whippet' ); ?></p>
 			<table class="form-table" role="presentation">
 				<tbody>
 				<tr>

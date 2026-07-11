@@ -17,7 +17,9 @@ if ( ! defined( 'WHIPPET_SCRIPTS_VERSION' ) ) {
 
 $dir = dirname( __FILE__ );
 require_once $dir . '/init-config.php';
-require_once $dir . '/inject-js.php';
-require_once $dir . '/html-rewrite.php';
+if ( apply_filters( 'whippet_scripts_output_buffer', true ) ) {
+	require_once $dir . '/inject-js.php';
+	require_once $dir . '/html-rewrite.php';
+}
 
 require_once $dir . '/settings/settings.php';

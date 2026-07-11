@@ -81,6 +81,9 @@ class Cache {
 	 * If a fresh cache file exists, serve it (with best available encoding) and exit.
 	 */
 	public function maybe_serve_cache() {
+		if ( ! apply_filters( 'whippet_cache_enabled_for_request', true ) ) {
+			return;
+		}
 		if ( ! $this->is_cacheable_request() ) {
 			return;
 		}
@@ -136,6 +139,9 @@ class Cache {
 	 * Start output buffering to capture the rendered page.
 	 */
 	public function maybe_start_buffering() {
+		if ( ! apply_filters( 'whippet_cache_enabled_for_request', true ) ) {
+			return;
+		}
 		if ( ! $this->is_cacheable_request() ) {
 			return;
 		}
@@ -237,6 +243,7 @@ class Cache {
 	public function clear_all_cache() {
 		$this->recursive_rmdir( $this->cache_dir, false );
 		\Whippet\Helper::audit_log( 'clear_all_cache' );
+		do_action( 'whippet_cache_cleared', '' );
 	}
 
 	// -------------------------------------------------------------------------
@@ -508,6 +515,8 @@ class Cache {
 			'# Bypass: logged-in users.',
 			'RewriteCond %{HTTP_COOKIE} wordpress_logged_in [NC]',
 			'RewriteRule . - [L]',
+			'RewriteCond %{HTTP_COOKIE} whippet_recovery [NC]',
+			'RewriteRule . - [L]',
 			'',
 			'# Bypass: POST requests.',
 			'RewriteCond %{REQUEST_METHOD} POST',
@@ -527,30 +536,26 @@ class Cache {
 		// User-defined cookie exclusions.
 		$raw_cookies = ! empty( $this->options['cache_exclude_cookies'] )
 			? $this->options['cache_exclude_cookies'] : '';
-		if ( $raw_cookies ) {
-			$cookies = array_filter( array_map( 'trim', explode( "\n", $raw_cookies ) ) );
-			if ( $cookies ) {
-				$lines[] = '';
-				$lines[] = '# Bypass: custom cookie exclusions.';
-				foreach ( $cookies as $c ) {
-					$lines[] = 'RewriteCond %{HTTP_COOKIE} ' . preg_quote( $c, '/' ) . ' [NC]';
-					$lines[] = 'RewriteRule . - [L]';
-				}
+		$cookies = apply_filters( 'whippet_cache_exclude_cookies', array_filter( array_map( 'trim', explode( "\n", (string) $raw_cookies ) ) ) );
+		if ( $cookies ) {
+			$lines[] = '';
+			$lines[] = '# Bypass: custom cookie exclusions.';
+			foreach ( $cookies as $c ) {
+				$lines[] = 'RewriteCond %{HTTP_COOKIE} ' . preg_quote( $c, '/' ) . ' [NC]';
+				$lines[] = 'RewriteRule . - [L]';
 			}
 		}
 
 		// User-defined URL exclusions.
 		$raw_urls = ! empty( $this->options['cache_exclude_urls'] )
 			? $this->options['cache_exclude_urls'] : '';
-		if ( $raw_urls ) {
-			$urls = array_filter( array_map( 'trim', explode( "\n", $raw_urls ) ) );
-			if ( $urls ) {
-				$lines[] = '';
-				$lines[] = '# Bypass: custom URL exclusions.';
-				foreach ( $urls as $u ) {
-					$lines[] = 'RewriteCond %{REQUEST_URI} ' . preg_quote( $u, '/' ) . ' [NC]';
-					$lines[] = 'RewriteRule . - [L]';
-				}
+		$urls = apply_filters( 'whippet_cache_exclude_urls', array_filter( array_map( 'trim', explode( "\n", (string) $raw_urls ) ) ) );
+		if ( $urls ) {
+			$lines[] = '';
+			$lines[] = '# Bypass: custom URL exclusions.';
+			foreach ( $urls as $u ) {
+				$lines[] = 'RewriteCond %{REQUEST_URI} ' . preg_quote( $u, '/' ) . ' [NC]';
+				$lines[] = 'RewriteRule . - [L]';
 			}
 		}
 
@@ -655,11 +660,11 @@ class Cache {
 		}
 
 		// Cookie-based exclusions.
-		$raw_cookies = ! empty( $this->options['cache_exclude_cookies'] )
-			? $this->options['cache_exclude_cookies'] : '';
-		if ( $raw_cookies ) {
-			foreach ( array_filter( array_map( 'trim', explode( "\n", $raw_cookies ) ) ) as $c ) {
-				if ( isset( $_COOKIE[ $c ] ) ) {
+		$raw_cookies = ! empty( $this->options['cache_exclude_cookies'] ) ? $this->options['cache_exclude_cookies'] : '';
+		$cookies     = apply_filters( 'whippet_cache_exclude_cookies', array_filter( array_map( 'trim', explode( "\n", (string) $raw_cookies ) ) ) );
+		foreach ( (array) $cookies as $c ) {
+			foreach ( array_keys( (array) $_COOKIE ) as $cookie_name ) {
+				if ( 0 === strpos( $cookie_name, (string) $c ) ) {
 					return false;
 				}
 			}
@@ -676,14 +681,12 @@ class Cache {
 		}
 
 		// URL-based exclusions.
-		$raw_urls = ! empty( $this->options['cache_exclude_urls'] )
-			? $this->options['cache_exclude_urls'] : '';
-		if ( $raw_urls ) {
-			$uri = sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ?? '/' ) );
-			foreach ( array_filter( array_map( 'trim', explode( "\n", $raw_urls ) ) ) as $pattern ) {
-				if ( false !== strpos( $uri, $pattern ) ) {
-					return false;
-				}
+		$raw_urls = ! empty( $this->options['cache_exclude_urls'] ) ? $this->options['cache_exclude_urls'] : '';
+		$urls     = apply_filters( 'whippet_cache_exclude_urls', array_filter( array_map( 'trim', explode( "\n", (string) $raw_urls ) ) ) );
+		$uri      = sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ?? '/' ) );
+		foreach ( (array) $urls as $pattern ) {
+			if ( false !== strpos( $uri, (string) $pattern ) ) {
+				return false;
 			}
 		}
 

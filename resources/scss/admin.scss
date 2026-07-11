@@ -1438,6 +1438,45 @@
 }
 
 @media (max-width: 782px) {
+	.wa-shell {
+		flex-direction: column;
+	}
+
+	.wa-sidebar {
+		width: 100%;
+		position: sticky;
+		top: 32px;
+		z-index: 20;
+		border-right: 0;
+		border-bottom: 1px solid var(--wa-border, #e2e8f0);
+	}
+
+	.wa-nav {
+		display: flex;
+		flex-wrap: nowrap;
+		overflow-x: auto;
+		gap: 0.25rem;
+		padding: 0.5rem;
+		-webkit-overflow-scrolling: touch;
+	}
+
+	.wa-nav-btn {
+		flex: 0 0 auto;
+		white-space: nowrap;
+	}
+
+	.wa-nav-divider {
+		display: none;
+	}
+
+	.wa-brand {
+		padding: 0.75rem 1rem 0.25rem;
+	}
+
+	.wa-content {
+		padding: 1rem;
+	}
+
 	.whippet-snippet-import-bar,
 	.whippet-snippet-section-head {
 		align-items: flex-start;

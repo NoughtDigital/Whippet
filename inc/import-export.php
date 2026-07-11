@@ -202,22 +202,39 @@ function whippet_process_settings_import() {
 		wp_die( esc_html__( 'Invalid JSON file format', 'whippet' ) );
 	}
 
-	delete_option( 'whippet_options' );
-
-	$valid_groups  = array( 'whippet_analytics', 'whippet_fonts', 'whippet_lazyload', 'whippet_pages', 'whippet_scripts' );
-	$allowed_keys  = \Whippet\Helper::allowed_import_option_keys();
+	$valid_groups = array( 'whippet_analytics', 'whippet_fonts', 'whippet_lazyload', 'whippet_pages', 'whippet_scripts' );
+	$allowed_keys = \Whippet\Helper::allowed_import_option_keys();
+	$applied      = array();
+	$skipped      = array();
 
 	foreach ( $settings as $key => $value ) {
 		if ( 'whippet_core' === $key ) {
-			add_option( 'whippet_options', $value );
+			$clean = \Whippet\Helper::sanitise_imported_core_options( $value );
+			if ( empty( $clean ) ) {
+				$skipped[] = 'whippet_core';
+				continue;
+			}
+			$existing = (array) get_option( 'whippet_options', array() );
+			update_option( 'whippet_options', array_merge( $existing, $clean ), false );
+			$applied[] = 'whippet_core';
 		} elseif ( 'whippet_snippets' === $key && class_exists( '\Whippet\SnippetManager' ) && is_array( $value ) ) {
 			\Whippet\SnippetManager::instance()->import_snippets( $value );
+			$applied[] = 'whippet_snippets';
 		} elseif ( in_array( $key, $valid_groups, true ) && is_array( $value ) ) {
+			$group_applied = false;
 			foreach ( $value as $setting => $setting_value ) {
 				if ( in_array( $setting, $allowed_keys, true ) ) {
 					update_option( $setting, $setting_value );
+					$group_applied = true;
+				} else {
+					$skipped[] = $setting;
 				}
 			}
+			if ( $group_applied ) {
+				$applied[] = $key;
+			}
+		} else {
+			$skipped[] = is_string( $key ) ? $key : 'unknown';
 		}
 	}
 
@@ -230,9 +247,25 @@ function whippet_process_settings_import() {
 		update_option( 'whippet_analytics_disable_on_login', get_option( 'sgal_track_admin' ) !== 'on' );
 	}
 
-	\Whippet\Helper::audit_log( 'settings_import', array( 'keys' => array_keys( $settings ) ) );
+	\Whippet\Helper::audit_log(
+		'settings_import',
+		array(
+			'applied' => $applied,
+			'skipped' => array_values( array_unique( $skipped ) ),
+		)
+	);
+	do_action( 'whippet_settings_imported', 'settings_import' );
 
-	wp_safe_redirect( admin_url( 'tools.php?page=whippet' ) );
+	set_transient(
+		'whippet_import_notice_' . get_current_user_id(),
+		array(
+			'applied' => $applied,
+			'skipped' => array_values( array_unique( $skipped ) ),
+		),
+		120
+	);
+
+	wp_safe_redirect( admin_url( 'tools.php?page=whippet&whippet_imported=1#import-export' ) );
 	exit;
 }
 add_action( 'admin_init', 'whippet_process_settings_import' );

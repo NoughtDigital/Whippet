@@ -1,12 +1,14 @@
 <?php
 /**
- * Plugin Name: Whippet - Disable Scripts/Styles Conditionally
- * Plugin URI: https://hashbangcode.com/
- * Description: Disable scripts and styles on a per-page basis to improve performance
- * Version: 1.0.2
+ * Plugin Name: Whippet
+ * Plugin URI: https://whippetwp.com/
+ * Description: All-in-one WordPress performance: remove bloat, cache pages, control scripts, optimise images, and connect optional Cloud premium services.
+ * Version: 1.1.0
  * Author: Jake Henshall
- * Author URI: https://hashbangcode.com/
- * License: GPL2
+ * Author URI: https://www.hashbangcode.com/
+ * License: GPLv3
+ * Requires at least: 5.8
+ * Requires PHP: 7.4
  * Text Domain: whippet
  * Domain Path: /languages
  *
