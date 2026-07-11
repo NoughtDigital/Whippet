@@ -65,15 +65,20 @@ class Assets {
 	 * Enqueue admin scripts
 	 */
 	private function enqueue_scripts() {
-		// Alpine.js for tabs functionality
+		$alpine_path = WHIPPET_PATH . 'resources/js/vendor/alpine.min.js';
+		$alpine_url  = WHIPPET_URL . 'resources/js/vendor/alpine.min.js';
+		if ( ! file_exists( $alpine_path ) ) {
+			$alpine_url = 'https://cdn.jsdelivr.net/npm/alpinejs@3.14.9/dist/cdn.min.js';
+		}
+
 		wp_enqueue_script(
 			'alpinejs',
-			'https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js',
+			$alpine_url,
 			array(),
-			'3.0.0',
+			'3.14.9',
 			true
 		);
-		
+
 		wp_script_add_data( 'alpinejs', 'defer', true );
 
 		// Custom admin scripts if needed

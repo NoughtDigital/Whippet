@@ -45,6 +45,9 @@ class SnippetManager {
 			return;
 		}
 		if ( isset( $_GET['whippet_safe_mode'] ) ) {
+			if ( ! wp_verify_nonce( $_GET['_wpnonce'] ?? '', 'whippet_safe_mode' ) ) {
+				return;
+			}
 			$enabled = '1' === (string) $_GET['whippet_safe_mode'];
 			$ttl     = time() + HOUR_IN_SECONDS;
 			setcookie( self::SAFE_MODE_COOKIE, $enabled ? '1' : '0', $ttl, COOKIEPATH, COOKIE_DOMAIN, is_ssl(), true );
@@ -88,6 +91,32 @@ class SnippetManager {
 		$asset_dir = trailingslashit( $dir ) . 'assets';
 		if ( ! file_exists( $asset_dir ) ) {
 			wp_mkdir_p( $asset_dir );
+		}
+
+		$htaccess = trailingslashit( $dir ) . '.htaccess';
+		if ( ! file_exists( $htaccess ) ) {
+			file_put_contents(
+				$htaccess,
+				"<IfModule mod_authz_core.c>\nRequire all denied\n</IfModule>\n<IfModule !mod_authz_core.c>\nDeny from all\n</IfModule>\n"
+			);
+		}
+
+		$index = trailingslashit( $dir ) . 'index.php';
+		if ( ! file_exists( $index ) ) {
+			file_put_contents( $index, "<?php\n// Silence is golden.\n" );
+		}
+
+		$assets_htaccess = trailingslashit( $asset_dir ) . '.htaccess';
+		if ( ! file_exists( $assets_htaccess ) ) {
+			file_put_contents(
+				$assets_htaccess,
+				"<FilesMatch \"\\.(js|css)$\">\nRequire all granted\n</FilesMatch>\nRequire all denied\n"
+			);
+		}
+
+		$assets_index = trailingslashit( $asset_dir ) . 'index.php';
+		if ( ! file_exists( $assets_index ) ) {
+			file_put_contents( $assets_index, "<?php\n// Silence is golden.\n" );
 		}
 	}
 
@@ -174,9 +203,14 @@ class SnippetManager {
 		if ( ! is_array( $snippets ) ) {
 			return false;
 		}
-		$normalized = array();
+		$php_enabled = Helper::php_snippets_enabled();
+		$normalized  = array();
 		foreach ( $snippets as $snippet ) {
-			$normalized[] = $this->normalize_snippet( $snippet );
+			$item = $this->normalize_snippet( $snippet );
+			if ( 'php' === $item['type'] && ! $php_enabled ) {
+				$item['enabled'] = false;
+			}
+			$normalized[] = $item;
 		}
 		return $this->save_snippets( $normalized );
 	}
@@ -203,10 +237,34 @@ class SnippetManager {
 	}
 
 	private function validate_php_syntax( $code ) {
-		try {
-			eval( 'if(false){' . $code . '}' );
-		} catch ( \Throwable $e ) {
-			return $e->getMessage();
+		if ( ! Helper::php_snippets_enabled() ) {
+			return __( 'PHP snippets are disabled. Enable them in Snippets settings first.', 'whippet' );
+		}
+
+		// Prefer lint via php -l when available.
+		$php_bin = ( defined( 'PHP_BINARY' ) && PHP_BINARY ) ? PHP_BINARY : 'php';
+		$tmp     = function_exists( 'wp_tempnam' ) ? wp_tempnam( 'whippet-php-lint' ) : false;
+		if ( $tmp ) {
+			file_put_contents( $tmp, "<?php\n" . $code );
+			$output = array();
+			$return = 1;
+			// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.system_calls_exec -- intentional syntax lint only.
+			@exec( escapeshellarg( $php_bin ) . ' -l ' . escapeshellarg( $tmp ) . ' 2>&1', $output, $return );
+			@unlink( $tmp );
+			if ( 0 === (int) $return ) {
+				return '';
+			}
+			if ( ! empty( $output ) ) {
+				return implode( ' ', array_map( 'strval', $output ) );
+			}
+		}
+
+		if ( ! function_exists( 'token_get_all' ) ) {
+			return __( 'PHP tokenizer unavailable.', 'whippet' );
+		}
+		$tokens = @token_get_all( '<?php ' . $code );
+		if ( ! is_array( $tokens ) ) {
+			return __( 'Invalid PHP syntax.', 'whippet' );
 		}
 		return '';
 	}
@@ -226,6 +284,20 @@ class SnippetManager {
 		$action   = sanitize_key( wp_unslash( $_POST['whippet_snippets_action'] ) );
 		$snippets = $this->load_snippets();
 
+		if ( 'toggle_php_snippets' === $action ) {
+			$enabled = ! empty( $_POST['whippet_php_snippets_enabled'] );
+			update_option( 'whippet_php_snippets_enabled', $enabled ? 1 : 0, false );
+			add_settings_error(
+				'whippet_snippets',
+				'whippet_php_snippets_toggled',
+				$enabled
+					? __( 'PHP snippet execution enabled. Use with extreme caution.', 'whippet' )
+					: __( 'PHP snippet execution disabled.', 'whippet' ),
+				$enabled ? 'warning' : 'success'
+			);
+			return;
+		}
+
 		if ( 'save_snippet' === $action ) {
 			$raw      = isset( $_POST['snippet'] ) ? (array) wp_unslash( $_POST['snippet'] ) : array();
 			$snippet  = $this->normalize_snippet( $raw );
@@ -236,6 +308,15 @@ class SnippetManager {
 			}
 
 			if ( 'php' === $snippet['type'] ) {
+				if ( ! Helper::php_snippets_enabled() ) {
+					add_settings_error(
+						'whippet_snippets',
+						'whippet_snippet_php_disabled',
+						__( 'PHP snippets are disabled. Enable them in Snippets settings first.', 'whippet' ),
+						'error'
+					);
+					return;
+				}
 				$error = $this->validate_php_syntax( $snippet['code'] );
 				if ( $error ) {
 					add_settings_error( 'whippet_snippets', 'whippet_snippet_php_error', sprintf( __( 'PHP syntax error: %s', 'whippet' ), $error ), 'error' );
@@ -280,11 +361,7 @@ class SnippetManager {
 				$json = file_get_contents( $file );
 				$data = json_decode( (string) $json, true );
 				if ( is_array( $data ) ) {
-					$imported = array();
-					foreach ( $data as $snippet ) {
-						$imported[] = $this->normalize_snippet( $snippet );
-					}
-					$this->save_snippets( $imported );
+					$this->import_snippets( $data );
 					add_settings_error( 'whippet_snippets', 'whippet_snippet_imported', __( 'Snippets imported.', 'whippet' ), 'success' );
 				}
 			}
@@ -403,6 +480,9 @@ class SnippetManager {
 	}
 
 	public function run_php_snippets() {
+		if ( ! Helper::php_snippets_enabled() ) {
+			return;
+		}
 		if ( is_admin() || $this->is_safe_mode() ) {
 			return;
 		}
@@ -416,6 +496,7 @@ class SnippetManager {
 
 		foreach ( $snippets as $snippet ) {
 			try {
+				// phpcs:ignore Squiz.PHP.Eval.Discouraged -- intentional gated PHP snippet execution.
 				eval( $snippet['code'] );
 			} catch ( \Throwable $e ) {
 				foreach ( $all as $index => $candidate ) {
@@ -582,9 +663,27 @@ function whippet_render_snippets_manager() {
 			<?php esc_html_e( 'Flat-file snippets stored in uploads/whippet-snippets for fast, zero-query frontend loading. On multisite, each site uses its own snippet file.', 'whippet' ); ?>
 		</p>
 
+		<?php $php_snippets_enabled = Helper::php_snippets_enabled(); ?>
+		<form method="post" class="whippet-php-snippets-toggle" style="margin:.75rem 0 1rem;padding:1rem;border:1px solid #fecaca;background:#fef2f2;border-radius:6px;">
+			<?php wp_nonce_field( 'whippet_snippets_nonce', 'whippet_snippets_nonce' ); ?>
+			<input type="hidden" name="whippet_snippets_action" value="toggle_php_snippets">
+			<label style="display:flex;align-items:flex-start;gap:.75rem;">
+				<input type="checkbox" name="whippet_php_snippets_enabled" value="1" <?php checked( $php_snippets_enabled ); ?> style="margin-top:.2rem;">
+				<span>
+					<strong><?php esc_html_e( 'Allow PHP snippet execution', 'whippet' ); ?></strong>
+					<span style="display:block;margin-top:.25rem;color:#991b1b;font-size:.8125rem;">
+						<?php esc_html_e( 'Dangerous: PHP snippets run on every matching front-end request. Leave this disabled unless you fully trust the code. Default is off.', 'whippet' ); ?>
+					</span>
+				</span>
+			</label>
+			<p style="margin:.75rem 0 0;">
+				<button type="submit" class="button button-secondary"><?php esc_html_e( 'Save PHP setting', 'whippet' ); ?></button>
+			</p>
+		</form>
+
 		<?php if ( 'editor' === $snippet_tab ) : ?>
 			<div class="whippet-snippet-overview" style="display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-end;gap:.75rem;margin:.75rem 0 1rem;">
-				<a class="button button-secondary" href="<?php echo esc_url( add_query_arg( array( 'page' => 'whippet', 'whippet_safe_mode' => $safe_mode_on ? '0' : '1' ), admin_url( 'tools.php' ) ) . '#snippets' ); ?>">
+				<a class="button button-secondary" href="<?php echo esc_url( wp_nonce_url( add_query_arg( array( 'page' => 'whippet', 'whippet_safe_mode' => $safe_mode_on ? '0' : '1' ), admin_url( 'tools.php' ) ), 'whippet_safe_mode' ) . '#snippets' ); ?>">
 					<?php echo $safe_mode_on ? esc_html__( 'Disable Safe Mode', 'whippet' ) : esc_html__( 'Enable Safe Mode (1 hour)', 'whippet' ); ?>
 				</a>
 			</div>
@@ -711,7 +810,7 @@ function whippet_render_snippets_manager() {
 						<span id="whippet-snippets-file-name" class="whippet-snippets-file-name"><?php esc_html_e( 'No file chosen', 'whippet' ); ?></span>
 						<button class="button button-secondary" type="submit"><?php esc_html_e( 'Import JSON', 'whippet' ); ?></button>
 					</form>
-					<a class="button button-secondary whippet-snippet-export" href="<?php echo esc_url( add_query_arg( array( 'page' => 'whippet', 'whippet_snippets_export' => '1' ), admin_url( 'tools.php' ) ) ); ?>"><?php esc_html_e( 'Export All Snippets', 'whippet' ); ?></a>
+					<a class="button button-secondary whippet-snippet-export" href="<?php echo esc_url( wp_nonce_url( add_query_arg( array( 'page' => 'whippet', 'whippet_snippets_export' => '1' ), admin_url( 'tools.php' ) ), 'whippet_snippets_export' ) ); ?>"><?php esc_html_e( 'Export All Snippets', 'whippet' ); ?></a>
 				</div>
 			</div>
 			<script>
@@ -779,7 +878,7 @@ function whippet_render_snippets_manager() {
 									<td>
 										<div class="whippet-snippet-row-actions">
 											<a class="button button-small" href="<?php echo esc_url( add_query_arg( array( 'page' => 'whippet', 'whippet_stab' => 'editor', 'snippet_edit' => $snippet['id'] ), admin_url( 'tools.php' ) ) . '#snippets' ); ?>"><?php esc_html_e( 'Edit', 'whippet' ); ?></a>
-											<a class="button button-small" href="<?php echo esc_url( add_query_arg( array( 'page' => 'whippet', 'whippet_snippet_export_id' => $snippet['id'] ), admin_url( 'tools.php' ) ) ); ?>"><?php esc_html_e( 'Export', 'whippet' ); ?></a>
+											<a class="button button-small" href="<?php echo esc_url( wp_nonce_url( add_query_arg( array( 'page' => 'whippet', 'whippet_snippet_export_id' => $snippet['id'] ), admin_url( 'tools.php' ) ), 'whippet_snippets_export' ) ); ?>"><?php esc_html_e( 'Export', 'whippet' ); ?></a>
 											<form method="post" class="whippet-snippet-inline-form">
 												<?php wp_nonce_field( 'whippet_snippets_nonce', 'whippet_snippets_nonce' ); ?>
 												<input type="hidden" name="whippet_snippets_action" value="delete_snippet">
@@ -809,6 +908,11 @@ add_action(
 		if ( empty( $_GET['page'] ) || 'whippet' !== $_GET['page'] ) {
 			return;
 		}
+		if ( empty( $_GET['whippet_snippet_export_id'] ) && empty( $_GET['whippet_snippets_export'] ) ) {
+			return;
+		}
+		check_admin_referer( 'whippet_snippets_export' );
+
 		$manager  = SnippetManager::instance();
 		$snippets = $manager->load_snippets();
 		if ( ! empty( $_GET['whippet_snippet_export_id'] ) ) {
@@ -821,8 +925,6 @@ add_action(
 					}
 				)
 			);
-		} elseif ( empty( $_GET['whippet_snippets_export'] ) ) {
-			return;
 		}
 		nocache_headers();
 		header( 'Content-Type: application/json; charset=utf-8' );

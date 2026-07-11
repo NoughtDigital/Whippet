@@ -1,0 +1,43 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, master, develop ]
+  pull_request:
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - name: Install npm dependencies
+        run: npm ci
+
+      - name: npm audit (production)
+        run: npm audit --omit=dev --audit-level=high || true
+
+      - name: Lint scripts
+        run: npm run lint:scripts
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          tools: composer
+
+      - name: Install Composer dependencies
+        run: composer install --prefer-dist --no-interaction --no-progress
+
+      - name: Run PHPUnit
+        run: composer test
+
+      - name: Build assets
+        run: npm run prod

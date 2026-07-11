@@ -180,8 +180,6 @@ function whippet_process_settings_import() {
 		wp_die( esc_html__( 'Please upload a file to import', 'whippet' ) );
 	}
 
-	delete_option( 'whippet_options' );
-
 	$content = file_get_contents( $import_file );
 	if ( false === $content ) {
 		wp_die( esc_html__( 'Error reading import file', 'whippet' ) );
@@ -200,7 +198,14 @@ function whippet_process_settings_import() {
 		}
 	}
 
-	$valid_groups = array( 'whippet_analytics', 'whippet_fonts', 'whippet_lazyload', 'whippet_pages', 'whippet_scripts' );
+	if ( ! is_array( $settings ) ) {
+		wp_die( esc_html__( 'Invalid JSON file format', 'whippet' ) );
+	}
+
+	delete_option( 'whippet_options' );
+
+	$valid_groups  = array( 'whippet_analytics', 'whippet_fonts', 'whippet_lazyload', 'whippet_pages', 'whippet_scripts' );
+	$allowed_keys  = \Whippet\Helper::allowed_import_option_keys();
 
 	foreach ( $settings as $key => $value ) {
 		if ( 'whippet_core' === $key ) {
@@ -209,7 +214,9 @@ function whippet_process_settings_import() {
 			\Whippet\SnippetManager::instance()->import_snippets( $value );
 		} elseif ( in_array( $key, $valid_groups, true ) && is_array( $value ) ) {
 			foreach ( $value as $setting => $setting_value ) {
-				update_option( $setting, $setting_value );
+				if ( in_array( $setting, $allowed_keys, true ) ) {
+					update_option( $setting, $setting_value );
+				}
 			}
 		}
 	}
@@ -222,6 +229,8 @@ function whippet_process_settings_import() {
 		update_option( 'whippet_analytics_method', 'minimal-analytics' );
 		update_option( 'whippet_analytics_disable_on_login', get_option( 'sgal_track_admin' ) !== 'on' );
 	}
+
+	\Whippet\Helper::audit_log( 'settings_import', array( 'keys' => array_keys( $settings ) ) );
 
 	wp_safe_redirect( admin_url( 'tools.php?page=whippet' ) );
 	exit;

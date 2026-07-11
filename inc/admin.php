@@ -455,7 +455,7 @@ if ( ! in_array( $whippet_active_tab, $whippet_valid_tabs, true ) ) {
 			$cc_header  = null;
 			$cc_checked = false;
 			if ( $run_checks ) {
-				$response = wp_remote_get( home_url( '/' ), array( 'timeout' => 10, 'sslverify' => false ) );
+				$response = wp_remote_get( home_url( '/' ), array( 'timeout' => 10, 'sslverify' => \Whippet\Helper::ssl_verify() ) );
 				if ( ! is_wp_error( $response ) ) {
 					$cc_header  = wp_remote_retrieve_header( $response, 'cache-control' );
 					$cc_checked = true;
@@ -502,6 +502,7 @@ if ( ! in_array( $whippet_active_tab, $whippet_valid_tabs, true ) ) {
 					<tbody>
 					<tr><th><?php esc_html_e( 'PHP', 'whippet' ); ?></th><td><code><?php echo esc_html( $php_ver ); ?></code></td></tr>
 					<tr><th><?php esc_html_e( 'WordPress', 'whippet' ); ?></th><td><code><?php echo esc_html( $wp_version ); ?></code></td></tr>
+					<tr><th><?php esc_html_e( 'WP-Cron', 'whippet' ); ?></th><td><code><?php echo ( defined( 'DISABLE_WP_CRON' ) && DISABLE_WP_CRON ) ? esc_html__( 'Disabled (system cron recommended)', 'whippet' ) : esc_html__( 'Enabled via site traffic — for large sites, disable WP-Cron and use a real system cron hitting wp-cron.php', 'whippet' ); ?></code></td></tr>
 					<tr><th><?php esc_html_e( 'GD', 'whippet' ); ?></th><td><code><?php echo function_exists( 'gd_info' ) ? esc_html( ( gd_info() )['GD Version'] ?? 'available' ) : esc_html__( 'not available', 'whippet' ); ?></code></td></tr>
 					<tr><th><?php esc_html_e( 'Imagick', 'whippet' ); ?></th><td><code><?php echo class_exists( 'Imagick' ) ? esc_html( \Imagick::getVersion()['versionString'] ?? 'available' ) : esc_html__( 'not available', 'whippet' ); ?></code></td></tr>
 					<tr><th><?php esc_html_e( 'Gzip', 'whippet' ); ?></th><td><code><?php echo defined( 'ZLIB_VERSION' ) ? esc_html( ZLIB_VERSION ) : ( function_exists( 'ob_gzhandler' ) ? esc_html__( 'available', 'whippet' ) : esc_html__( 'not available', 'whippet' ) ); ?></code></td></tr>
@@ -862,7 +863,8 @@ if ( ! in_array( $whippet_active_tab, $whippet_valid_tabs, true ) ) {
 				</div>
 				<div style="display:flex;align-items:center;gap:.5rem;">
 					<input type="password" name="ie_api_key" id="ie_api_key"
-					       value="<?php echo esc_attr( $ie_api_key ); ?>"
+					       value=""
+					       placeholder="<?php echo $ie_api_key ? esc_attr( \Whippet\Helper::mask_secret( $ie_api_key ) ) : ''; ?>"
 					       class="regular-text" autocomplete="off" />
 					<button type="button" style="background:none;border:none;cursor:pointer;padding:0;color:#64748b;"
 					        onclick="var f=document.getElementById('ie_api_key');f.type=f.type==='password'?'text':'password';"
@@ -930,14 +932,31 @@ if ( ! in_array( $whippet_active_tab, $whippet_valid_tabs, true ) ) {
 				syncBtn.addEventListener('click', function() {
 					syncBtn.disabled = true;
 					syncMsg.textContent = 'Working\u2026';
-					fetch(window.ajaxurl, {
-						method: 'POST',
-						headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-						body: new URLSearchParams({ action: 'ie_sync_all', _wpnonce: '<?php echo esc_js( wp_create_nonce( 'ie_sync_all' ) ); ?>' })
-					})
-					.then(function(r) { return r.json(); })
-					.then(function(d) { syncMsg.textContent = d.data && d.data.message ? d.data.message : 'Done.'; syncBtn.disabled = false; })
-					.catch(function() { syncMsg.textContent = 'Request failed.'; syncBtn.disabled = false; });
+					var nonce = '<?php echo esc_js( wp_create_nonce( 'ie_sync_all' ) ); ?>';
+					function runBatch(offset) {
+						fetch(window.ajaxurl, {
+							method: 'POST',
+							headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+							body: new URLSearchParams({ action: 'ie_sync_all', _wpnonce: nonce, offset: String(offset) })
+						})
+						.then(function(r) { return r.json(); })
+						.then(function(d) {
+							if (!d.success) {
+								syncMsg.textContent = d.data && d.data.message ? d.data.message : 'Something went wrong.';
+								syncBtn.disabled = false;
+								return;
+							}
+							var data = d.data || {};
+							syncMsg.textContent = data.message || 'Working\u2026';
+							if (data.done) {
+								syncBtn.disabled = false;
+								return;
+							}
+							runBatch(data.offset || 0);
+						})
+						.catch(function() { syncMsg.textContent = 'Request failed.'; syncBtn.disabled = false; });
+					}
+					runBatch(0);
 				});
 			}
 
@@ -948,14 +967,30 @@ if ( ! in_array( $whippet_active_tab, $whippet_valid_tabs, true ) ) {
 				btn.disabled = true;
 				msgEl.style.display = 'block';
 				msgEl.textContent = 'Working\u2026';
-				fetch(window.ajaxurl, {
-					method: 'POST',
-					headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-					body: new URLSearchParams({ action: action, _wpnonce: nonce })
-				})
-				.then(function(r) { return r.json(); })
-				.then(function(d) { msgEl.textContent = d.data && d.data.message ? d.data.message : 'Done.'; btn.disabled = false; })
-				.catch(function() { msgEl.textContent = 'Request failed.'; btn.disabled = false; });
+				function runBatch(offset) {
+					fetch(window.ajaxurl, {
+						method: 'POST',
+						headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+						body: new URLSearchParams({ action: action, _wpnonce: nonce, offset: String(offset) })
+					})
+					.then(function(r) { return r.json(); })
+					.then(function(d) {
+						if (!d.success) {
+							msgEl.textContent = d.data && d.data.message ? d.data.message : 'Something went wrong.';
+							btn.disabled = false;
+							return;
+						}
+						var data = d.data || {};
+						msgEl.textContent = data.message || 'Working\u2026';
+						if (data.done || typeof data.done === 'undefined') {
+							btn.disabled = false;
+							return;
+						}
+						runBatch(data.offset || 0);
+					})
+					.catch(function() { msgEl.textContent = 'Request failed.'; btn.disabled = false; });
+				}
+				runBatch(0);
 			}
 
 			var restoreBtn = document.getElementById('ie-restore-btn');
@@ -1025,7 +1060,9 @@ if ( ! in_array( $whippet_active_tab, $whippet_valid_tabs, true ) ) {
 					<td>
 						<div style="display:flex;align-items:center;gap:.5rem;">
 						<input id="cce_api_key" name="cce_api_key" type="password" class="regular-text"
-						       value="<?php echo esc_attr( $cce_api_key ); ?>" autocomplete="off">
+						       value=""
+						       placeholder="<?php echo $cce_api_key ? esc_attr( \Whippet\Helper::mask_secret( $cce_api_key ) ) : ''; ?>"
+						       autocomplete="off">
 							<button type="button" style="background:none;border:none;cursor:pointer;padding:0;color:#64748b;"
 							        onclick="var f=document.getElementById('cce_api_key');f.type=f.type==='password'?'text':'password';"
 							        title="<?php esc_attr_e( 'Show / hide', 'whippet' ); ?>">
@@ -1360,29 +1397,40 @@ if ( ! in_array( $whippet_active_tab, $whippet_valid_tabs, true ) ) {
 				regenAllBtn.textContent = '<?php echo esc_js( __( 'Queueing\u2026', 'whippet' ) ); ?>';
 				regenAllStatus.style.color = '#64748b';
 				regenAllStatus.textContent = '';
-				fetch(ajaxUrl, {
-					method: 'POST',
-					headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-					body: new URLSearchParams({ action: 'cce_regenerate_all', nonce: nonce })
-				})
-				.then(function(r) { return r.json(); })
-				.then(function(res) {
-					regenAllBtn.disabled = false;
-					regenAllBtn.textContent = '<?php echo esc_js( __( 'Regenerate All Posts', 'whippet' ) ); ?>';
-					if (res.success) {
-						regenAllStatus.style.color = '#10b981';
-						regenAllStatus.textContent = res.data.queued + ' jobs queued.';
-					} else {
+				var totalQueued = 0;
+				function runBatch(offset) {
+					fetch(ajaxUrl, {
+						method: 'POST',
+						headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+						body: new URLSearchParams({ action: 'cce_regenerate_all', nonce: nonce, offset: String(offset) })
+					})
+					.then(function(r) { return r.json(); })
+					.then(function(res) {
+						if (!res.success) {
+							regenAllBtn.disabled = false;
+							regenAllBtn.textContent = '<?php echo esc_js( __( 'Regenerate All Posts', 'whippet' ) ); ?>';
+							regenAllStatus.style.color = '#ef4444';
+							regenAllStatus.textContent = 'Error: ' + res.data;
+							return;
+						}
+						totalQueued += (res.data.queued || 0);
+						regenAllStatus.textContent = totalQueued + ' jobs queued' + (res.data.total ? ' (' + res.data.offset + '/' + res.data.total + ')' : '') + '.';
+						if (res.data.done) {
+							regenAllBtn.disabled = false;
+							regenAllBtn.textContent = '<?php echo esc_js( __( 'Regenerate All Posts', 'whippet' ) ); ?>';
+							regenAllStatus.style.color = '#10b981';
+						} else {
+							runBatch(res.data.offset || 0);
+						}
+					})
+					.catch(function() {
+						regenAllBtn.disabled = false;
+						regenAllBtn.textContent = '<?php echo esc_js( __( 'Regenerate All Posts', 'whippet' ) ); ?>';
 						regenAllStatus.style.color = '#ef4444';
-						regenAllStatus.textContent = 'Error: ' + res.data;
-					}
-				})
-				.catch(function() {
-					regenAllBtn.disabled = false;
-					regenAllBtn.textContent = '<?php echo esc_js( __( 'Regenerate All Posts', 'whippet' ) ); ?>';
-					regenAllStatus.style.color = '#ef4444';
-					regenAllStatus.textContent = '<?php echo esc_js( __( 'Request failed.', 'whippet' ) ); ?>';
-				});
+						regenAllStatus.textContent = '<?php echo esc_js( __( 'Request failed.', 'whippet' ) ); ?>';
+					});
+				}
+				runBatch(0);
 			});
 		}
 

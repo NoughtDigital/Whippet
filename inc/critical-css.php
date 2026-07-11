@@ -230,31 +230,14 @@ function cce_cluster_option_key( string $cluster_id, string $base, string $varia
 	return $base . $key . cce_variant_suffix( $variant );
 }
 
+/**
+ * Auth cookies are never forwarded to the Critical CSS Engine.
+ * Logged-in variants are generated without session credentials.
+ *
+ * @return array<int,array<string,mixed>>
+ */
 function cce_capture_auth_cookies(): array {
-	if ( ! is_user_logged_in() || empty( $_COOKIE ) ) {
-		return [];
-	}
-
-	$cookies = [];
-	$site_url = home_url( '/' );
-
-	foreach ( $_COOKIE as $name => $value ) {
-		if ( 0 !== strpos( $name, 'wordpress_logged_in_' ) && 'wordpress_test_cookie' !== $name ) {
-			continue;
-		}
-
-		$cookies[] = [
-			'name'     => (string) $name,
-			'value'    => (string) $value,
-			'url'      => $site_url,
-			'path'     => '/',
-			'secure'   => is_ssl(),
-			'httpOnly' => false,
-			'sameSite' => 'Lax',
-		];
-	}
-
-	return $cookies;
+	return [];
 }
 
 // ── Admin: Settings Registration + Meta Box + AJAX ───────────────────────────
@@ -281,7 +264,7 @@ class CCE_Admin {
 	// ── Settings ─────────────────────────────────────────────────────────────
 
 	public static function register_settings(): void {
-		register_setting( 'cce_settings', 'cce_api_key', [ 'sanitize_callback' => 'sanitize_text_field' ] );
+		register_setting( 'cce_settings', 'cce_api_key', [ 'sanitize_callback' => [ __CLASS__, 'sanitize_api_key' ] ] );
 		register_setting( 'cce_settings', 'cce_enabled', [ 'sanitize_callback' => 'absint', 'default' => 1 ] );
 		register_setting( 'cce_settings', 'cce_post_types', [
 			'sanitize_callback' => function ( $val ) {
@@ -291,6 +274,20 @@ class CCE_Admin {
 			},
 			'default' => [ 'post', 'page' ],
 		] );
+	}
+
+	/**
+	 * Keep the existing API key when the field is left blank or still masked.
+	 *
+	 * @param mixed $value Submitted value.
+	 * @return string
+	 */
+	public static function sanitize_api_key( $value ): string {
+		$value = is_string( $value ) ? trim( $value ) : '';
+		if ( '' === $value || false !== strpos( $value, '****' ) ) {
+			return (string) get_option( 'cce_api_key', '' );
+		}
+		return sanitize_text_field( $value );
 	}
 
 	public static function available_post_types(): array {
@@ -433,6 +430,9 @@ class CCE_Admin {
 		if ( ! $post_id || ! $url ) {
 			wp_send_json_error( 'Missing post_id or url' );
 		}
+		if ( ! current_user_can( 'edit_post', $post_id ) ) {
+			wp_send_json_error( 'Forbidden', 403 );
+		}
 
 		$result = CCE_API::generate( $post_id, $url, 'public' );
 		if ( is_wp_error( $result ) ) {
@@ -441,19 +441,18 @@ class CCE_Admin {
 
 		update_post_meta( $post_id, '_cce_job_id', sanitize_text_field( $result['jobId'] ) );
 		update_post_meta( $post_id, '_cce_status', 'pending' );
+		delete_post_meta( $post_id, '_cce_poll_attempts' );
 
-		wp_schedule_single_event( time() + 20, 'cce_poll_job', [ $post_id, $result['jobId'], 'public' ] );
+		wp_schedule_single_event( time() + 20, 'cce_poll_job', [ $post_id, $result['jobId'], 'public', 0 ] );
 
-		$logged_in_job_id  = '';
-		$logged_in_cookies = cce_capture_auth_cookies();
-		if ( ! empty( $logged_in_cookies ) ) {
-			$logged_in = CCE_API::generate( $post_id, $url, 'logged_in', $logged_in_cookies );
-			if ( ! is_wp_error( $logged_in ) && ! empty( $logged_in['jobId'] ) ) {
-				$logged_in_job_id = sanitize_text_field( $logged_in['jobId'] );
-				update_post_meta( $post_id, cce_post_meta_key( '_cce_job_id', 'logged_in' ), $logged_in_job_id );
-				update_post_meta( $post_id, cce_post_meta_key( '_cce_status', 'logged_in' ), 'pending' );
-				wp_schedule_single_event( time() + 25, 'cce_poll_job', [ $post_id, $logged_in_job_id, 'logged_in' ] );
-			}
+		// Logged-in variants no longer receive WordPress auth cookies.
+		$logged_in_job_id = '';
+		$logged_in        = CCE_API::generate( $post_id, $url, 'logged_in', [] );
+		if ( ! is_wp_error( $logged_in ) && ! empty( $logged_in['jobId'] ) ) {
+			$logged_in_job_id = sanitize_text_field( $logged_in['jobId'] );
+			update_post_meta( $post_id, cce_post_meta_key( '_cce_job_id', 'logged_in' ), $logged_in_job_id );
+			update_post_meta( $post_id, cce_post_meta_key( '_cce_status', 'logged_in' ), 'pending' );
+			wp_schedule_single_event( time() + 25, 'cce_poll_job', [ $post_id, $logged_in_job_id, 'logged_in', 0 ] );
 		}
 
 		wp_send_json_success( [
@@ -475,6 +474,9 @@ class CCE_Admin {
 
 		if ( ! $job_id ) {
 			wp_send_json_error( 'Missing job_id' );
+		}
+		if ( $post_id && ! current_user_can( 'edit_post', $post_id ) ) {
+			wp_send_json_error( 'Forbidden', 403 );
 		}
 
 		$status = CCE_API::status( $job_id );
@@ -600,7 +602,7 @@ class CCE_Admin {
 			: '(empty)';
 
 		// Health check — no auth
-		$health_resp = wp_remote_get( $api_url . '/health', [ 'timeout' => 5, 'sslverify' => false ] );
+		$health_resp = wp_remote_get( $api_url . '/health', [ 'timeout' => 5, 'sslverify' => \Whippet\Helper::ssl_verify() ] );
 		$health_code = is_wp_error( $health_resp ) ? $health_resp->get_error_message() : wp_remote_retrieve_response_code( $health_resp );
 		$health_body = is_wp_error( $health_resp ) ? '' : wp_remote_retrieve_body( $health_resp );
 
@@ -612,7 +614,7 @@ class CCE_Admin {
 				'headers'   => array_merge( $headers, [ 'Content-Type' => 'application/json' ] ),
 				'body'      => $json_body,
 				'timeout'   => 10,
-				'sslverify' => false,
+				'sslverify' => \Whippet\Helper::ssl_verify(),
 			] );
 			return [
 				'code' => is_wp_error( $r ) ? $r->get_error_message() : wp_remote_retrieve_response_code( $r ),
@@ -704,8 +706,9 @@ class CCE_Admin {
 			wp_send_json_error( 'Forbidden', 403 );
 		}
 
-		$count = cce_regenerate_all_published_posts( cce_capture_auth_cookies() );
-		wp_send_json_success( [ 'queued' => $count ] );
+		$offset = absint( $_POST['offset'] ?? 0 );
+		$result = cce_regenerate_published_posts_batch( $offset, 10 );
+		wp_send_json_success( $result );
 	}
 
 	// ── AJAX: poll an in-flight scan job ─────────────────────────────────────
@@ -844,9 +847,9 @@ class CCE_Injector {
 class CCE_Cron {
 
 	public static function init(): void {
-		add_action( 'cce_poll_job',     [ __CLASS__, 'poll_job' ],     10, 3 );
-		add_action( 'cce_poll_scan',    [ __CLASS__, 'poll_scan' ],    10, 2 );
-		add_action( 'cce_poll_cluster', [ __CLASS__, 'poll_cluster' ], 10, 3 );
+		add_action( 'cce_poll_job',     [ __CLASS__, 'poll_job' ],     10, 4 );
+		add_action( 'cce_poll_scan',    [ __CLASS__, 'poll_scan' ],    10, 3 );
+		add_action( 'cce_poll_cluster', [ __CLASS__, 'poll_cluster' ], 10, 4 );
 	}
 
 	public static function unschedule(): void {
@@ -855,11 +858,20 @@ class CCE_Cron {
 		wp_clear_scheduled_hook( 'cce_poll_cluster' );
 	}
 
-	/** Poll a per-post generate job every 15 s until done. */
-	public static function poll_job( int $post_id, string $job_id, string $variant = 'public' ): void {
+	private const MAX_POLL_ATTEMPTS = 40;
+
+	/** Poll a per-post generate job every 15 s until done or attempt ceiling. */
+	public static function poll_job( int $post_id, string $job_id, string $variant = 'public', int $attempt = 0 ): void {
 		$variant = cce_normalize_variant( $variant );
 		$status_data = CCE_API::status( $job_id );
 		if ( is_wp_error( $status_data ) ) {
+			$attempt++;
+			if ( $attempt >= self::MAX_POLL_ATTEMPTS ) {
+				update_post_meta( $post_id, cce_post_meta_key( '_cce_status', $variant ), 'failed' );
+				\Whippet\Helper::audit_log( 'cce_poll_failed', array( 'post_id' => $post_id, 'job_id' => $job_id, 'reason' => 'api_error' ) );
+				return;
+			}
+			wp_schedule_single_event( time() + 30, 'cce_poll_job', [ $post_id, $job_id, $variant, $attempt ] );
 			return;
 		}
 
@@ -880,14 +892,26 @@ class CCE_Cron {
 		}
 
 		if ( in_array( $status, [ 'pending', 'active' ], true ) ) {
-			wp_schedule_single_event( time() + 15, 'cce_poll_job', [ $post_id, $job_id, $variant ] );
+			$attempt++;
+			if ( $attempt >= self::MAX_POLL_ATTEMPTS ) {
+				update_post_meta( $post_id, cce_post_meta_key( '_cce_status', $variant ), 'failed' );
+				\Whippet\Helper::audit_log( 'cce_poll_exhausted', array( 'post_id' => $post_id, 'job_id' => $job_id ) );
+				return;
+			}
+			wp_schedule_single_event( time() + 15, 'cce_poll_job', [ $post_id, $job_id, $variant, $attempt ] );
 		}
 	}
 
 	/** Poll a full-site scan job every 30 s; on completion process the report. */
-	public static function poll_scan( string $scan_id, string $job_id ): void {
+	public static function poll_scan( string $scan_id, string $job_id, int $attempt = 0 ): void {
 		$status_data = CCE_API::status( $job_id );
 		if ( is_wp_error( $status_data ) ) {
+			$attempt++;
+			if ( $attempt >= self::MAX_POLL_ATTEMPTS ) {
+				update_option( 'cce_scan_status', 'failed', false );
+				return;
+			}
+			wp_schedule_single_event( time() + 30, 'cce_poll_scan', [ $scan_id, $job_id, $attempt ] );
 			return;
 		}
 
@@ -900,15 +924,26 @@ class CCE_Cron {
 		}
 
 		if ( in_array( $status, [ 'pending', 'active' ], true ) ) {
-			wp_schedule_single_event( time() + 30, 'cce_poll_scan', [ $scan_id, $job_id ] );
+			$attempt++;
+			if ( $attempt >= self::MAX_POLL_ATTEMPTS ) {
+				update_option( 'cce_scan_status', 'failed', false );
+				return;
+			}
+			wp_schedule_single_event( time() + 30, 'cce_poll_scan', [ $scan_id, $job_id, $attempt ] );
 		}
 	}
 
 	/** Poll a cluster-level generate job every 15 s; store CSS in an option on completion. */
-	public static function poll_cluster( string $cluster_id, string $job_id, string $variant = 'public' ): void {
+	public static function poll_cluster( string $cluster_id, string $job_id, string $variant = 'public', int $attempt = 0 ): void {
 		$variant = cce_normalize_variant( $variant );
 		$status_data = CCE_API::status( $job_id );
 		if ( is_wp_error( $status_data ) ) {
+			$attempt++;
+			if ( $attempt >= self::MAX_POLL_ATTEMPTS ) {
+				update_option( cce_cluster_option_key( $cluster_id, 'cce_cluster_status_', $variant ), 'failed', false );
+				return;
+			}
+			wp_schedule_single_event( time() + 30, 'cce_poll_cluster', [ $cluster_id, $job_id, $variant, $attempt ] );
 			return;
 		}
 
@@ -929,7 +964,12 @@ class CCE_Cron {
 		}
 
 		if ( in_array( $status, [ 'pending', 'active' ], true ) ) {
-			wp_schedule_single_event( time() + 15, 'cce_poll_cluster', [ $cluster_id, $job_id, $variant ] );
+			$attempt++;
+			if ( $attempt >= self::MAX_POLL_ATTEMPTS ) {
+				update_option( cce_cluster_option_key( $cluster_id, 'cce_cluster_status_', $variant ), 'failed', false );
+				return;
+			}
+			wp_schedule_single_event( time() + 15, 'cce_poll_cluster', [ $cluster_id, $job_id, $variant, $attempt ] );
 		}
 	}
 }
@@ -937,51 +977,114 @@ class CCE_Cron {
 // ── Bulk Regeneration Helper ──────────────────────────────────────────────────
 
 /**
- * Queue a fresh generate job for every published post/page across all
- * configured post types. Returns the number of jobs queued.
+ * Queue generate jobs in batches to avoid timeouts and API storms.
+ *
+ * @param int $offset     Queue offset.
+ * @param int $batch_size Posts per batch.
+ * @return array{done:bool,offset:int,total:int,queued:int}
  */
-function cce_regenerate_all_published_posts( array $logged_in_cookies = [] ): int {
+function cce_regenerate_published_posts_batch( int $offset = 0, int $batch_size = 10 ): array {
 	if ( ! get_option( 'cce_enabled', 1 ) ) {
-		return 0;
+		return [
+			'done'   => true,
+			'offset' => 0,
+			'total'  => 0,
+			'queued' => 0,
+		];
 	}
 
-	$post_types = CCE_Admin::enabled_post_types();
-	$posts      = get_posts( [
-		'post_type'      => $post_types,
-		'post_status'    => 'publish',
-		'posts_per_page' => -1,
-		'fields'         => 'ids',
-	] );
+	if ( 0 === $offset ) {
+		$post_types = CCE_Admin::enabled_post_types();
+		$posts      = get_posts( [
+			'post_type'      => $post_types,
+			'post_status'    => 'publish',
+			'posts_per_page' => -1,
+			'fields'         => 'ids',
+		] );
+		update_option( 'cce_regen_queue', array_map( 'absint', $posts ), false );
+	}
 
-	$delay  = 0;
+	$queue  = get_option( 'cce_regen_queue', [] );
+	if ( ! is_array( $queue ) ) {
+		$queue = [];
+	}
+	$total  = count( $queue );
+	$slice  = array_slice( $queue, $offset, $batch_size );
 	$queued = 0;
+	$delay  = 0;
 
-	foreach ( $posts as $post_id ) {
+	foreach ( $slice as $post_id ) {
+		$post_id = absint( $post_id );
+		if ( ! $post_id ) {
+			continue;
+		}
 		delete_post_meta( $post_id, '_cce_content_hash' );
 
 		$result = CCE_API::generate( $post_id, get_permalink( $post_id ), 'public' );
 		if ( ! is_wp_error( $result ) && ! empty( $result['jobId'] ) ) {
 			update_post_meta( $post_id, '_cce_job_id', sanitize_text_field( $result['jobId'] ) );
 			update_post_meta( $post_id, '_cce_status', 'pending' );
-			wp_schedule_single_event( time() + 30 + $delay, 'cce_poll_job', [ $post_id, $result['jobId'], 'public' ] );
+			wp_schedule_single_event( time() + 30 + $delay, 'cce_poll_job', [ $post_id, $result['jobId'], 'public', 0 ] );
 			$delay += 5;
 			$queued++;
 		}
 
-		if ( ! empty( $logged_in_cookies ) ) {
-			$logged_in = CCE_API::generate( $post_id, get_permalink( $post_id ), 'logged_in', $logged_in_cookies );
-			if ( ! is_wp_error( $logged_in ) && ! empty( $logged_in['jobId'] ) ) {
-				update_post_meta( $post_id, cce_post_meta_key( '_cce_job_id', 'logged_in' ), sanitize_text_field( $logged_in['jobId'] ) );
-				update_post_meta( $post_id, cce_post_meta_key( '_cce_status', 'logged_in' ), 'pending' );
-				wp_schedule_single_event( time() + 30 + $delay, 'cce_poll_job', [ $post_id, $logged_in['jobId'], 'logged_in' ] );
-				$delay += 5;
-				$queued++;
-			}
+		// Logged-in variant without forwarding auth cookies.
+		$logged_in = CCE_API::generate( $post_id, get_permalink( $post_id ), 'logged_in', [] );
+		if ( ! is_wp_error( $logged_in ) && ! empty( $logged_in['jobId'] ) ) {
+			update_post_meta( $post_id, cce_post_meta_key( '_cce_job_id', 'logged_in' ), sanitize_text_field( $logged_in['jobId'] ) );
+			update_post_meta( $post_id, cce_post_meta_key( '_cce_status', 'logged_in' ), 'pending' );
+			wp_schedule_single_event( time() + 30 + $delay, 'cce_poll_job', [ $post_id, $logged_in['jobId'], 'logged_in', 0 ] );
+			$delay += 5;
+			$queued++;
 		}
 	}
 
-	return $queued;
+	$next = $offset + count( $slice );
+	$done = $next >= $total;
+	if ( $done ) {
+		delete_option( 'cce_regen_queue' );
+	}
+
+	return [
+		'done'   => $done,
+		'offset' => $next,
+		'total'  => $total,
+		'queued' => $queued,
+	];
 }
+
+/**
+ * Queue a fresh generate job for every published post/page across all
+ * configured post types. Returns the number of jobs queued.
+ * Processes in batches via WP-Cron to avoid request timeouts.
+ *
+ * @param array $logged_in_cookies Unused; retained for backward compatibility.
+ */
+function cce_regenerate_all_published_posts( array $logged_in_cookies = [] ): int {
+	unset( $logged_in_cookies );
+	$result = cce_regenerate_published_posts_batch( 0, 10 );
+	$total_queued = (int) $result['queued'];
+
+	if ( empty( $result['done'] ) ) {
+		wp_schedule_single_event( time() + 5, 'cce_regen_batch', [ (int) $result['offset'] ] );
+	}
+
+	return $total_queued;
+}
+
+/**
+ * Cron: continue batched regeneration.
+ *
+ * @param int $offset Queue offset.
+ */
+function cce_cron_regen_batch( int $offset = 0 ): void {
+	$result = cce_regenerate_published_posts_batch( $offset, 10 );
+	if ( empty( $result['done'] ) ) {
+		wp_schedule_single_event( time() + 5, 'cce_regen_batch', [ (int) $result['offset'] ] );
+	}
+}
+add_action( 'cce_regen_batch', 'cce_cron_regen_batch', 10, 1 );
 
 // ── Scan Report Processor ─────────────────────────────────────────────────────
 

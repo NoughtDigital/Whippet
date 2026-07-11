@@ -94,6 +94,10 @@ function whippet_scripts_view_settings() {
         $mu_mode_new = ! empty( $_POST['whippet_scripts_mu_mode'] );
         update_option( 'whippet_scripts_mu_mode', $mu_mode_new ? 1 : 0 );
         if ( $mu_mode_new ) {
+            $token = (string) get_option( 'whippet_mu_bypass_token', '' );
+            if ( '' === $token ) {
+                update_option( 'whippet_mu_bypass_token', wp_generate_password( 32, false, false ), false );
+            }
             $install = whippet_scripts_install_mu_plugin();
             set_transient( 'whippet_mu_install_result', $install, 30 );
         }

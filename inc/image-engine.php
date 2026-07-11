@@ -45,6 +45,7 @@ class Whippet_Image_Engine {
 		add_filter( 'the_content',                                 [ $this, 'filter_content_images' ], 20 );
 		add_action( 'template_redirect',                           [ $this, 'maybe_start_output_buffer' ], 20 );
 		add_action( 'rest_api_init',                               [ $this, 'register_webhook_endpoint' ] );
+		add_action( 'ie_process_sync_batch',                       [ $this, 'cron_process_sync_batch' ] );
 	}
 
 	// =========================================================================
@@ -116,14 +117,13 @@ class Whippet_Image_Engine {
 	}
 
 	/**
-	 * Returns the webhook secret, generating and persisting one automatically
-	 * if it doesn't exist yet. Users never need to create or copy this value —
-	 * it is sent to Image Engine as callback_secret on every upload request so
-	 * both sides always stay in sync.
+	 * Returns the webhook secret.
+	 *
+	 * @param bool $create Whether to generate and persist a secret when missing.
 	 */
-	private function webhook_secret(): string {
+	private function webhook_secret( bool $create = true ): string {
 		$secret = (string) get_option( 'ie_webhook_secret', '' );
-		if ( empty( $secret ) ) {
+		if ( empty( $secret ) && $create ) {
 			$secret = wp_generate_password( 32, false );
 			update_option( 'ie_webhook_secret', $secret );
 		}
@@ -219,7 +219,7 @@ class Whippet_Image_Engine {
 	public function register_settings(): void {
 		$options = [
 			'ie_api_url'                 => 'sanitize_text_field',
-			'ie_api_key'                 => 'sanitize_text_field',
+			'ie_api_key'                 => [ $this, 'sanitize_api_key' ],
 			'ie_preset'                  => 'sanitize_text_field',
 			'ie_delivery_format'         => 'sanitize_text_field',
 			'ie_format_filter'           => 'sanitize_text_field',
@@ -232,6 +232,20 @@ class Whippet_Image_Engine {
 		foreach ( $options as $key => $sanitizer ) {
 			register_setting( 'image_engine', $key, [ 'sanitize_callback' => $sanitizer ] );
 		}
+	}
+
+	/**
+	 * Keep the existing API key when the field is left blank or still masked.
+	 *
+	 * @param mixed $value Submitted value.
+	 * @return string
+	 */
+	public function sanitize_api_key( $value ): string {
+		$value = is_string( $value ) ? trim( $value ) : '';
+		if ( '' === $value || false !== strpos( $value, '****' ) ) {
+			return (string) get_option( 'ie_api_key', '' );
+		}
+		return sanitize_text_field( $value );
 	}
 
 	// =========================================================================
@@ -266,8 +280,9 @@ class Whippet_Image_Engine {
 	private function http_get( string $path ): array|WP_Error {
 		return $this->parse_response(
 			wp_remote_get( $this->api_base() . $path, [
-				'headers' => $this->auth_headers(),
-				'timeout' => 15,
+				'headers'   => $this->auth_headers(),
+				'timeout'   => 15,
+				'sslverify' => \Whippet\Helper::ssl_verify(),
 			] )
 		);
 	}
@@ -276,8 +291,9 @@ class Whippet_Image_Engine {
 	private function http_post( string $path ): array|WP_Error {
 		return $this->parse_response(
 			wp_remote_post( $this->api_base() . $path, [
-				'headers' => $this->auth_headers(),
-				'timeout' => 15,
+				'headers'   => $this->auth_headers(),
+				'timeout'   => 15,
+				'sslverify' => \Whippet\Helper::ssl_verify(),
 			] )
 		);
 	}
@@ -288,9 +304,10 @@ class Whippet_Image_Engine {
 		$headers['Content-Type'] = 'application/json';
 		return $this->parse_response(
 			wp_remote_post( $this->api_base() . $path, [
-				'headers' => $headers,
-				'body'    => wp_json_encode( $body ),
-				'timeout' => 15,
+				'headers'   => $headers,
+				'body'      => wp_json_encode( $body ),
+				'timeout'   => 15,
+				'sslverify' => \Whippet\Helper::ssl_verify(),
 			] )
 		);
 	}
@@ -299,9 +316,10 @@ class Whippet_Image_Engine {
 	private function http_delete( string $path ): array|WP_Error {
 		return $this->parse_response(
 			wp_remote_request( $this->api_base() . $path, [
-				'method'  => 'DELETE',
-				'headers' => $this->auth_headers(),
-				'timeout' => 15,
+				'method'    => 'DELETE',
+				'headers'   => $this->auth_headers(),
+				'timeout'   => 15,
+				'sslverify' => \Whippet\Helper::ssl_verify(),
 			] )
 		);
 	}
@@ -341,6 +359,7 @@ class Whippet_Image_Engine {
 		curl_setopt( $ch, CURLOPT_POSTFIELDS, $post_fields );
 		curl_setopt( $ch, CURLOPT_RETURNTRANSFER, true );
 		curl_setopt( $ch, CURLOPT_TIMEOUT, 60 );
+		curl_setopt( $ch, CURLOPT_SSL_VERIFYPEER, \Whippet\Helper::ssl_verify() );
 		if ( $curl_headers ) {
 			curl_setopt( $ch, CURLOPT_HTTPHEADER, $curl_headers );
 		}
@@ -552,15 +571,19 @@ class Whippet_Image_Engine {
 
 	private function get_local_file_path_from_url( string $url ): string {
 		$url = $this->normalize_lookup_url( $url );
-		if ( '' === $url ) {
+		if ( '' === $url || false !== strpos( $url, '..' ) ) {
 			return '';
 		}
 
 		$uploads = wp_get_upload_dir();
 		if ( ! empty( $uploads['baseurl'] ) && ! empty( $uploads['basedir'] ) && 0 === strpos( $url, (string) $uploads['baseurl'] ) ) {
 			$relative = ltrim( substr( $url, strlen( (string) $uploads['baseurl'] ) ), '/' );
-			$path     = trailingslashit( (string) $uploads['basedir'] ) . $relative;
-			return file_exists( $path ) ? $path : '';
+			if ( false !== strpos( $relative, '..' ) ) {
+				return '';
+			}
+			$path = trailingslashit( (string) $uploads['basedir'] ) . $relative;
+			$path = \Whippet\Helper::resolve_path_under_root( $path, (string) $uploads['basedir'] );
+			return ( '' !== $path && file_exists( $path ) ) ? $path : '';
 		}
 
 		$locations = [
@@ -571,8 +594,12 @@ class Whippet_Image_Engine {
 		foreach ( $locations as $base_url => $base_dir ) {
 			if ( 0 === strpos( $url, $base_url ) ) {
 				$relative = ltrim( substr( $url, strlen( $base_url ) ), '/' );
-				$path     = $base_dir . $relative;
-				return file_exists( $path ) ? $path : '';
+				if ( false !== strpos( $relative, '..' ) ) {
+					return '';
+				}
+				$path = $base_dir . $relative;
+				$path = \Whippet\Helper::resolve_path_under_root( $path, $base_dir );
+				return ( '' !== $path && file_exists( $path ) ) ? $path : '';
 			}
 		}
 
@@ -900,20 +927,50 @@ class Whippet_Image_Engine {
 	}
 
 	public function handle_webhook( WP_REST_Request $request ): WP_REST_Response {
-		$secret = $this->webhook_secret();
-		if ( ! empty( $secret ) ) {
-			$sig      = (string) $request->get_header( 'X-Image-Engine-Signature' );
-			$expected = 'sha256=' . hash_hmac( 'sha256', $request->get_body(), $secret );
-			if ( ! hash_equals( $expected, $sig ) ) {
-				return new WP_REST_Response( [ 'error' => 'Invalid signature' ], 403 );
+		$secret = $this->webhook_secret( false );
+		if ( '' === $secret ) {
+			\Whippet\Helper::audit_log( 'ie_webhook_failed', [ 'reason' => 'secret_unavailable' ] );
+			return new WP_REST_Response( [ 'error' => 'Webhook secret unavailable' ], 503 );
+		}
+
+		$body     = $request->get_body();
+		$sig      = (string) $request->get_header( 'X-Image-Engine-Signature' );
+		$expected = 'sha256=' . hash_hmac( 'sha256', $body, $secret );
+		if ( '' === $sig || ! hash_equals( $expected, $sig ) ) {
+			\Whippet\Helper::audit_log( 'ie_webhook_failed', [ 'reason' => 'invalid_signature' ] );
+			return new WP_REST_Response( [ 'error' => 'Invalid signature' ], 403 );
+		}
+
+		$ts_header = $request->get_header( 'X-Image-Engine-Timestamp' );
+		if ( null !== $ts_header && '' !== $ts_header ) {
+			$ts = (int) $ts_header;
+			if ( abs( time() - $ts ) > 300 ) {
+				\Whippet\Helper::audit_log( 'ie_webhook_failed', [ 'reason' => 'timestamp_expired' ] );
+				return new WP_REST_Response( [ 'error' => 'Timestamp out of range' ], 403 );
 			}
 		}
-		$payload = (array) $request->get_json_params();
-		$wp_id   = (int) ( $payload['wp_attachment_id'] ?? 0 );
+
+		$body_hash = hash( 'sha256', $body );
+		$seen_key  = 'ie_webhook_seen_' . $body_hash;
+		if ( false !== get_transient( $seen_key ) ) {
+			return new WP_REST_Response( [ 'ok' => true ], 200 );
+		}
+
+		$payload = json_decode( $body, true );
+		if ( ! is_array( $payload ) ) {
+			\Whippet\Helper::audit_log( 'ie_webhook_failed', [ 'reason' => 'invalid_json' ] );
+			return new WP_REST_Response( [ 'error' => 'Invalid JSON' ], 400 );
+		}
+
+		$wp_id = (int) ( $payload['wp_attachment_id'] ?? 0 );
 		if ( ! $wp_id ) {
+			\Whippet\Helper::audit_log( 'ie_webhook_failed', [ 'reason' => 'missing_attachment_id' ] );
 			return new WP_REST_Response( [ 'error' => 'Missing wp_attachment_id' ], 400 );
 		}
+
 		$this->pull_attachment_meta( $wp_id );
+		set_transient( $seen_key, 1, 10 * MINUTE_IN_SECONDS );
+		\Whippet\Helper::audit_log( 'ie_webhook_ok', [ 'attachment_id' => $wp_id ] );
 		return new WP_REST_Response( [ 'ok' => true ], 200 );
 	}
 
@@ -922,6 +979,12 @@ class Whippet_Image_Engine {
 		if ( is_wp_error( $meta ) ) {
 			update_post_meta( $attachment_id, '_ie_status', 'error' );
 			update_post_meta( $attachment_id, '_ie_error', $meta->get_error_message() );
+			return;
+		}
+		if ( ! is_array( $meta ) || ( empty( $meta['file'] ) && empty( $meta['sizes'] ) && empty( $meta['width'] ) ) ) {
+			update_post_meta( $attachment_id, '_ie_status', 'error' );
+			update_post_meta( $attachment_id, '_ie_error', 'Invalid attachment metadata from Image Engine.' );
+			\Whippet\Helper::audit_log( 'ie_meta_rejected', [ 'attachment_id' => $attachment_id ] );
 			return;
 		}
 		update_post_meta( $attachment_id, '_wp_attachment_metadata', $meta );
@@ -1030,45 +1093,119 @@ class Whippet_Image_Engine {
 		if ( ! $this->is_configured() ) {
 			wp_send_json_error( [ 'message' => 'No API key configured. Enter your Image Engine API key and save settings first.' ] );
 		}
-		$ids = get_posts( [
-			'post_type'      => 'attachment',
-			'post_mime_type' => 'image',
-			'posts_per_page' => -1,
-			'post_status'    => 'any',
-			'fields'         => 'ids',
-		] );
-		$ids_to_process = [];
-		$skipped        = 0;
-		foreach ( (array) $ids as $id ) {
-			$status = get_post_meta( (int) $id, '_ie_status', true );
-			if ( in_array( $status, [ 'queued', 'processing', 'completed', 'restored' ], true ) ) {
-				$skipped++;
-				continue;
+
+		$batch_size = 20;
+		$offset     = absint( $_POST['offset'] ?? 0 );
+
+		if ( 0 === $offset ) {
+			$ids = get_posts( [
+				'post_type'      => 'attachment',
+				'post_mime_type' => 'image',
+				'posts_per_page' => -1,
+				'post_status'    => 'any',
+				'fields'         => 'ids',
+			] );
+			$ids_to_process = [];
+			foreach ( (array) $ids as $id ) {
+				$status = get_post_meta( (int) $id, '_ie_status', true );
+				if ( in_array( $status, [ 'queued', 'processing', 'completed', 'restored' ], true ) ) {
+					continue;
+				}
+				$ids_to_process[] = (int) $id;
 			}
-			$ids_to_process[] = (int) $id;
+			update_option( 'ie_sync_queue', $ids_to_process, false );
+			$this->set_last_run_attachment_ids( $ids_to_process );
 		}
 
-		$this->set_last_run_attachment_ids( $ids_to_process );
+		$queue = get_option( 'ie_sync_queue', [] );
+		if ( ! is_array( $queue ) ) {
+			$queue = [];
+		}
 
-		$queued = $failed = 0;
-		$errors = [];
-		foreach ( $ids_to_process as $id ) {
+		$result = $this->process_sync_queue_slice( $queue, $offset, $batch_size );
+		wp_send_json_success( $result );
+	}
+
+	/**
+	 * Cron backup: continue processing the sync queue if AJAX stops.
+	 */
+	public function cron_process_sync_batch(): void {
+		$queue = get_option( 'ie_sync_queue', [] );
+		if ( ! is_array( $queue ) || empty( $queue ) ) {
+			return;
+		}
+		$offset = absint( get_option( 'ie_sync_queue_offset', 0 ) );
+		$result = $this->process_sync_queue_slice( $queue, $offset, 20 );
+		if ( empty( $result['done'] ) ) {
+			update_option( 'ie_sync_queue_offset', (int) $result['offset'], false );
+			if ( ! wp_next_scheduled( 'ie_process_sync_batch' ) ) {
+				wp_schedule_single_event( time() + 2, 'ie_process_sync_batch' );
+			}
+		} else {
+			delete_option( 'ie_sync_queue_offset' );
+		}
+	}
+
+	/**
+	 * Process a slice of the sync queue.
+	 *
+	 * @param array<int,int> $queue Queue of attachment IDs.
+	 * @return array{done:bool,offset:int,total:int,message:string,queued?:int,failed?:int}
+	 */
+	private function process_sync_queue_slice( array $queue, int $offset, int $batch_size ): array {
+		$slice   = array_slice( $queue, $offset, $batch_size );
+		$queued  = 0;
+		$failed  = 0;
+		$errors  = [];
+
+		foreach ( $slice as $id ) {
+			$id = (int) $id;
 			$this->upload_attachment( $id );
-			if ( 'queued' === get_post_meta( (int) $id, '_ie_status', true ) ) {
+			if ( 'queued' === get_post_meta( $id, '_ie_status', true ) ) {
 				$queued++;
 			} else {
 				$failed++;
-				$err = (string) get_post_meta( (int) $id, '_ie_error', true );
+				$err = (string) get_post_meta( $id, '_ie_error', true );
 				if ( $err && ! in_array( $err, $errors, true ) ) {
 					$errors[] = $err;
 				}
 			}
 		}
-		$message = "{$queued} queued, {$skipped} skipped, {$failed} failed.";
+
+		$next = $offset + count( $slice );
+		$done = $next >= count( $queue );
+		if ( $done ) {
+			delete_option( 'ie_sync_queue' );
+			delete_option( 'ie_sync_queue_offset' );
+		} else {
+			update_option( 'ie_sync_queue_offset', $next, false );
+			if ( ! wp_next_scheduled( 'ie_process_sync_batch' ) ) {
+				wp_schedule_single_event( time() + 2, 'ie_process_sync_batch' );
+			}
+		}
+
+		$message = sprintf(
+			'Processed %d of %d. Queued this batch: %d, failed: %d.',
+			$next,
+			count( $queue ),
+			$queued,
+			$failed
+		);
+		if ( $done ) {
+			$message = sprintf( 'Done. %d images processed.', count( $queue ) );
+		}
 		if ( $errors ) {
 			$message .= ' Error: ' . implode( '; ', array_slice( $errors, 0, 3 ) );
 		}
-		wp_send_json_success( [ 'message' => $message ] );
+
+		return [
+			'done'      => $done,
+			'offset'    => $next,
+			'total'     => count( $queue ),
+			'queued'    => $queued,
+			'failed'    => $failed,
+			'message'   => $message,
+		];
 	}
 
 	// =========================================================================
@@ -1087,6 +1224,9 @@ class Whippet_Image_Engine {
 		$id = (int) ( $_POST['attachment_id'] ?? 0 );
 		if ( ! $id ) {
 			wp_send_json_error( [ 'message' => 'Missing attachment_id.' ] );
+		}
+		if ( ! current_user_can( 'edit_post', $id ) ) {
+			wp_send_json_error( [ 'message' => 'Unauthorised.' ] );
 		}
 
 		$this->upload_attachment( $id );
@@ -1112,6 +1252,9 @@ class Whippet_Image_Engine {
 		if ( ! $id ) {
 			wp_send_json_error( [ 'message' => 'Missing attachment_id.' ] );
 		}
+		if ( ! current_user_can( 'edit_post', $id ) ) {
+			wp_send_json_error( [ 'message' => 'Unauthorised.' ] );
+		}
 		$result = $this->restore_attachment( $id );
 		is_wp_error( $result )
 			? wp_send_json_error( [ 'message' => $result->get_error_message() ] )
@@ -1131,6 +1274,9 @@ class Whippet_Image_Engine {
 		if ( ! $id ) {
 			wp_send_json_error( [ 'message' => 'Missing attachment_id.' ] );
 		}
+		if ( ! current_user_can( 'edit_post', $id ) ) {
+			wp_send_json_error( [ 'message' => 'Unauthorised.' ] );
+		}
 		$result = $this->delete_original( $id );
 		is_wp_error( $result )
 			? wp_send_json_error( [ 'message' => $result->get_error_message() ] )
@@ -1146,37 +1292,56 @@ class Whippet_Image_Engine {
 		if ( ! current_user_can( 'manage_options' ) ) {
 			wp_send_json_error( [ 'message' => 'Unauthorised.' ] );
 		}
-		$ids = get_posts( [
-			'post_type'      => 'attachment',
-			'post_mime_type' => 'image',
-			'posts_per_page' => -1,
-			'post_status'    => 'any',
-			'meta_query'     => [
-				[
-					'key'   => '_ie_status',
-					'value' => 'completed',
-				],
-				[
-					'relation' => 'OR',
+
+		$batch_size = 20;
+		$offset     = absint( $_POST['offset'] ?? 0 );
+
+		if ( 0 === $offset ) {
+			$ids = get_posts( [
+				'post_type'      => 'attachment',
+				'post_mime_type' => 'image',
+				'posts_per_page' => -1,
+				'post_status'    => 'any',
+				'meta_query'     => [
 					[
-						'key'     => '_ie_original_deleted',
-						'compare' => 'NOT EXISTS',
+						'key'   => '_ie_status',
+						'value' => 'completed',
 					],
 					[
-						'key'     => '_ie_original_deleted',
-						'value'   => '1',
-						'compare' => '!=',
+						'relation' => 'OR',
+						[
+							'key'     => '_ie_original_deleted',
+							'compare' => 'NOT EXISTS',
+						],
+						[
+							'key'     => '_ie_original_deleted',
+							'value'   => '1',
+							'compare' => '!=',
+						],
 					],
 				],
-			],
-			'fields'         => 'ids',
-		] );
-		if ( empty( $ids ) ) {
-			wp_send_json_success( [ 'message' => 'No eligible images with preserved originals were found.' ] );
+				'fields'         => 'ids',
+			] );
+			update_option( 'ie_bulk_restore_queue', array_map( 'absint', (array) $ids ), false );
 		}
-		$done = $failed = 0;
+
+		$queue = get_option( 'ie_bulk_restore_queue', [] );
+		if ( ! is_array( $queue ) ) {
+			$queue = [];
+		}
+		if ( empty( $queue ) && 0 === $offset ) {
+			wp_send_json_success( [
+				'done'    => true,
+				'offset'  => 0,
+				'total'   => 0,
+				'message' => 'No eligible images with preserved originals were found.',
+			] );
+		}
+
+		$slice  = array_slice( $queue, $offset, $batch_size );
+		$done_n = $failed = 0;
 		$errors = [];
-		foreach ( (array) $ids as $id ) {
+		foreach ( $slice as $id ) {
 			$result = $this->restore_attachment( (int) $id );
 			if ( is_wp_error( $result ) ) {
 				$failed++;
@@ -1185,14 +1350,30 @@ class Whippet_Image_Engine {
 					$errors[] = $error;
 				}
 			} else {
-				$done++;
+				$done_n++;
 			}
 		}
-		$message = "{$done} restored to originals, {$failed} failed.";
+
+		$next = $offset + count( $slice );
+		$done = $next >= count( $queue );
+		if ( $done ) {
+			delete_option( 'ie_bulk_restore_queue' );
+		}
+
+		$message = sprintf( 'Restored %d of %d (%d failed this batch).', $next, count( $queue ), $failed );
+		if ( $done ) {
+			$message = sprintf( '%d restored to originals.', count( $queue ) );
+		}
 		if ( $errors ) {
 			$message .= ' Error: ' . implode( '; ', array_slice( $errors, 0, 3 ) );
 		}
-		wp_send_json_success( [ 'message' => $message ] );
+
+		wp_send_json_success( [
+			'done'    => $done,
+			'offset'  => $next,
+			'total'   => count( $queue ),
+			'message' => $message,
+		] );
 	}
 
 	// =========================================================================
@@ -1204,24 +1385,58 @@ class Whippet_Image_Engine {
 		if ( ! current_user_can( 'manage_options' ) ) {
 			wp_send_json_error( [ 'message' => 'Unauthorised.' ] );
 		}
-		$ids = get_posts( [
-			'post_type'      => 'attachment',
-			'post_mime_type' => 'image',
-			'posts_per_page' => -1,
-			'post_status'    => 'any',
-			'meta_key'       => '_ie_status',
-			'meta_value'     => 'completed',
-			'fields'         => 'ids',
-		] );
-		$done = $failed = 0;
-		foreach ( (array) $ids as $id ) {
-			if ( get_post_meta( (int) $id, '_ie_original_deleted', true ) ) {
-				continue;
+
+		$batch_size = 20;
+		$offset     = absint( $_POST['offset'] ?? 0 );
+
+		if ( 0 === $offset ) {
+			$ids = get_posts( [
+				'post_type'      => 'attachment',
+				'post_mime_type' => 'image',
+				'posts_per_page' => -1,
+				'post_status'    => 'any',
+				'meta_key'       => '_ie_status',
+				'meta_value'     => 'completed',
+				'fields'         => 'ids',
+			] );
+			$queue = [];
+			foreach ( (array) $ids as $id ) {
+				if ( get_post_meta( (int) $id, '_ie_original_deleted', true ) ) {
+					continue;
+				}
+				$queue[] = (int) $id;
 			}
-			$result = $this->delete_original( (int) $id );
-			is_wp_error( $result ) ? $failed++ : $done++;
+			update_option( 'ie_bulk_delete_queue', $queue, false );
 		}
-		wp_send_json_success( [ 'message' => "{$done} originals deleted, {$failed} failed." ] );
+
+		$queue = get_option( 'ie_bulk_delete_queue', [] );
+		if ( ! is_array( $queue ) ) {
+			$queue = [];
+		}
+
+		$slice  = array_slice( $queue, $offset, $batch_size );
+		$done_n = $failed = 0;
+		foreach ( $slice as $id ) {
+			$result = $this->delete_original( (int) $id );
+			is_wp_error( $result ) ? $failed++ : $done_n++;
+		}
+
+		$next = $offset + count( $slice );
+		$done = $next >= count( $queue );
+		if ( $done ) {
+			delete_option( 'ie_bulk_delete_queue' );
+		}
+
+		$message = $done
+			? sprintf( '%d originals deleted.', count( $queue ) )
+			: sprintf( 'Deleted %d of %d (%d failed this batch).', $next, count( $queue ), $failed );
+
+		wp_send_json_success( [
+			'done'    => $done,
+			'offset'  => $next,
+			'total'   => count( $queue ),
+			'message' => $message,
+		] );
 	}
 
 	// =========================================================================

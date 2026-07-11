@@ -371,7 +371,7 @@ class AdvancedFeatures {
 	}
 
 	public function add_clone_link_to_post_rows( $actions, $post ) {
-		if ( ! current_user_can( 'edit_posts' ) || 'trash' === $post->post_status ) {
+		if ( ! current_user_can( 'edit_post', $post->ID ) || 'trash' === $post->post_status ) {
 			return $actions;
 		}
 		$url = wp_nonce_url(
@@ -383,9 +383,6 @@ class AdvancedFeatures {
 	}
 
 	public function handle_clone_post_action() {
-		if ( ! current_user_can( 'edit_posts' ) ) {
-			wp_die( esc_html__( 'Permission denied.', 'whippet' ) );
-		}
 		$post_id = isset( $_GET['post'] ) ? absint( $_GET['post'] ) : 0;
 		if ( ! $post_id || ! wp_verify_nonce( $_GET['_wpnonce'] ?? '', 'whippet_clone_post_' . $post_id ) ) {
 			wp_die( esc_html__( 'Invalid request.', 'whippet' ) );
@@ -394,6 +391,10 @@ class AdvancedFeatures {
 		$post = get_post( $post_id );
 		if ( ! $post ) {
 			wp_die( esc_html__( 'Post not found.', 'whippet' ) );
+		}
+
+		if ( ! current_user_can( 'edit_post', $post_id ) ) {
+			wp_die( esc_html__( 'Permission denied.', 'whippet' ) );
 		}
 
 		$new_id = wp_insert_post(

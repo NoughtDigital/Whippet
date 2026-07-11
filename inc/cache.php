@@ -184,6 +184,12 @@ class Cache {
 			}
 		}
 
+		$writes = (int) get_option( 'whippet_cache_write_count', 0 ) + 1;
+		update_option( 'whippet_cache_write_count', $writes, false );
+		if ( 0 === ( $writes % 25 ) ) {
+			$this->enforce_cache_quota();
+		}
+
 		return $html;
 	}
 
@@ -230,6 +236,7 @@ class Cache {
 	 */
 	public function clear_all_cache() {
 		$this->recursive_rmdir( $this->cache_dir, false );
+		\Whippet\Helper::audit_log( 'clear_all_cache' );
 	}
 
 	// -------------------------------------------------------------------------
@@ -237,19 +244,36 @@ class Cache {
 	// -------------------------------------------------------------------------
 
 	/**
-	 * WP-Cron callback: crawl every public URL to warm up the cache.
+	 * WP-Cron callback: crawl queued public URLs to warm up the cache (batched).
 	 */
 	public function cron_preload_cache() {
-		foreach ( $this->get_all_public_urls() as $url ) {
+		$queue = get_option( 'whippet_preload_queue', array() );
+		if ( ! is_array( $queue ) || empty( $queue ) ) {
+			$queue = $this->get_all_public_urls();
+		}
+
+		$batch = array_splice( $queue, 0, 25 );
+		foreach ( $batch as $url ) {
 			wp_remote_get(
 				$url,
 				array(
 					'timeout'    => 15,
-					'blocking'   => false,
+					'blocking'   => true,
 					'user-agent' => 'WhippetCachePreloader/1.0 (compatible; WordPress)',
-					'sslverify'  => false,
+					'sslverify'  => \Whippet\Helper::ssl_verify(),
 				)
 			);
+			usleep( 100000 );
+		}
+
+		if ( ! empty( $queue ) ) {
+			update_option( 'whippet_preload_queue', array_values( $queue ), false );
+			if ( ! wp_next_scheduled( 'whippet_cache_preload_event' ) ) {
+				wp_schedule_single_event( time() + 5, 'whippet_cache_preload_event' );
+			}
+		} else {
+			delete_option( 'whippet_preload_queue' );
+			$this->enforce_cache_quota();
 		}
 	}
 
@@ -262,8 +286,94 @@ class Cache {
 			wp_send_json_error( array( 'message' => __( 'Permission denied.', 'whippet' ) ) );
 		}
 		$this->clear_all_cache();
-		wp_schedule_single_event( time(), 'whippet_cache_preload_event' );
+		$urls = $this->get_all_public_urls();
+		update_option( 'whippet_preload_queue', $urls, false );
+		if ( ! wp_next_scheduled( 'whippet_cache_preload_event' ) ) {
+			wp_schedule_single_event( time(), 'whippet_cache_preload_event' );
+		}
 		wp_send_json_success( array( 'message' => __( 'Cache cleared. Preload started in the background.', 'whippet' ) ) );
+	}
+
+	/**
+	 * Enforce disk quota on the cache directory.
+	 * Deletes oldest files until usage is under 80% of the configured maximum.
+	 */
+	public function enforce_cache_quota() {
+		$max_mb = (int) get_option( 'whippet_cache_max_mb', 500 );
+		if ( $max_mb < 1 ) {
+			$max_mb = 500;
+		}
+		$max_bytes = $max_mb * 1048576;
+		$total     = $this->get_cache_dir_size();
+		if ( $total <= $max_bytes ) {
+			return;
+		}
+
+		$target = (int) ( $max_bytes * 0.8 );
+		$files  = $this->list_cache_files_by_mtime();
+		foreach ( $files as $path => $mtime ) {
+			if ( $total <= $target ) {
+				break;
+			}
+			if ( ! is_file( $path ) ) {
+				continue;
+			}
+			$size = (int) @filesize( $path ); // phpcs:ignore WordPress.PHP.NoSilencedErrors
+			if ( @unlink( $path ) ) { // phpcs:ignore WordPress.PHP.NoSilencedErrors
+				$total -= $size;
+			}
+		}
+	}
+
+	/**
+	 * Recursive size of the cache directory in bytes.
+	 *
+	 * @return int
+	 */
+	private function get_cache_dir_size() {
+		$bytes = 0;
+		if ( ! is_dir( $this->cache_dir ) ) {
+			return 0;
+		}
+		try {
+			$iter = new \RecursiveIteratorIterator(
+				new \RecursiveDirectoryIterator( $this->cache_dir, \RecursiveDirectoryIterator::SKIP_DOTS )
+			);
+			foreach ( $iter as $f ) {
+				if ( $f->isFile() ) {
+					$bytes += $f->getSize();
+				}
+			}
+		} catch ( \Throwable $e ) {
+			return $bytes;
+		}
+		return $bytes;
+	}
+
+	/**
+	 * List cache files ordered by mtime ascending (oldest first).
+	 *
+	 * @return array<string,int> path => mtime
+	 */
+	private function list_cache_files_by_mtime() {
+		$files = array();
+		if ( ! is_dir( $this->cache_dir ) ) {
+			return $files;
+		}
+		try {
+			$iter = new \RecursiveIteratorIterator(
+				new \RecursiveDirectoryIterator( $this->cache_dir, \RecursiveDirectoryIterator::SKIP_DOTS )
+			);
+			foreach ( $iter as $f ) {
+				if ( $f->isFile() ) {
+					$files[ $f->getPathname() ] = (int) $f->getMTime();
+				}
+			}
+		} catch ( \Throwable $e ) {
+			return $files;
+		}
+		asort( $files, SORT_NUMERIC );
+		return $files;
 	}
 
 	/**

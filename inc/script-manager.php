@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 // Database check is handled in Plugin::activate()
 
 global $whippet_db_version;
-$whippet_db_version = '1.4';
+$whippet_db_version = '1.5';
 
 /**
  * Created certain tables
@@ -34,7 +34,9 @@ function whippet_create_db( $table ) {
 				handler_name varchar(128) DEFAULT '' NOT NULL,
 				url varchar(255) DEFAULT '' NOT NULL,
 				regex TEXT NOT NULL DEFAULT '',
-				PRIMARY KEY (id)
+				PRIMARY KEY (id),
+				KEY url (url(191)),
+				KEY handler_name (handler_name)
 			) $charset_collate;";
 			break;
 		case 'whippet_enabled':
@@ -44,7 +46,10 @@ function whippet_create_db( $table ) {
 				handler_name varchar(128) DEFAULT '' NOT NULL,
 				content_type varchar(64) DEFAULT '' NOT NULL,
 				url varchar(255) DEFAULT '' NOT NULL,
-				PRIMARY KEY (id)
+				PRIMARY KEY (id),
+				KEY url (url(191)),
+				KEY content_type (content_type),
+				KEY handler_name (handler_name)
 			) $charset_collate;";
 			break;
 		case 'whippet_p_disabled':
@@ -53,7 +58,9 @@ function whippet_create_db( $table ) {
 				name varchar(128) DEFAULT '' NOT NULL,
 				url varchar(255) DEFAULT '' NOT NULL,
 				regex TEXT NOT NULL,
-				PRIMARY KEY (id)
+				PRIMARY KEY (id),
+				KEY url (url(191)),
+				KEY name (name)
 			) $charset_collate;";
 			break;
 		case 'whippet_p_enabled':
@@ -62,7 +69,10 @@ function whippet_create_db( $table ) {
 				name varchar(128) DEFAULT '' NOT NULL,
 				content_type varchar(64) DEFAULT '' NOT NULL,
 				url varchar(255) DEFAULT '' NOT NULL,
-				PRIMARY KEY (id)
+				PRIMARY KEY (id),
+				KEY url (url(191)),
+				KEY name (name),
+				KEY content_type (content_type)
 			) $charset_collate;";
 			break;
 	}
@@ -101,6 +111,14 @@ function whippet_check_db() {
 
 	if ( version_compare( $current_db_version, 1.4 , '<' ) ) {
 		whippet_create_db( 'whippet_disabled' );
+		$updated = true;
+	}
+
+	if ( version_compare( $current_db_version, '1.5', '<' ) ) {
+		whippet_create_db( 'whippet_disabled' );
+		whippet_create_db( 'whippet_enabled' );
+		whippet_create_db( 'whippet_p_disabled' );
+		whippet_create_db( 'whippet_p_enabled' );
 		$updated = true;
 	}
 
@@ -890,9 +908,15 @@ class Whippet {
 			$mu_mode_new = ! empty( $_POST['whippet_scripts_mu_mode'] );
 			if ( $mu_mode_new !== $mu_mode_old ) {
 				update_option( 'whippet_scripts_mu_mode', $mu_mode_new ? 1 : 0 );
-				if ( $mu_mode_new && function_exists( 'whippet_scripts_install_mu_plugin' ) ) {
-					$install = whippet_scripts_install_mu_plugin();
-					set_transient( 'whippet_mu_install_result', $install, 30 );
+				if ( $mu_mode_new ) {
+					$token = (string) get_option( 'whippet_mu_bypass_token', '' );
+					if ( '' === $token ) {
+						update_option( 'whippet_mu_bypass_token', wp_generate_password( 32, false, false ), false );
+					}
+					if ( function_exists( 'whippet_scripts_install_mu_plugin' ) ) {
+						$install = whippet_scripts_install_mu_plugin();
+						set_transient( 'whippet_mu_install_result', $install, 30 );
+					}
 				}
 			}
 		}
@@ -928,6 +952,11 @@ class Whippet {
 			} elseif ( function_exists( 'rocket_clean_files' ) ) {
 				rocket_clean_files( $http_referer );
 			}
+		}
+
+		wp_cache_set( 'whippet_sm_rules_version', time(), 'whippet' );
+		if ( function_exists( 'wp_cache_flush_group' ) ) {
+			wp_cache_flush_group( 'whippet' );
 		}
 
 		// Redirect to refresh plugins configuration.
@@ -1136,15 +1165,27 @@ class Whippet {
 	public function load_configuration() {
 		global $wpdb;
 
+		// Verify that database structure is correct.
+		whippet_check_db();
+
+		$current_url   = $this->get_current_url();
+		$rules_version = wp_cache_get( 'whippet_sm_rules_version', 'whippet' );
+		if ( false === $rules_version ) {
+			$rules_version = 0;
+		}
+		$cache_key = 'whippet_sm_config_' . md5( $current_url . '|' . (string) $rules_version );
+		$cached    = wp_cache_get( $cache_key, 'whippet' );
+		if ( is_array( $cached ) && isset( $cached['assets'], $cached['plugins'] ) ) {
+			$this->whippet_data         = $cached['assets'];
+			$this->whippet_data_plugins = $cached['plugins'];
+			return;
+		}
+
 		/**
 		 * CSS/JS
 		 */
 		$out = array();
 
-		// Verify that database structure is correct.
-		whippet_check_db();
-
-		$current_url = $this->get_current_url();
 		$disabled_global = $wpdb->get_results( "SELECT * FROM {$wpdb->prefix}whippet_disabled WHERE url = '' AND (regex IS NULL OR regex = '')", ARRAY_A );
 		$disabled_here  = $wpdb->get_results( $wpdb->prepare(
 			"SELECT * FROM {$wpdb->prefix}whippet_disabled WHERE url = %s",
@@ -1273,6 +1314,16 @@ class Whippet {
 		}
 
 		$this->whippet_data_plugins = $out;
+
+		wp_cache_set(
+			$cache_key,
+			array(
+				'assets'  => $this->whippet_data,
+				'plugins' => $this->whippet_data_plugins,
+			),
+			'whippet',
+			60
+		);
 	}
 
 	/**

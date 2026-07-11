@@ -90,6 +90,14 @@ class DbCleanup {
 		$results = $this->run_cleanup_tasks();
 		$total   = array_sum( $results );
 
+		\Whippet\Helper::audit_log(
+			'db_cleanup_run',
+			array(
+				'total'   => $total,
+				'results' => $results,
+			)
+		);
+
 		update_option( 'whippet_db_cleanup_last_run', array(
 			'time'    => time(),
 			'total'   => $total,

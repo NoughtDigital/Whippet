@@ -3,5 +3,11 @@
 # ignore node dependency directories
 node_modules/
 
+# ignore PHP dependencies (Composer)
+/vendor/
+
+# ignore PHPUnit cache
+.phpunit.result.cache
+
 # ignore dist directories
 dist/

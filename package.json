@@ -11,6 +11,7 @@
     "lint:styles": "cross-env stylelint './resources/scss/**/*.scss' --syntax scss",
     "lint:scripts": "cross-env eslint './resources/js/**/*.js'",
     "lint:php": "cross-env ./vendor/bin/phpcs .",
+    "test": "composer test",
     "i18n": "npm run i18n:textdomain && npm run i18n:pot",
     "i18n:textdomain": "npx wpi18n addtextdomain --exclude=vendor,node_modules",
     "i18n:pot": "npx wpi18n makepot"

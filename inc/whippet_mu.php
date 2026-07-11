@@ -151,12 +151,34 @@ function whippet_mu_filter_active_plugins( $plugins ) {
 		return $plugins;
 	}
 
-	if ( isset( $_GET['whippet_mu_mode'] ) && sanitize_text_field( wp_unslash( $_GET['whippet_mu_mode'] ) ) === 'off' ) {
-		return $plugins;
+	if ( isset( $_GET['whippet_mu_mode'] ) && 'off' === sanitize_text_field( wp_unslash( $_GET['whippet_mu_mode'] ) ) ) {
+		$allowed = false;
+		if (
+			function_exists( 'is_user_logged_in' ) && is_user_logged_in()
+			&& function_exists( 'current_user_can' ) && current_user_can( 'manage_options' )
+			&& isset( $_GET['_wpnonce'] )
+			&& function_exists( 'wp_verify_nonce' )
+			&& wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ), 'whippet_mu_mode' )
+		) {
+			$allowed = true;
+		}
+		$token = (string) get_option( 'whippet_mu_bypass_token', '' );
+		if ( $token && isset( $_GET['whippet_mu_key'] ) && hash_equals( $token, sanitize_text_field( wp_unslash( $_GET['whippet_mu_key'] ) ) ) ) {
+			$allowed = true;
+		}
+		if ( $allowed ) {
+			return $plugins;
+		}
 	}
 
 	if ( ! get_option( 'whippet_scripts_mu_mode', 0 ) ) {
 		return $plugins;
+	}
+
+	// Ensure a bypass token exists once MU mode is active (for emergency recovery).
+	$existing_token = (string) get_option( 'whippet_mu_bypass_token', '' );
+	if ( '' === $existing_token && function_exists( 'wp_generate_password' ) ) {
+		update_option( 'whippet_mu_bypass_token', wp_generate_password( 32, false, false ), false );
 	}
 
 	if ( whippet_mu_should_bypass_request() ) {
