@@ -516,22 +516,22 @@ if ( ! in_array( $whippet_active_tab, $whippet_valid_tabs, true ) ) {
 
 			<div class="wa-card">
 				<div class="wa-card-section-title"><?php esc_html_e( 'Cache-Control Header', 'whippet' ); ?></div>
+				<div class="wa-card-body">
 				<?php if ( $cc_checked ) :
 					$no_store = strpos( $cc_header ?? '', 'no-store' ) !== false; ?>
 					<?php if ( ! $no_store ) : ?>
-						<p style="font-size:.8125rem;color:#15803d;padding:0 1.25rem .75rem;">✓ <?php esc_html_e( '"no-store" not found — caching is not blocked by your server.', 'whippet' ); ?></p>
+						<p class="wa-card-status is-ok">✓ <?php esc_html_e( '"no-store" not found — caching is not blocked by your server.', 'whippet' ); ?></p>
 					<?php else : ?>
-						<p style="font-size:.8125rem;color:#b91c1c;padding:0 1.25rem .5rem;">✗ <?php esc_html_e( '"no-store" found — server is preventing caching. Contact your host.', 'whippet' ); ?></p>
-						<p style="font-size:.8125rem;padding:0 1.25rem .75rem;"><?php esc_html_e( 'Current:', 'whippet' ); ?> <code><?php echo esc_html( $cc_header ); ?></code></p>
+						<p class="wa-card-status is-error">✗ <?php esc_html_e( '"no-store" found — server is preventing caching. Contact your host.', 'whippet' ); ?></p>
+						<p><?php esc_html_e( 'Current:', 'whippet' ); ?> <code><?php echo esc_html( $cc_header ); ?></code></p>
 					<?php endif; ?>
 				<?php else : ?>
-					<p style="font-size:.8125rem;color:#64748b;padding:0 1.25rem .75rem;"><?php esc_html_e( 'Makes an HTTP request to your homepage to inspect response headers.', 'whippet' ); ?></p>
-					<div style="padding:0 1.25rem 1rem;">
-						<a href="<?php echo esc_url( add_query_arg( array( 'page' => 'whippet', 'whippet_tools' => '1' ), admin_url( 'tools.php' ) ) . '#tools' ); ?>" class="button button-secondary">
-							<?php esc_html_e( 'Run Cache-Control Check', 'whippet' ); ?>
-						</a>
-					</div>
+					<p class="wa-card-status is-muted"><?php esc_html_e( 'Makes an HTTP request to your homepage to inspect response headers.', 'whippet' ); ?></p>
+					<a href="<?php echo esc_url( add_query_arg( array( 'page' => 'whippet', 'whippet_tools' => '1' ), admin_url( 'tools.php' ) ) . '#tools' ); ?>" class="button button-secondary">
+						<?php esc_html_e( 'Run Cache-Control Check', 'whippet' ); ?>
+					</a>
 				<?php endif; ?>
+				</div>
 			</div>
 			<?php \Whippet\AssetIntegrity::render_ui(); ?>
 			<?php whippet_render_snapshots_panel(); ?>
@@ -1166,81 +1166,87 @@ if ( ! in_array( $whippet_active_tab, $whippet_valid_tabs, true ) ) {
 
 		<div class="wa-card" style="margin-bottom:1rem;">
 			<div class="wa-card-section-title"><?php esc_html_e( 'Full Site Scan', 'whippet' ); ?></div>
-			<p style="padding:0 1.25rem;font-size:.8125rem;color:#64748b;">
-				<?php esc_html_e( 'Crawls every page, clusters templates, and generates critical CSS in bulk — one file per template cluster.', 'whippet' ); ?>
-				<?php if ( $cce_scan_id ) : ?>
-					<br><?php esc_html_e( 'Last scan ID:', 'whippet' ); ?> <code><?php echo esc_html( $cce_scan_id ); ?></code>
-					<?php if ( $cce_scan_status ) : ?>
-						&nbsp;<span style="color:<?php echo $cce_scan_status === 'completed' ? '#10b981' : '#f59e0b'; ?>;">(<?php echo esc_html( $cce_scan_status ); ?>)</span>
+			<div class="wa-card-body">
+				<p class="wa-card-status is-muted">
+					<?php esc_html_e( 'Crawls every page, clusters templates, and generates critical CSS in bulk — one file per template cluster.', 'whippet' ); ?>
+					<?php if ( $cce_scan_id ) : ?>
+						<br><?php esc_html_e( 'Last scan ID:', 'whippet' ); ?> <code><?php echo esc_html( $cce_scan_id ); ?></code>
+						<?php if ( $cce_scan_status ) : ?>
+							&nbsp;<span style="color:<?php echo $cce_scan_status === 'completed' ? '#10b981' : '#f59e0b'; ?>;">(<?php echo esc_html( $cce_scan_status ); ?>)</span>
+						<?php endif; ?>
 					<?php endif; ?>
-				<?php endif; ?>
-			</p>
-			<div style="padding:0 1.25rem 1.25rem;display:flex;align-items:center;gap:.75rem;">
-				<button type="button" id="cce-scan-btn" class="button button-secondary" <?php echo $cce_healthy ? '' : 'disabled title="' . esc_attr__( 'Service unreachable. Ensure the service is running.', 'whippet' ) . '"'; ?>>
-					<?php esc_html_e( 'Start Full Scan', 'whippet' ); ?>
-				</button>
-				<span id="cce-scan-status" style="font-size:.8125rem;color:#64748b;"></span>
-			</div>
+				</p>
+				<div class="wa-card-row">
+					<button type="button" id="cce-scan-btn" class="button button-secondary" <?php echo $cce_healthy ? '' : 'disabled title="' . esc_attr__( 'Service unreachable. Ensure the service is running.', 'whippet' ) . '"'; ?>>
+						<?php esc_html_e( 'Start Full Scan', 'whippet' ); ?>
+					</button>
+					<span id="cce-scan-status" class="wa-card-status is-muted"></span>
+				</div>
 
-			<div id="cce-clusters-section" style="padding:0 1.25rem 1.25rem;<?php echo empty( $cce_cluster_ids ) ? 'display:none;' : ''; ?>">
-				<div style="font-size:.75rem;font-weight:600;color:#475569;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.5rem;"><?php esc_html_e( 'Template Clusters', 'whippet' ); ?></div>
-				<table style="width:100%;border-collapse:collapse;font-size:.8125rem;">
-					<thead>
-						<tr style="border-bottom:1px solid #e2e8f0;">
-							<th style="text-align:left;padding:.35rem .5rem;color:#64748b;font-weight:500;"><?php esc_html_e( 'Cluster', 'whippet' ); ?></th>
-							<th style="text-align:right;padding:.35rem .5rem;color:#64748b;font-weight:500;"><?php esc_html_e( 'Posts', 'whippet' ); ?></th>
-							<th style="text-align:right;padding:.35rem .5rem;color:#64748b;font-weight:500;"><?php esc_html_e( 'Size', 'whippet' ); ?></th>
-							<th style="text-align:right;padding:.35rem .5rem;color:#64748b;font-weight:500;"><?php esc_html_e( 'Reduction', 'whippet' ); ?></th>
-							<th style="text-align:center;padding:.35rem .5rem;color:#64748b;font-weight:500;"><?php esc_html_e( 'Status', 'whippet' ); ?></th>
+				<div id="cce-clusters-section" class="wa-cce-clusters" style="<?php echo empty( $cce_cluster_ids ) ? 'display:none;' : ''; ?>">
+					<div class="wa-cce-clusters-title"><?php esc_html_e( 'Template Clusters', 'whippet' ); ?></div>
+					<table class="wa-cce-clusters-table">
+						<thead>
+							<tr>
+								<th><?php esc_html_e( 'Cluster', 'whippet' ); ?></th>
+								<th class="is-num"><?php esc_html_e( 'Posts', 'whippet' ); ?></th>
+								<th class="is-num"><?php esc_html_e( 'Size', 'whippet' ); ?></th>
+								<th class="is-num"><?php esc_html_e( 'Reduction', 'whippet' ); ?></th>
+								<th class="is-center"><?php esc_html_e( 'Status', 'whippet' ); ?></th>
+							</tr>
+						</thead>
+						<tbody id="cce-clusters-body">
+						<?php foreach ( $cce_cluster_ids as $cid ) :
+							$ckey    = md5( $cid );
+							$cmeta   = get_option( 'cce_cluster_meta_'    . $ckey, [] );
+							$cstatus = get_option( 'cce_cluster_status_'  . $ckey, 'pending' );
+							$cbytes  = (int) get_option( 'cce_cluster_bytes_'   . $ckey, 0 );
+							$csavings = (float) get_option( 'cce_cluster_savings_' . $ckey, 0 );
+							$color   = $cstatus === 'completed' ? '#10b981' : ( $cstatus === 'failed' ? '#ef4444' : '#f59e0b' );
+						?>
+						<tr>
+							<td class="is-mono"><?php echo esc_html( $cid ); ?></td>
+							<td class="is-num"><?php echo esc_html( $cmeta['post_count'] ?? '—' ); ?></td>
+							<td class="is-num"><?php echo $cbytes ? esc_html( number_format( $cbytes ) . ' B' ) : '—'; ?></td>
+							<td class="is-num"><?php echo $csavings ? esc_html( $csavings . '%' ) : '—'; ?></td>
+							<td class="is-center"><span style="color:<?php echo esc_attr( $color ); ?>;font-weight:500;"><?php echo esc_html( $cstatus ); ?></span></td>
 						</tr>
-					</thead>
-					<tbody id="cce-clusters-body">
-					<?php foreach ( $cce_cluster_ids as $cid ) :
-						$ckey    = md5( $cid );
-						$cmeta   = get_option( 'cce_cluster_meta_'    . $ckey, [] );
-						$cstatus = get_option( 'cce_cluster_status_'  . $ckey, 'pending' );
-						$cbytes  = (int) get_option( 'cce_cluster_bytes_'   . $ckey, 0 );
-						$csavings = (float) get_option( 'cce_cluster_savings_' . $ckey, 0 );
-						$color   = $cstatus === 'completed' ? '#10b981' : ( $cstatus === 'failed' ? '#ef4444' : '#f59e0b' );
-					?>
-					<tr style="border-bottom:1px solid #f1f5f9;">
-						<td style="padding:.4rem .5rem;font-family:monospace;"><?php echo esc_html( $cid ); ?></td>
-						<td style="padding:.4rem .5rem;text-align:right;color:#64748b;"><?php echo esc_html( $cmeta['post_count'] ?? '—' ); ?></td>
-						<td style="padding:.4rem .5rem;text-align:right;color:#64748b;"><?php echo $cbytes ? esc_html( number_format( $cbytes ) . ' B' ) : '—'; ?></td>
-						<td style="padding:.4rem .5rem;text-align:right;color:#64748b;"><?php echo $csavings ? esc_html( $csavings . '%' ) : '—'; ?></td>
-						<td style="padding:.4rem .5rem;text-align:center;"><span style="color:<?php echo esc_attr( $color ); ?>;font-weight:500;"><?php echo esc_html( $cstatus ); ?></span></td>
-					</tr>
-					<?php endforeach; ?>
-					</tbody>
-				</table>
+						<?php endforeach; ?>
+						</tbody>
+					</table>
+				</div>
 			</div>
 		</div>
 
 		<div class="wa-card" style="margin-bottom:1rem;">
 			<div class="wa-card-section-title"><?php esc_html_e( 'Regenerate All', 'whippet' ); ?></div>
-			<p style="padding:0 1.25rem;font-size:.8125rem;color:#64748b;">
-				<?php esc_html_e( 'Re-queue a fresh critical CSS job for every published post and page. Use after a theme update or major layout change.', 'whippet' ); ?>
-			</p>
-			<div style="padding:0 1.25rem 1.25rem;display:flex;align-items:center;gap:.75rem;">
-				<button type="button" id="cce-regen-all-btn" class="button button-secondary" <?php echo $cce_healthy ? '' : 'disabled title="' . esc_attr__( 'Service unreachable. Ensure the service is running.', 'whippet' ) . '"'; ?>>
-					<?php esc_html_e( 'Regenerate All Posts', 'whippet' ); ?>
-				</button>
-				<span id="cce-regen-all-status" style="font-size:.8125rem;color:#64748b;"></span>
+			<div class="wa-card-body">
+				<p class="wa-card-status is-muted">
+					<?php esc_html_e( 'Re-queue a fresh critical CSS job for every published post and page. Use after a theme update or major layout change.', 'whippet' ); ?>
+				</p>
+				<div class="wa-card-row">
+					<button type="button" id="cce-regen-all-btn" class="button button-secondary" <?php echo $cce_healthy ? '' : 'disabled title="' . esc_attr__( 'Service unreachable. Ensure the service is running.', 'whippet' ) . '"'; ?>>
+						<?php esc_html_e( 'Regenerate All Posts', 'whippet' ); ?>
+					</button>
+					<span id="cce-regen-all-status" class="wa-card-status is-muted"></span>
+				</div>
 			</div>
 		</div>
 
 		<?php if ( $cce_site_id ) : ?>
 		<div class="wa-card" style="margin-bottom:1rem;">
 			<div class="wa-card-section-title"><?php esc_html_e( 'Purge CSS Cache', 'whippet' ); ?></div>
-			<p style="padding:0 1.25rem;font-size:.8125rem;color:#64748b;">
-				<?php esc_html_e( 'Site ID:', 'whippet' ); ?> <code><?php echo esc_html( $cce_site_id ); ?></code>
-			</p>
-			<div style="padding:0 1.25rem 1.25rem;display:flex;align-items:center;gap:.75rem;">
-				<button type="button" id="cce-purge-btn" class="button button-secondary"
-				        data-site-id="<?php echo esc_attr( $cce_site_id ); ?>">
-					<?php esc_html_e( 'Purge Cache', 'whippet' ); ?>
-				</button>
-				<span id="cce-purge-status" style="font-size:.8125rem;color:#64748b;"></span>
+			<div class="wa-card-body">
+				<p class="wa-card-status is-muted">
+					<?php esc_html_e( 'Site ID:', 'whippet' ); ?> <code><?php echo esc_html( $cce_site_id ); ?></code>
+				</p>
+				<div class="wa-card-row">
+					<button type="button" id="cce-purge-btn" class="button button-secondary"
+					        data-site-id="<?php echo esc_attr( $cce_site_id ); ?>">
+						<?php esc_html_e( 'Purge Cache', 'whippet' ); ?>
+					</button>
+					<span id="cce-purge-status" class="wa-card-status is-muted"></span>
+				</div>
 			</div>
 		</div>
 		<?php endif; ?>
@@ -1273,12 +1279,12 @@ if ( ! in_array( $whippet_active_tab, $whippet_valid_tabs, true ) ) {
 			clustersBody.innerHTML = data.clusters.map(function(cluster) {
 				var savings = cluster.savings ? cluster.savings + '%' : '\u2014';
 				var count = cluster.postCount || '\u2014';
-				return '<tr style="border-bottom:1px solid #f1f5f9;">'
-					+ '<td style="padding:.4rem .5rem;font-family:monospace;">' + cluster.id + '</td>'
-					+ '<td style="padding:.4rem .5rem;text-align:right;color:#64748b;">' + count + '</td>'
-					+ '<td style="padding:.4rem .5rem;text-align:right;color:#64748b;">' + cceFormatBytes(cluster.bytes) + '</td>'
-					+ '<td style="padding:.4rem .5rem;text-align:right;color:#64748b;">' + savings + '</td>'
-					+ '<td style="padding:.4rem .5rem;text-align:center;"><span style="color:' + cluster.statusColor + ';font-weight:500;">' + cluster.status + '</span></td>'
+				return '<tr>'
+					+ '<td class="is-mono">' + cluster.id + '</td>'
+					+ '<td class="is-num">' + count + '</td>'
+					+ '<td class="is-num">' + cceFormatBytes(cluster.bytes) + '</td>'
+					+ '<td class="is-num">' + savings + '</td>'
+					+ '<td class="is-center"><span style="color:' + cluster.statusColor + ';font-weight:500;">' + cluster.status + '</span></td>'
 					+ '</tr>';
 			}).join('');
 		}

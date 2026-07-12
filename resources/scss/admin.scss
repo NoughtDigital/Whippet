@@ -248,7 +248,8 @@
 	padding: 1rem 1.5rem 1.25rem;
 
 	> p,
-	> .description {
+	> .description,
+	.wa-card-status {
 		margin: 0;
 		font-size: 0.8125rem;
 		line-height: 1.55;
@@ -259,10 +260,15 @@
 		color: var(--wa-text-muted);
 	}
 
+	.wa-card-status.is-ok { color: #15803d; }
+	.wa-card-status.is-error { color: #b91c1c; }
+	.wa-card-status.is-muted { color: var(--wa-text-muted); }
+
 	> form,
 	> ul,
 	> pre,
-	> .wa-2col {
+	> .wa-2col,
+	> .wa-cce-clusters {
 		margin: 0;
 		width: 100%;
 	}
@@ -374,6 +380,44 @@
 .wa-card > .form-table,
 .wa-card > form > .form-table {
 	margin: 0.5rem 0 0;
+}
+
+.wa-cce-clusters {
+	width: 100%;
+}
+
+.wa-cce-clusters-title {
+	font-size: 0.75rem;
+	font-weight: 600;
+	color: var(--wa-text-sm);
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+	margin-bottom: 0.5rem;
+}
+
+.wa-cce-clusters-table {
+	width: 100%;
+	border-collapse: collapse;
+	font-size: 0.8125rem;
+
+	th,
+	td {
+		padding: 0.4rem 0.5rem;
+		border-bottom: 1px solid var(--wa-border-light);
+	}
+
+	th {
+		text-align: left;
+		color: var(--wa-text-muted);
+		font-weight: 500;
+		border-bottom-color: var(--wa-border);
+	}
+
+	.is-num { text-align: right; color: var(--wa-text-muted); }
+	.is-center { text-align: center; }
+	.is-mono { font-family: "SF Mono", Monaco, Consolas, "Courier New", monospace; }
+	th.is-num,
+	th.is-center { color: var(--wa-text-muted); }
 }
 
 /* ─── Sub-tab pills ────────────────────────────────────────────────────── */
