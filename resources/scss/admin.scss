@@ -1515,6 +1515,25 @@
 	margin: 0 0 0.75rem;
 }
 
+.wa-premium-panel-body.wa-premium-locked {
+	opacity: 0.55;
+	filter: grayscale(0.2);
+	user-select: none;
+
+	input,
+	select,
+	textarea,
+	button,
+	.button,
+	.wa-subtab-btn,
+	.wa-ie-format-btn,
+	.wa-ie-refresh,
+	a {
+		pointer-events: none !important;
+		cursor: not-allowed !important;
+	}
+}
+
 .wa-premium-modal {
 	position: fixed;
 	inset: 0;

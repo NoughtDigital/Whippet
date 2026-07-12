@@ -14,6 +14,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 class CloudConnect {
 	public static function boot() {
 		add_action( 'admin_init', array( __CLASS__, 'save' ) );
+		add_action( 'admin_init', array( __CLASS__, 'block_settings_saves' ), 1 );
+		add_action( 'admin_init', array( __CLASS__, 'register_ajax_guards' ), 1 );
 		add_action( 'wp_ajax_whippet_cloud_test', array( __CLASS__, 'ajax_test' ) );
 		add_action( 'wp_ajax_whippet_premium_waitlist', array( __CLASS__, 'ajax_waitlist' ) );
 	}
@@ -22,11 +24,93 @@ class CloudConnect {
 		return untrailingslashit( (string) apply_filters( 'whippet_cloud_api_url', 'https://api.whippetwp.com' ) );
 	}
 
+	/**
+	 * Whether Premium admin controls may mutate settings / run Cloud actions.
+	 * Locked until a Pro/Agency plan is active (Coming soon).
+	 *
+	 * @return bool
+	 */
+	public static function controls_enabled() {
+		return (bool) apply_filters( 'whippet_premium_controls_enabled', self::is_pro() );
+	}
+
+	/**
+	 * User-facing lock message.
+	 *
+	 * @return string
+	 */
+	public static function locked_message() {
+		return __( 'Whippet Cloud Premium is coming soon. These controls are not active yet.', 'whippet' );
+	}
+
+	/**
+	 * Reject Premium settings form posts while locked.
+	 */
+	public static function block_settings_saves() {
+		if ( self::controls_enabled() || empty( $_POST['option_page'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
+			return;
+		}
+		$page = sanitize_key( wp_unslash( $_POST['option_page'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
+		if ( ! in_array( $page, array( 'image_engine', 'cce_settings' ), true ) ) {
+			return;
+		}
+		wp_die(
+			esc_html( self::locked_message() ),
+			esc_html__( 'Coming soon', 'whippet' ),
+			array( 'response' => 403 )
+		);
+	}
+
+	/**
+	 * Short-circuit Premium AJAX actions while locked.
+	 */
+	public static function register_ajax_guards() {
+		if ( self::controls_enabled() ) {
+			return;
+		}
+		$actions = array(
+			'ie_sync_all',
+			'ie_send_attachment',
+			'ie_restore_attachment',
+			'ie_delete_original',
+			'ie_bulk_restore',
+			'ie_bulk_delete_originals',
+			'cce_generate',
+			'cce_status',
+			'cce_scan',
+			'cce_cluster_status',
+			'cce_purge',
+			'cce_test',
+			'cce_regenerate_all',
+			'cce_poll_scan',
+			'whippet_cloud_test',
+		);
+		foreach ( $actions as $action ) {
+			add_action( 'wp_ajax_' . $action, array( __CLASS__, 'reject_ajax' ), 0 );
+		}
+	}
+
+	/**
+	 * JSON reject for locked Premium AJAX.
+	 */
+	public static function reject_ajax() {
+		wp_send_json_error( array( 'message' => self::locked_message() ), 403 );
+	}
+
 	public static function save() {
 		if ( empty( $_POST['whippet_cloud_save'] ) || ! Helper::user_can_manage() ) {
 			return;
 		}
 		check_admin_referer( 'whippet_cloud_save', 'whippet_cloud_nonce' );
+		if ( ! self::controls_enabled() ) {
+			add_settings_error(
+				'whippet_cloud',
+				'whippet_cloud_locked',
+				self::locked_message(),
+				'error'
+			);
+			return;
+		}
 		$key = isset( $_POST['whippet_cloud_api_key'] ) ? trim( sanitize_text_field( wp_unslash( $_POST['whippet_cloud_api_key'] ) ) ) : '';
 		if ( '' !== $key && false === strpos( $key, '*' ) ) {
 			update_option( 'whippet_cloud_api_key', $key, false );
@@ -69,6 +153,9 @@ class CloudConnect {
 		check_ajax_referer( 'whippet_cloud_test', 'nonce' );
 		if ( ! Helper::user_can_manage() ) {
 			wp_send_json_error( array( 'message' => __( 'Permission denied.', 'whippet' ) ), 403 );
+		}
+		if ( ! self::controls_enabled() ) {
+			wp_send_json_error( array( 'message' => self::locked_message() ), 403 );
 		}
 		$result = self::test_connection();
 		if ( is_wp_error( $result ) ) {

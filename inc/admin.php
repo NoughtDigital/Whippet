@@ -20,8 +20,9 @@ $whippet_current_user   = wp_get_current_user();
 if ( $whippet_current_user && is_email( $whippet_current_user->user_email ) ) {
 	$whippet_waitlist_email = $whippet_current_user->user_email;
 }
-$whippet_waitlist_saved = (string) get_option( 'whippet_premium_waitlist_email', '' );
-$whippet_premium_unlocked = '' !== $whippet_waitlist_saved;
+$whippet_waitlist_saved      = (string) get_option( 'whippet_premium_waitlist_email', '' );
+$whippet_premium_controls    = class_exists( '\Whippet\CloudConnect' ) && \Whippet\CloudConnect::controls_enabled();
+$whippet_premium_waitlisted  = '' !== $whippet_waitlist_saved;
 ?>
 <div class="wrap whippet-admin" x-data="{
 	activeTab: (function() {
@@ -39,16 +40,8 @@ $whippet_premium_unlocked = '' !== $whippet_waitlist_saved;
 	})(),
 	isDragging: false,
 	premiumModalOpen: false,
-	premiumUnlocked: (function() {
-		if (<?php echo $whippet_premium_unlocked ? 'true' : 'false'; ?>) {
-			return true;
-		}
-		try {
-			return localStorage.getItem('whippet_premium_waitlist_joined') === '1';
-		} catch (e) {
-			return false;
-		}
-	})(),
+	premiumControlsEnabled: <?php echo $whippet_premium_controls ? 'true' : 'false'; ?>,
+	premiumWaitlisted: <?php echo $whippet_premium_waitlisted ? 'true' : 'false'; ?>,
 	premiumWaitlistEmail: '<?php echo esc_js( $whippet_waitlist_saved ? $whippet_waitlist_saved : $whippet_waitlist_email ); ?>',
 	premiumWaitlistBusy: false,
 	premiumWaitlistMessage: '',
@@ -77,7 +70,7 @@ $whippet_premium_unlocked = '' !== $whippet_waitlist_saved;
 		if (this.activeTab !== 'premium') {
 			return;
 		}
-		if (this.premiumUnlocked) {
+		if (this.premiumControlsEnabled || this.premiumWaitlisted) {
 			this.premiumModalOpen = false;
 			return;
 		}
@@ -90,7 +83,7 @@ $whippet_premium_unlocked = '' !== $whippet_waitlist_saved;
 	declinePremium() {
 		this.premiumModalOpen = false;
 		this.premiumWaitlistMessage = '';
-		if (this.premiumUnlocked) {
+		if (this.premiumControlsEnabled || this.premiumWaitlisted) {
 			return;
 		}
 		var dest = this.lastNonPremiumTab || 'dashboard';
@@ -100,10 +93,6 @@ $whippet_premium_unlocked = '' !== $whippet_waitlist_saved;
 		this.setTab(dest);
 	},
 	closePremiumModal() {
-		if (this.premiumUnlocked) {
-			this.premiumModalOpen = false;
-			return;
-		}
 		this.declinePremium();
 	},
 	submitPremiumWaitlist() {
@@ -132,10 +121,7 @@ $whippet_premium_unlocked = '' !== $whippet_waitlist_saved;
 				return;
 			}
 			self.premiumWaitlistMessage = (res.data && res.data.message) ? res.data.message : '<?php echo esc_js( __( 'You are on the list. We will be in touch.', 'whippet' ) ); ?>';
-			self.premiumUnlocked = true;
-			try {
-				localStorage.setItem('whippet_premium_waitlist_joined', '1');
-			} catch (e) {}
+			self.premiumWaitlisted = true;
 			setTimeout(function() { self.premiumModalOpen = false; }, 1200);
 		})
 		.catch(function() {
@@ -799,14 +785,12 @@ $whippet_premium_unlocked = '' !== $whippet_waitlist_saved;
 		<div class="wa-panel" x-show="activeTab === 'premium'" style="<?php echo 'premium' === $whippet_active_tab ? '' : 'display:none'; ?>"
 			 x-transition:enter="wa-fade-in" x-transition:enter-start="wa-fade-start" x-transition:enter-end="wa-fade-end">
 
-			<div x-show="premiumUnlocked" x-cloak>
-
 			<div class="wa-panel-hd">
 				<h2>
 					<?php esc_html_e( 'Premium', 'whippet' ); ?>
 					<span class="wa-premium-badge"><?php esc_html_e( 'Coming soon', 'whippet' ); ?></span>
 				</h2>
-				<p><?php esc_html_e( 'Whippet Cloud Premium brings advanced image optimisation and critical CSS — early access tools are below while we finalise the launch.', 'whippet' ); ?></p>
+				<p><?php esc_html_e( 'Whippet Cloud Premium brings advanced image optimisation and critical CSS — preview the controls below while we finalise the launch.', 'whippet' ); ?></p>
 			</div>
 
 			<div class="wa-premium-teaser-banner">
@@ -819,7 +803,16 @@ $whippet_premium_unlocked = '' !== $whippet_waitlist_saved;
 				</button>
 			</div>
 
-			<p class="wa-premium-early-access-note"><?php esc_html_e( 'Early access: connect a Cloud API key below if you already have one.', 'whippet' ); ?></p>
+			<p class="wa-premium-early-access-note" x-show="!premiumControlsEnabled" x-cloak>
+				<?php esc_html_e( 'Preview only — these controls do nothing until Whippet Cloud Premium launches.', 'whippet' ); ?>
+			</p>
+
+			<div
+				class="wa-premium-panel-body"
+				:class="{ 'wa-premium-locked': !premiumControlsEnabled }"
+				:inert="premiumControlsEnabled ? false : true"
+				@submit.capture="if (!premiumControlsEnabled) { $event.preventDefault(); $event.stopPropagation(); }"
+			>
 
 		<?php whippet_render_cloud_panel(); ?>
 
@@ -1663,7 +1656,7 @@ $whippet_premium_unlocked = '' !== $whippet_waitlist_saved;
 		<?php endif; // $whippet_ptab ?>
 
 			</div>
-			<!-- /premiumUnlocked -->
+			<!-- /wa-premium-panel-body -->
 
 	</div>
 
