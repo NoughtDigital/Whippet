@@ -15,8 +15,9 @@ function whippet_images_settings_responsiveness() {
     $enable_cdn = get_option('whippet_images_enable_cdn');
     $enable_responsive_images = get_option('whippet_images_enable_responsive_images');
 
-    if(!$enable_cdn) echo '<br/><div class="notice notice-error is-dismissible"><p>CDN must be enabled for Responsiveness</p></div>';
-    
+    if ( ! $enable_cdn ) {
+        echo '<div class="notice notice-error is-dismissible"><p>' . esc_html__( 'CDN must be enabled for Responsiveness.', 'whippet' ) . '</p></div>';
+    }
     ?>
     <form method="POST">
         <?php wp_nonce_field('whippet-images', 'whippet-images-settings-form'); ?>

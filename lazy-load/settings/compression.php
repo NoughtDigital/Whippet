@@ -17,8 +17,9 @@ function whippet_images_settings_compression() {
     $enable_compression = get_option('whippet_images_enable_compression');
     $quality = esc_attr(get_option('whippet_images_quality'));
 
-    if(!$enable_cdn) echo '<br/><div class="notice notice-error is-dismissible"><p>CDN must be enabled for Compression</p></div>';
-    
+    if ( ! $enable_cdn ) {
+        echo '<div class="notice notice-error is-dismissible"><p>' . esc_html__( 'CDN must be enabled for Compression.', 'whippet' ) . '</p></div>';
+    }
     ?>
     <form method="POST">
         <?php wp_nonce_field('whippet-images', 'whippet-images-settings-form'); ?>

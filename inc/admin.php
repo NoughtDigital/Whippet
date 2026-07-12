@@ -425,11 +425,6 @@ $whippet_premium_waitlisted  = '' !== $whippet_waitlist_saved;
 		<div class="wa-panel" x-show="activeTab === 'lazyload'" style="<?php echo 'lazyload' === $whippet_active_tab ? '' : 'display:none'; ?>"
 			 x-transition:enter="wa-fade-in" x-transition:enter-start="wa-fade-start" x-transition:enter-end="wa-fade-end">
 
-			<div class="wa-panel-hd">
-				<h2><?php esc_html_e( 'Lazy Load', 'whippet' ); ?></h2>
-				<p><?php esc_html_e( 'Lazy load images and optimise delivery.', 'whippet' ); ?></p>
-			</div>
-
 			<?php
 			$whippet_ltab  = isset( $_GET['whippet_ltab'] ) ? sanitize_text_field( $_GET['whippet_ltab'] ) : 'lazyload';
 			$lazyload_tabs = array(
@@ -439,7 +434,23 @@ $whippet_premium_waitlisted  = '' !== $whippet_waitlist_saved;
 				'compression'    => __( 'Compression', 'whippet' ),
 				'webp'           => __( 'WebP', 'whippet' ),
 			);
+			if ( ! isset( $lazyload_tabs[ $whippet_ltab ] ) ) {
+				$whippet_ltab = 'lazyload';
+			}
+			$lazyload_descs = array(
+				'lazyload'       => __( 'Lazy load images and optimise delivery.', 'whippet' ),
+				'cdn'            => __( 'Deliver images through a CDN for faster loads.', 'whippet' ),
+				'responsiveness' => __( 'Serve adaptive images with srcset.', 'whippet' ),
+				'compression'    => __( 'Compress images on the fly via the CDN.', 'whippet' ),
+				'webp'           => __( 'Convert images to WebP on the fly when supported.', 'whippet' ),
+			);
 			?>
+
+			<div class="wa-panel-hd">
+				<h2><?php echo esc_html( $lazyload_tabs[ $whippet_ltab ] ); ?></h2>
+				<p><?php echo esc_html( $lazyload_descs[ $whippet_ltab ] ); ?></p>
+			</div>
+
 			<div class="wa-subtabs">
 				<?php foreach ( $lazyload_tabs as $key => $label ) : ?>
 					<a href="<?php echo esc_url( add_query_arg( array( 'page' => 'whippet', 'whippet_ltab' => $key ), admin_url( 'tools.php' ) ) . '#lazyload' ); ?>"
