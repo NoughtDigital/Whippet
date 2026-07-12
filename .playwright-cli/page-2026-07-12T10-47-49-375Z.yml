@@ -1,0 +1,377 @@
+- generic [ref=f7e2]:
+  - navigation "Main menu":
+    - link "Skip to main content" [ref=f7e3] [cursor=pointer]:
+      - /url: "#wpbody-content"
+    - link "Skip to toolbar" [ref=f7e4] [cursor=pointer]:
+      - /url: "#wp-toolbar"
+    - list [ref=f7e7]:
+      - listitem [ref=f7e8]:
+        - link "Dashboard" [ref=f7e9] [cursor=pointer]:
+          - /url: index.php
+          - generic [ref=f7e10]: 
+        - list [ref=f7e12]:
+          - listitem [ref=f7e13]:
+            - link "Home" [ref=f7e14] [cursor=pointer]:
+              - /url: index.php
+          - listitem [ref=f7e15]:
+            - link "Updates" [ref=f7e16] [cursor=pointer]:
+              - /url: update-core.php
+      - listitem [ref=f7e17]
+      - listitem [ref=f7e19]:
+        - link "Posts" [ref=f7e20] [cursor=pointer]:
+          - /url: edit.php
+          - generic [ref=f7e21]: 
+        - list [ref=f7e23]:
+          - listitem [ref=f7e24]:
+            - link "All Posts" [ref=f7e25] [cursor=pointer]:
+              - /url: edit.php
+          - listitem [ref=f7e26]:
+            - link "Add Post" [ref=f7e27] [cursor=pointer]:
+              - /url: post-new.php
+          - listitem [ref=f7e28]:
+            - link "Categories" [ref=f7e29] [cursor=pointer]:
+              - /url: edit-tags.php?taxonomy=category
+          - listitem [ref=f7e30]:
+            - link "Tags" [ref=f7e31] [cursor=pointer]:
+              - /url: edit-tags.php?taxonomy=post_tag
+      - listitem [ref=f7e32]:
+        - link "Media" [ref=f7e33] [cursor=pointer]:
+          - /url: upload.php
+          - generic [ref=f7e34]: 
+        - list [ref=f7e36]:
+          - listitem [ref=f7e37]:
+            - link "Library" [ref=f7e38] [cursor=pointer]:
+              - /url: upload.php
+          - listitem [ref=f7e39]:
+            - link "Add Media File" [ref=f7e40] [cursor=pointer]:
+              - /url: media-new.php
+      - listitem [ref=f7e41]:
+        - link "Pages" [ref=f7e42] [cursor=pointer]:
+          - /url: edit.php?post_type=page
+          - generic [ref=f7e43]: 
+        - list [ref=f7e45]:
+          - listitem [ref=f7e46]:
+            - link "All Pages" [ref=f7e47] [cursor=pointer]:
+              - /url: edit.php?post_type=page
+          - listitem [ref=f7e48]:
+            - link "Add Page" [ref=f7e49] [cursor=pointer]:
+              - /url: post-new.php?post_type=page
+      - listitem [ref=f7e50]:
+        - link "Comments" [ref=f7e51] [cursor=pointer]:
+          - /url: edit-comments.php
+          - generic [ref=f7e52]: 
+      - listitem [ref=f7e54]
+      - listitem [ref=f7e56]:
+        - link "Appearance" [ref=f7e57] [cursor=pointer]:
+          - /url: themes.php
+          - generic [ref=f7e58]: 
+        - list [ref=f7e60]:
+          - listitem [ref=f7e61]:
+            - link "Themes" [ref=f7e62] [cursor=pointer]:
+              - /url: themes.php
+          - listitem [ref=f7e63]:
+            - link "Editor" [ref=f7e64] [cursor=pointer]:
+              - /url: site-editor.php
+          - listitem [ref=f7e65]:
+            - link "Fonts" [ref=f7e66] [cursor=pointer]:
+              - /url: font-library.php
+      - listitem [ref=f7e67]:
+        - link "Plugins" [ref=f7e68] [cursor=pointer]:
+          - /url: plugins.php
+          - generic [ref=f7e69]: 
+        - list [ref=f7e71]:
+          - listitem [ref=f7e72]:
+            - link "Installed Plugins" [ref=f7e73] [cursor=pointer]:
+              - /url: plugins.php
+          - listitem [ref=f7e74]:
+            - link "Add Plugin" [ref=f7e75] [cursor=pointer]:
+              - /url: plugin-install.php
+      - listitem [ref=f7e76]:
+        - link "Users" [ref=f7e77] [cursor=pointer]:
+          - /url: users.php
+          - generic [ref=f7e78]: 
+        - list [ref=f7e80]:
+          - listitem [ref=f7e81]:
+            - link "All Users" [ref=f7e82] [cursor=pointer]:
+              - /url: users.php
+          - listitem [ref=f7e83]:
+            - link "Add User" [ref=f7e84] [cursor=pointer]:
+              - /url: user-new.php
+          - listitem [ref=f7e85]:
+            - link "Profile" [ref=f7e86] [cursor=pointer]:
+              - /url: profile.php
+      - listitem [ref=f7e87]:
+        - link "Tools" [ref=f7e88] [cursor=pointer]:
+          - /url: tools.php
+          - generic [ref=f7e89]: 
+        - list [ref=f7e91]:
+          - listitem [ref=f7e92]:
+            - link "Available Tools" [ref=f7e93] [cursor=pointer]:
+              - /url: tools.php
+          - listitem [ref=f7e94]:
+            - link "Import" [ref=f7e95] [cursor=pointer]:
+              - /url: import.php
+          - listitem [ref=f7e96]:
+            - link "Export" [ref=f7e97] [cursor=pointer]:
+              - /url: export.php
+          - listitem [ref=f7e98]:
+            - link "Site Health" [ref=f7e99] [cursor=pointer]:
+              - /url: site-health.php
+          - listitem [ref=f7e100]:
+            - link "Export Personal Data" [ref=f7e101] [cursor=pointer]:
+              - /url: export-personal-data.php
+          - listitem [ref=f7e102]:
+            - link "Erase Personal Data" [ref=f7e103] [cursor=pointer]:
+              - /url: erase-personal-data.php
+          - listitem [ref=f7e104]:
+            - link "Whippet" [ref=f7e105] [cursor=pointer]:
+              - /url: tools.php?page=whippet
+          - listitem [ref=f7e106]:
+            - link "Theme file editor" [ref=f7e107] [cursor=pointer]:
+              - /url: theme-editor.php
+          - listitem [ref=f7e108]:
+            - link "Plugin file editor" [ref=f7e109] [cursor=pointer]:
+              - /url: plugin-editor.php
+      - listitem [ref=f7e110]:
+        - link "Settings" [ref=f7e111] [cursor=pointer]:
+          - /url: options-general.php
+          - generic [ref=f7e112]: 
+        - list [ref=f7e114]:
+          - listitem [ref=f7e115]:
+            - link "General" [ref=f7e116] [cursor=pointer]:
+              - /url: options-general.php
+          - listitem [ref=f7e117]:
+            - link "Connectors" [ref=f7e118] [cursor=pointer]:
+              - /url: options-connectors.php
+          - listitem [ref=f7e119]:
+            - link "Writing" [ref=f7e120] [cursor=pointer]:
+              - /url: options-writing.php
+          - listitem [ref=f7e121]:
+            - link "Reading" [ref=f7e122] [cursor=pointer]:
+              - /url: options-reading.php
+          - listitem [ref=f7e123]:
+            - link "Discussion" [ref=f7e124] [cursor=pointer]:
+              - /url: options-discussion.php
+          - listitem [ref=f7e125]:
+            - link "Media" [ref=f7e126] [cursor=pointer]:
+              - /url: options-media.php
+          - listitem [ref=f7e127]:
+            - link "Permalinks" [ref=f7e128] [cursor=pointer]:
+              - /url: options-permalink.php
+          - listitem [ref=f7e129]:
+            - link "Privacy" [ref=f7e130] [cursor=pointer]:
+              - /url: options-privacy.php
+      - listitem [ref=f7e131]:
+        - button "Collapse Main menu" [expanded] [ref=f7e132] [cursor=pointer]:
+          - generic [ref=f7e134]: Collapse Menu
+  - generic [ref=f7e135]:
+    - generic [ref=f7e136]:
+      - navigation "Toolbar":
+        - menu:
+          - group [ref=f7e137]:
+            - menuitem "About WordPress" [ref=f7e138] [cursor=pointer]
+          - group [ref=f7e141]:
+            - menuitem "WhippetWP" [ref=f7e142] [cursor=pointer]
+          - group [ref=f7e143]:
+            - menuitem "⌘K Open command palette" [ref=f7e144] [cursor=pointer]:
+              - generic [ref=f7e146]:
+                - text: ⌘K
+                - generic [ref=f7e147]: Open command palette
+          - group [ref=f7e148]:
+            - menuitem "0 Comments in moderation" [ref=f7e149] [cursor=pointer]:
+              - generic [ref=f7e151]: "0"
+          - group [ref=f7e153]:
+            - menuitem "New" [ref=f7e154] [cursor=pointer]
+        - menu [ref=f7e157]:
+          - group [ref=f7e158]:
+            - menuitem "Hi, jake" [ref=f7e159] [cursor=pointer]
+    - main [ref=f7e160]:
+      - generic [ref=f7e163]:
+        - complementary [ref=f7e164]:
+          - generic [ref=f7e169]:
+            - generic [ref=f7e170]: Whippet
+            - generic [ref=f7e171]: v1.1.0
+          - navigation [ref=f7e172]:
+            - button "Dashboard" [ref=f7e173] [cursor=pointer]
+            - button "Performance" [ref=f7e180] [cursor=pointer]
+            - button "Analytics" [ref=f7e184] [cursor=pointer]
+            - button "Fonts" [ref=f7e188] [cursor=pointer]
+            - button "Lazy Load" [ref=f7e192] [cursor=pointer]
+            - button "Preload" [ref=f7e198] [cursor=pointer]
+            - button "Script Manager" [ref=f7e202] [cursor=pointer]
+            - button "Snippets" [ref=f7e207] [cursor=pointer]
+            - button "Extras" [ref=f7e213] [cursor=pointer]
+            - button "Tools" [ref=f7e217] [cursor=pointer]
+            - button "Import / Export" [ref=f7e223] [cursor=pointer]
+            - button "Docs" [ref=f7e228] [cursor=pointer]
+            - button "Premium" [ref=f7e234] [cursor=pointer]
+        - generic [ref=f7e341]:
+          - generic [ref=f7e342]:
+            - heading "Documentation" [level=2] [ref=f7e343]
+            - paragraph [ref=f7e344]: Learn how to use Whippet and fix common issues.
+          - generic [ref=f7e345]:
+            - generic [ref=f7e347]:
+              - generic [ref=f7e348]:
+                - heading "Whippet Documentation" [level=3] [ref=f7e349]
+                - paragraph [ref=f7e350]: Whippet helps you remove front-end bloat, keep more assets local, and apply performance changes with less guesswork. The safest approach is to make small changes, test the front end, and clear caches after each save.
+                - paragraph [ref=f7e351]: "Use this page as a practical guide: what to turn on first, what each tab does, and how to avoid the most common mistakes."
+              - generic [ref=f7e352]:
+                - generic [ref=f7e353]: Best order to work in
+                - list [ref=f7e354]:
+                  - listitem [ref=f7e355]: Export your current settings first
+                  - listitem [ref=f7e356]: Apply low-risk Dashboard changes
+                  - listitem [ref=f7e357]: Set up caching and compression
+                  - listitem [ref=f7e358]: Configure Analytics, Fonts, Lazy Load, and Preload
+                  - listitem [ref=f7e359]: Use Script Manager last for page-specific clean-up
+            - generic [ref=f7e360]:
+              - generic [ref=f7e361]:
+                - heading "Quick Start" [level=3] [ref=f7e362]
+                - list [ref=f7e363]:
+                  - listitem [ref=f7e364]:
+                    - strong [ref=f7e365]: Back up first.
+                    - text: Use Import / Export before making large changes so you can restore a known working setup in seconds.
+                  - listitem [ref=f7e366]:
+                    - strong [ref=f7e367]: Start with safe wins.
+                    - text: Dashboard options such as disabling emojis, embeds, query strings, and feed links are usually low risk and easy to test.
+                  - listitem [ref=f7e368]:
+                    - strong [ref=f7e369]: Move on to delivery improvements.
+                    - text: Page caching, compression, lazy loading, and local analytics usually deliver bigger speed gains than aggressive script removal alone.
+                  - listitem [ref=f7e370]:
+                    - strong [ref=f7e371]: Use Script Manager carefully.
+                    - text: Disable files per URL first. Only move to wider rules when you are certain a file is not needed anywhere else.
+                  - listitem [ref=f7e372]:
+                    - strong [ref=f7e373]: Clear every cache after saving.
+                    - text: That includes any page cache, server cache, CDN cache, and browser cache if you are not seeing changes immediately.
+              - generic [ref=f7e374]:
+                - heading "Golden Rules" [level=3] [ref=f7e375]
+                - list [ref=f7e376]:
+                  - listitem [ref=f7e377]: Test on staging if the site is live or business critical.
+                  - listitem [ref=f7e378]: Change one area at a time so regressions are obvious.
+                  - listitem [ref=f7e379]: Check the front end while logged out as well as logged in.
+                  - listitem [ref=f7e380]: If something breaks, roll back the last change before trying another.
+                  - listitem [ref=f7e381]: Use the Tools tab to confirm whether the server supports Brotli and WebP.
+            - generic [ref=f7e382]:
+              - heading "What Each Tab Does" [level=3] [ref=f7e383]
+              - generic [ref=f7e384]:
+                - generic [ref=f7e385]:
+                  - heading "Dashboard" [level=4] [ref=f7e386]
+                  - paragraph [ref=f7e387]: Turns off unnecessary WordPress features such as emojis, embeds, feed links, header tags, and selected WooCommerce extras. This is the best place to start.
+                - generic [ref=f7e388]:
+                  - heading "Performance" [level=4] [ref=f7e389]
+                  - paragraph [ref=f7e390]: Handles bigger site-wide gains such as caching, compression, image optimisation, database clean-up, and server-related tuning.
+                - generic [ref=f7e391]:
+                  - heading "Analytics" [level=4] [ref=f7e392]
+                  - paragraph [ref=f7e393]: Lets you host analytics files locally and optionally disable tracking for logged-in admins. Useful for privacy, fewer third-party requests, and improved page speed.
+                - generic [ref=f7e394]:
+                  - heading "Fonts" [level=4] [ref=f7e395]
+                  - paragraph [ref=f7e396]: Reduces external font overhead by removing Google Fonts or improving perceived loading with font-display swap.
+                - generic [ref=f7e397]:
+                  - heading "Lazy Load" [level=4] [ref=f7e398]
+                  - paragraph [ref=f7e399]: Controls image loading behaviour, delivery, responsiveness, compression, CDN options, and WebP support where available.
+                - generic [ref=f7e400]:
+                  - heading "Preload" [level=4] [ref=f7e401]
+                  - paragraph [ref=f7e402]: Preloads likely next-page visits so navigation feels faster. Tune delays and request limits carefully if your server is already under load.
+                - generic [ref=f7e403]:
+                  - heading "Script Manager" [level=4] [ref=f7e404]
+                  - paragraph [ref=f7e405]: Disables CSS and JavaScript on specific pages, URLs, or broader rules. Powerful, but it should usually be the last step rather than the first.
+                - generic [ref=f7e406]:
+                  - heading "Snippets and Extras" [level=4] [ref=f7e407]
+                  - paragraph [ref=f7e408]: Adds custom code and utility features such as maintenance mode, cookie notices, social sharing, and other one-off enhancements.
+                - generic [ref=f7e409]:
+                  - heading "Tools, Import / Export, and Premium" [level=4] [ref=f7e410]
+                  - paragraph [ref=f7e411]: Use Tools to check server capabilities, Import / Export for backups and migration, and Premium for advanced image optimisation or Critical CSS workflows.
+            - generic [ref=f7e412]:
+              - heading "Recommended Setup Flow" [level=3] [ref=f7e413]
+              - generic [ref=f7e414]:
+                - generic [ref=f7e415]:
+                  - 'heading "Phase 1: Safe foundation" [level=4] [ref=f7e416]'
+                  - list [ref=f7e417]:
+                    - listitem [ref=f7e418]: Export current settings.
+                    - listitem [ref=f7e419]: Apply low-risk Dashboard clean-up options.
+                    - listitem [ref=f7e420]: Enable caching and compression where supported.
+                    - listitem [ref=f7e421]: Check the Tools tab for HTTPS, Brotli, and WebP support.
+                - generic [ref=f7e422]:
+                  - 'heading "Phase 2: Asset delivery" [level=4] [ref=f7e423]'
+                  - list [ref=f7e424]:
+                    - listitem [ref=f7e425]: Move analytics files local if you use Google Analytics.
+                    - listitem [ref=f7e426]: Reduce or replace Google Fonts where possible.
+                    - listitem [ref=f7e427]: Enable Lazy Load and tune image delivery.
+                    - listitem [ref=f7e428]: Use Preload conservatively if your hosting is limited.
+                - generic [ref=f7e429]:
+                  - 'heading "Phase 3: Fine-tuning with Script Manager" [level=4] [ref=f7e430]'
+                  - paragraph [ref=f7e431]: Only start here once the easy site-wide wins are in place. Script Manager is most useful for plugin assets that load where they are not needed, such as sliders, forms, maps, or WooCommerce files on non-shop pages.
+                  - list [ref=f7e432]:
+                    - listitem [ref=f7e433]: Disable one file at a time.
+                    - listitem [ref=f7e434]: Prefer current URL rules before global rules.
+                    - listitem [ref=f7e435]: "Test key journeys straight away: menus, forms, cart, search, and mobile navigation."
+            - generic [ref=f7e436]:
+              - generic [ref=f7e437]:
+                - heading "Using the Script Manager Safely" [level=3] [ref=f7e438]
+                - list [ref=f7e439]:
+                  - listitem [ref=f7e440]: Open the front end of the exact page you want to optimise while logged in as an administrator.
+                  - listitem [ref=f7e441]: Launch Whippet from the admin bar and inspect the loaded CSS and JavaScript files.
+                  - listitem [ref=f7e442]: Look for plugin files that are clearly unrelated to the current page.
+                  - listitem [ref=f7e443]: Disable a single file and save.
+                  - listitem [ref=f7e444]: Refresh, then test visible layout, interactive elements, forms, and any plugin features on that page.
+                  - listitem [ref=f7e445]: Only widen the rule once you know the file is not required elsewhere.
+                - paragraph [ref=f7e447]:
+                  - strong [ref=f7e448]: Do not start by disabling dozens of files at once.
+                  - text: If something breaks, it becomes much harder to identify the cause.
+              - generic [ref=f7e449]:
+                - heading "Common Jobs" [level=3] [ref=f7e450]
+                - generic [ref=f7e451]:
+                  - generic [ref=f7e452]:
+                    - heading "I want faster first loads" [level=4] [ref=f7e453]
+                    - paragraph [ref=f7e454]: Start with caching, compression, local analytics, font clean-up, and image optimisation before touching page-specific scripts.
+                  - generic [ref=f7e455]:
+                    - heading "I want fewer third-party requests" [level=4] [ref=f7e456]
+                    - paragraph [ref=f7e457]: Review Analytics and Fonts first, then check whether embeds, maps, and external widget scripts can be reduced or conditionally disabled.
+                  - generic [ref=f7e458]:
+                    - heading "I want safer roll-outs" [level=4] [ref=f7e459]
+                    - paragraph [ref=f7e460]: Export settings, make a single change, clear caches, test logged out, and keep notes on what you changed before moving on.
+                  - generic [ref=f7e461]:
+                    - heading "I want to reduce server load" [level=4] [ref=f7e462]
+                    - paragraph [ref=f7e463]: Be conservative with Preload, disable analytics for logged-in admins, review Heartbeat settings, and avoid aggressive features that create extra background work without measuring the result.
+            - generic [ref=f7e464]:
+              - heading "Troubleshooting" [level=3] [ref=f7e465]
+              - generic [ref=f7e466]:
+                - generic [ref=f7e467]:
+                  - heading "The site looks broken after disabling a script or style" [level=4] [ref=f7e468]
+                  - paragraph [ref=f7e469]: Undo the last rule first. Then re-test with cache cleared. If the issue disappears, re-apply the change more narrowly, such as on the current URL instead of everywhere.
+                - generic [ref=f7e470]:
+                  - heading "I saved changes but nothing changed on the front end" [level=4] [ref=f7e471]
+                  - paragraph [ref=f7e472]: A cache is usually the reason. Purge any caching plugin, server cache, CDN cache, and browser cache, then test again in a private window.
+                - generic [ref=f7e473]:
+                  - heading "The Script Manager does not appear in the admin bar" [level=4] [ref=f7e474]
+                  - paragraph [ref=f7e475]: Make sure you are viewing the front end while logged in with administrator access. The manager does not appear for visitors or for users without the required capability.
+                - generic [ref=f7e476]:
+                  - heading "Preload is causing extra traffic or server pressure" [level=4] [ref=f7e477]
+                  - paragraph [ref=f7e478]: Increase the delay, lower the requests per second, or switch to hover-only preloading. Also consider disabling preload for logged-in admins.
+                - generic [ref=f7e479]:
+                  - heading "Analytics is not recording visits" [level=4] [ref=f7e480]
+                  - paragraph [ref=f7e481]: Check that the tracking ID is correct, confirm the selected tracking method matches your needs, clear caches, and test in a browser without ad blockers.
+                - generic [ref=f7e482]:
+                  - heading "Brotli or WebP shows as unavailable" [level=4] [ref=f7e483]
+                  - paragraph [ref=f7e484]: That support depends on your PHP extensions or server stack. Use the Tools tab to confirm what is available before enabling features that rely on it.
+            - generic [ref=f7e485]:
+              - heading "Safe Roll-out Checklist" [level=3] [ref=f7e486]
+              - generic [ref=f7e487]:
+                - generic [ref=f7e488]: Export settings before major changes.
+                - generic [ref=f7e489]: Change one area at a time.
+                - generic [ref=f7e490]: Clear all caches after each save.
+                - generic [ref=f7e491]: Test the front end while logged out.
+                - generic [ref=f7e492]: Check forms, menus, search, and checkout flows.
+                - generic [ref=f7e493]: Measure impact with Lighthouse or PageSpeed Insights.
+            - generic [ref=f7e494]:
+              - heading "Need More Help?" [level=3] [ref=f7e495]
+              - paragraph [ref=f7e496]: If you need updates, support, or product information, visit the Whippet site below.
+              - link "Visit Website" [ref=f7e498] [cursor=pointer]:
+                - /url: https://hashbangcode.com/
+  - contentinfo [ref=f7e334]:
+    - paragraph [ref=f7e335]:
+      - generic [ref=f7e336]:
+        - text: Thank you for creating with
+        - link "WordPress" [ref=f7e337] [cursor=pointer]:
+          - /url: https://wordpress.org/
+        - text: .
+    - paragraph [ref=f7e338]: Version 7.0.1

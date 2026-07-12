@@ -92,6 +92,17 @@ if ( ! function_exists( 'apply_filters' ) ) {
 		return $value;
 	}
 }
+if ( ! function_exists( 'sanitize_html_class' ) ) {
+	function sanitize_html_class( $class, $fallback = '' ) {
+		$class = preg_replace( '/[^A-Za-z0-9_-]/', '', (string) $class );
+		return '' !== $class ? $class : $fallback;
+	}
+}
+if ( ! function_exists( 'add_action' ) ) {
+	function add_action( $hook, $callback, $priority = 10, $accepted_args = 1 ) { // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
+		return true;
+	}
+}
 if ( ! function_exists( 'current_user_can' ) ) {
 	function current_user_can( $cap ) { // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
 		return true;

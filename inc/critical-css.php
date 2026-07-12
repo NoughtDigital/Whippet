@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 class CCE_API {
 
-	private const DEFAULT_BASE_URL = 'http://localhost:3000';
+	private const DEFAULT_BASE_URL = 'https://api.whippetwp.com/critical-css';
 
 	private static function base_url(): string {
 		return self::base_url_public();
@@ -24,6 +24,7 @@ class CCE_API {
 
 	public static function base_url_public(): string {
 		$legacy_url = trim( (string) get_option( 'cce_api_url', '' ) );
+		// Prefer explicit option, then filter, then production cloud. Localhost only if filtered.
 		$base_url   = $legacy_url ?: self::DEFAULT_BASE_URL;
 
 		return rtrim( (string) apply_filters( 'whippet_cce_api_url', $base_url ), '/' );
@@ -266,6 +267,18 @@ class CCE_Admin {
 	public static function register_settings(): void {
 		register_setting( 'cce_settings', 'cce_api_key', [ 'sanitize_callback' => [ __CLASS__, 'sanitize_api_key' ] ] );
 		register_setting( 'cce_settings', 'cce_enabled', [ 'sanitize_callback' => 'absint', 'default' => 1 ] );
+		register_setting( 'cce_settings', 'cce_remove_unused_css', [ 'sanitize_callback' => 'absint', 'default' => 0 ] );
+		register_setting( 'cce_settings', 'cce_rucss_safelist', [
+			'sanitize_callback' => static function ( $val ) {
+				$text  = is_array( $val ) ? implode( "\n", $val ) : (string) $val;
+				$lines = preg_split( '/\r\n|\r|\n/', $text );
+				$clean = array_values( array_filter( array_map( static function ( $line ) {
+					return sanitize_text_field( trim( (string) $line ) );
+				}, is_array( $lines ) ? $lines : array() ) ) );
+				return implode( "\n", $clean );
+			},
+			'default' => '',
+		] );
 		register_setting( 'cce_settings', 'cce_post_types', [
 			'sanitize_callback' => function ( $val ) {
 				$post_types = is_array( $val ) ? array_values( array_map( 'sanitize_key', $val ) ) : [ 'post', 'page' ];
@@ -751,6 +764,19 @@ class CCE_Injector {
 		add_action( 'wp_head', [ __CLASS__, 'inject' ], 1 );
 	}
 
+	/**
+	 * Stylesheet handles / URL keywords that must never be deferred by used-CSS mode.
+	 *
+	 * @return array<int,string>
+	 */
+	public static function rucss_safelist(): array {
+		$saved = get_option( 'cce_rucss_safelist', '' );
+		$lines = is_array( $saved ) ? $saved : preg_split( '/\r\n|\r|\n/', (string) $saved );
+		$list  = array_filter( array_map( 'trim', is_array( $lines ) ? $lines : array() ) );
+		$defaults = array( 'admin-bar', 'dashicons', 'woocommerce-inline', 'whippet-css' );
+		return array_values( array_unique( array_merge( $defaults, $list ) ) );
+	}
+
 	private static function get_post_css( int $post_id, string $variant ): string {
 		$variant = cce_normalize_variant( $variant );
 
@@ -811,6 +837,32 @@ class CCE_Injector {
 				$html
 			);
 		}
+
+						// Remove Unused CSS mode: convert remaining stylesheet <link> tags to async load,
+						// unless they match the safelist (by id/href keyword).
+						if ( get_option( 'cce_remove_unused_css', 0 ) ) {
+							$safelist = self::rucss_safelist();
+							$html     = preg_replace_callback(
+								'/<link\b[^>]*rel=(["\'])stylesheet\1[^>]*>/i',
+								static function ( array $matches ) use ( $safelist ) {
+									$tag = $matches[0];
+									foreach ( $safelist as $safe ) {
+										if ( $safe && false !== stripos( $tag, $safe ) ) {
+											return $tag;
+										}
+									}
+									if ( false !== stripos( $tag, 'critical-css' ) || false !== stripos( $tag, 'data-whippet-keep' ) ) {
+										return $tag;
+									}
+									$async = preg_replace( '/\srel=(["\'])stylesheet\1/i', ' rel="preload" as="style" onload="this.onload=null;this.rel=\'stylesheet\'"', $tag, 1 );
+									if ( $async && $async !== $tag ) {
+										return $async . '<noscript>' . $tag . '</noscript>';
+									}
+									return $tag;
+								},
+								$html
+							);
+						}
 
 		if ( empty( $deferred_markup ) ) {
 			return $html;

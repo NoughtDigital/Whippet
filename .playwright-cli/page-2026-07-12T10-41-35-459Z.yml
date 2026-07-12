@@ -1,0 +1,333 @@
+- generic [ref=f3e2]:
+  - navigation "Main menu":
+    - link "Skip to main content" [ref=f3e3] [cursor=pointer]:
+      - /url: "#wpbody-content"
+    - link "Skip to toolbar" [ref=f3e4] [cursor=pointer]:
+      - /url: "#wp-toolbar"
+    - list [ref=f3e7]:
+      - listitem [ref=f3e8]:
+        - link "Dashboard" [ref=f3e9] [cursor=pointer]:
+          - /url: index.php
+          - generic [ref=f3e10]: 
+        - list [ref=f3e12]:
+          - listitem [ref=f3e13]:
+            - link "Home" [ref=f3e14] [cursor=pointer]:
+              - /url: index.php
+          - listitem [ref=f3e15]:
+            - link "Updates" [ref=f3e16] [cursor=pointer]:
+              - /url: update-core.php
+      - listitem [ref=f3e17]
+      - listitem [ref=f3e19]:
+        - link "Posts" [ref=f3e20] [cursor=pointer]:
+          - /url: edit.php
+          - generic [ref=f3e21]: 
+        - list [ref=f3e23]:
+          - listitem [ref=f3e24]:
+            - link "All Posts" [ref=f3e25] [cursor=pointer]:
+              - /url: edit.php
+          - listitem [ref=f3e26]:
+            - link "Add Post" [ref=f3e27] [cursor=pointer]:
+              - /url: post-new.php
+          - listitem [ref=f3e28]:
+            - link "Categories" [ref=f3e29] [cursor=pointer]:
+              - /url: edit-tags.php?taxonomy=category
+          - listitem [ref=f3e30]:
+            - link "Tags" [ref=f3e31] [cursor=pointer]:
+              - /url: edit-tags.php?taxonomy=post_tag
+      - listitem [ref=f3e32]:
+        - link "Media" [ref=f3e33] [cursor=pointer]:
+          - /url: upload.php
+          - generic [ref=f3e34]: 
+        - list [ref=f3e36]:
+          - listitem [ref=f3e37]:
+            - link "Library" [ref=f3e38] [cursor=pointer]:
+              - /url: upload.php
+          - listitem [ref=f3e39]:
+            - link "Add Media File" [ref=f3e40] [cursor=pointer]:
+              - /url: media-new.php
+      - listitem [ref=f3e41]:
+        - link "Pages" [ref=f3e42] [cursor=pointer]:
+          - /url: edit.php?post_type=page
+          - generic [ref=f3e43]: 
+        - list [ref=f3e45]:
+          - listitem [ref=f3e46]:
+            - link "All Pages" [ref=f3e47] [cursor=pointer]:
+              - /url: edit.php?post_type=page
+          - listitem [ref=f3e48]:
+            - link "Add Page" [ref=f3e49] [cursor=pointer]:
+              - /url: post-new.php?post_type=page
+      - listitem [ref=f3e50]:
+        - link "Comments" [ref=f3e51] [cursor=pointer]:
+          - /url: edit-comments.php
+          - generic [ref=f3e52]: 
+      - listitem [ref=f3e54]
+      - listitem [ref=f3e56]:
+        - link "Appearance" [ref=f3e57] [cursor=pointer]:
+          - /url: themes.php
+          - generic [ref=f3e58]: 
+        - list [ref=f3e60]:
+          - listitem [ref=f3e61]:
+            - link "Themes" [ref=f3e62] [cursor=pointer]:
+              - /url: themes.php
+          - listitem [ref=f3e63]:
+            - link "Editor" [ref=f3e64] [cursor=pointer]:
+              - /url: site-editor.php
+          - listitem [ref=f3e65]:
+            - link "Fonts" [ref=f3e66] [cursor=pointer]:
+              - /url: font-library.php
+      - listitem [ref=f3e67]:
+        - link "Plugins" [ref=f3e68] [cursor=pointer]:
+          - /url: plugins.php
+          - generic [ref=f3e69]: 
+        - list [ref=f3e71]:
+          - listitem [ref=f3e72]:
+            - link "Installed Plugins" [ref=f3e73] [cursor=pointer]:
+              - /url: plugins.php
+          - listitem [ref=f3e74]:
+            - link "Add Plugin" [ref=f3e75] [cursor=pointer]:
+              - /url: plugin-install.php
+      - listitem [ref=f3e76]:
+        - link "Users" [ref=f3e77] [cursor=pointer]:
+          - /url: users.php
+          - generic [ref=f3e78]: 
+        - list [ref=f3e80]:
+          - listitem [ref=f3e81]:
+            - link "All Users" [ref=f3e82] [cursor=pointer]:
+              - /url: users.php
+          - listitem [ref=f3e83]:
+            - link "Add User" [ref=f3e84] [cursor=pointer]:
+              - /url: user-new.php
+          - listitem [ref=f3e85]:
+            - link "Profile" [ref=f3e86] [cursor=pointer]:
+              - /url: profile.php
+      - listitem [ref=f3e87]:
+        - link "Tools" [ref=f3e88] [cursor=pointer]:
+          - /url: tools.php
+          - generic [ref=f3e89]: 
+        - list [ref=f3e91]:
+          - listitem [ref=f3e92]:
+            - link "Available Tools" [ref=f3e93] [cursor=pointer]:
+              - /url: tools.php
+          - listitem [ref=f3e94]:
+            - link "Import" [ref=f3e95] [cursor=pointer]:
+              - /url: import.php
+          - listitem [ref=f3e96]:
+            - link "Export" [ref=f3e97] [cursor=pointer]:
+              - /url: export.php
+          - listitem [ref=f3e98]:
+            - link "Site Health" [ref=f3e99] [cursor=pointer]:
+              - /url: site-health.php
+          - listitem [ref=f3e100]:
+            - link "Export Personal Data" [ref=f3e101] [cursor=pointer]:
+              - /url: export-personal-data.php
+          - listitem [ref=f3e102]:
+            - link "Erase Personal Data" [ref=f3e103] [cursor=pointer]:
+              - /url: erase-personal-data.php
+          - listitem [ref=f3e104]:
+            - link "Whippet" [ref=f3e105] [cursor=pointer]:
+              - /url: tools.php?page=whippet
+          - listitem [ref=f3e106]:
+            - link "Theme file editor" [ref=f3e107] [cursor=pointer]:
+              - /url: theme-editor.php
+          - listitem [ref=f3e108]:
+            - link "Plugin file editor" [ref=f3e109] [cursor=pointer]:
+              - /url: plugin-editor.php
+      - listitem [ref=f3e110]:
+        - link "Settings" [ref=f3e111] [cursor=pointer]:
+          - /url: options-general.php
+          - generic [ref=f3e112]: 
+        - list [ref=f3e114]:
+          - listitem [ref=f3e115]:
+            - link "General" [ref=f3e116] [cursor=pointer]:
+              - /url: options-general.php
+          - listitem [ref=f3e117]:
+            - link "Connectors" [ref=f3e118] [cursor=pointer]:
+              - /url: options-connectors.php
+          - listitem [ref=f3e119]:
+            - link "Writing" [ref=f3e120] [cursor=pointer]:
+              - /url: options-writing.php
+          - listitem [ref=f3e121]:
+            - link "Reading" [ref=f3e122] [cursor=pointer]:
+              - /url: options-reading.php
+          - listitem [ref=f3e123]:
+            - link "Discussion" [ref=f3e124] [cursor=pointer]:
+              - /url: options-discussion.php
+          - listitem [ref=f3e125]:
+            - link "Media" [ref=f3e126] [cursor=pointer]:
+              - /url: options-media.php
+          - listitem [ref=f3e127]:
+            - link "Permalinks" [ref=f3e128] [cursor=pointer]:
+              - /url: options-permalink.php
+          - listitem [ref=f3e129]:
+            - link "Privacy" [ref=f3e130] [cursor=pointer]:
+              - /url: options-privacy.php
+      - listitem [ref=f3e131]:
+        - button "Collapse Main menu" [expanded] [ref=f3e132] [cursor=pointer]:
+          - generic [ref=f3e134]: Collapse Menu
+  - generic [ref=f3e135]:
+    - generic [ref=f3e136]:
+      - navigation "Toolbar":
+        - menu:
+          - group [ref=f3e137]:
+            - menuitem "About WordPress" [ref=f3e138] [cursor=pointer]
+          - group [ref=f3e141]:
+            - menuitem "WhippetWP" [ref=f3e142] [cursor=pointer]
+          - group [ref=f3e143]:
+            - menuitem "⌘K Open command palette" [ref=f3e144] [cursor=pointer]:
+              - generic [ref=f3e146]:
+                - text: ⌘K
+                - generic [ref=f3e147]: Open command palette
+          - group [ref=f3e148]:
+            - menuitem "0 Comments in moderation" [ref=f3e149] [cursor=pointer]:
+              - generic [ref=f3e151]: "0"
+          - group [ref=f3e153]:
+            - menuitem "New" [ref=f3e154] [cursor=pointer]
+        - menu [ref=f3e157]:
+          - group [ref=f3e158]:
+            - menuitem "Hi, jake" [ref=f3e159] [cursor=pointer]
+    - main [ref=f3e160]:
+      - generic [ref=f3e163]:
+        - complementary [ref=f3e164]:
+          - generic [ref=f3e169]:
+            - generic [ref=f3e170]: Whippet
+            - generic [ref=f3e171]: v1.1.0
+          - navigation [ref=f3e172]:
+            - button "Dashboard" [ref=f3e173] [cursor=pointer]
+            - button "Performance" [ref=f3e180] [cursor=pointer]
+            - button "Analytics" [ref=f3e184] [cursor=pointer]
+            - button "Fonts" [ref=f3e188] [cursor=pointer]
+            - button "Lazy Load" [ref=f3e192] [cursor=pointer]
+            - button "Preload" [ref=f3e198] [cursor=pointer]
+            - button "Script Manager" [ref=f3e202] [cursor=pointer]
+            - button "Snippets" [ref=f3e207] [cursor=pointer]
+            - button "Extras" [ref=f3e213] [cursor=pointer]
+            - button "Tools" [ref=f3e217] [cursor=pointer]
+            - button "Import / Export" [ref=f3e223] [cursor=pointer]
+            - button "Docs" [ref=f3e228] [cursor=pointer]
+            - button "Premium" [ref=f3e234] [cursor=pointer]
+        - generic [ref=f3e239]:
+          - generic [ref=f3e240]:
+            - heading "Premium Premium" [level=2] [ref=f3e241]:
+              - text: Premium
+              - generic [ref=f3e242]: Premium
+            - paragraph [ref=f3e243]: Premium features for advanced performance — image optimisation, delivery, and critical CSS generation.
+          - generic [ref=f3e244]:
+            - generic [ref=f3e245]: Whippet Cloud
+            - generic [ref=f3e246]:
+              - generic [ref=f3e248]:
+                - textbox [ref=f3e249]
+                - button "Save connection" [ref=f3e250] [cursor=pointer]
+              - paragraph [ref=f3e251]: "Status: not connected. Plan: free."
+              - button "Test connection" [ref=f3e252] [cursor=pointer]
+          - generic [ref=f3e253]:
+            - link "Image Engine" [ref=f3e254] [cursor=pointer]:
+              - /url: http://localhost:10029/wp-admin/tools.php?page=whippet&whippet_ptab=image-engine#premium
+            - link "Critical CSS" [ref=f3e255] [cursor=pointer]:
+              - /url: http://localhost:10029/wp-admin/tools.php?page=whippet&whippet_ptab=critical-css#premium
+          - generic [ref=f3e256]:
+            - generic [ref=f3e257]:
+              - generic [ref=f3e258]: Image Optimization
+              - link "Refresh stats" [ref=f3e264] [cursor=pointer]:
+                - /url: http://localhost:10029/wp-admin/tools.php?page=whippet&whippet_ptab=image-engine#premium
+            - generic [ref=f3e268]:
+              - generic [ref=f3e269]: Images Processed
+              - generic [ref=f3e271]: Not connected
+            - generic [ref=f3e272]:
+              - generic [ref=f3e273]: Total Image Size
+              - generic [ref=f3e275]: Not connected
+            - button "Optimise Images" [disabled] [ref=f3e277]
+          - generic [ref=f3e278]:
+            - generic [ref=f3e279]:
+              - generic [ref=f3e280]: Image Settings
+              - generic [ref=f3e281]:
+                - generic [ref=f3e282]:
+                  - generic [ref=f3e283]: Image Format
+                  - generic [ref=f3e284]: Auto lets Image Engine pick the best format per image — e.g. AVIF where it saves more, WebP elsewhere
+                - generic [ref=f3e285]:
+                  - generic [ref=f3e286] [cursor=pointer]:
+                    - radio "Auto" [checked]
+                    - text: Auto
+                  - generic [ref=f3e287] [cursor=pointer]:
+                    - radio "WebP"
+                    - text: WebP
+                  - generic [ref=f3e288] [cursor=pointer]:
+                    - radio "AVIF"
+                    - text: AVIF
+              - generic [ref=f3e289]:
+                - generic [ref=f3e290]:
+                  - generic [ref=f3e291]: Compression Type
+                  - generic [ref=f3e292]: Control the balance between image quality and file size
+                - generic [ref=f3e293]:
+                  - generic [ref=f3e294] [cursor=pointer]:
+                    - radio "Lossless"
+                    - text: Lossless
+                  - generic [ref=f3e295] [cursor=pointer]:
+                    - radio "Lossy" [checked]
+                    - text: Lossy
+              - generic [ref=f3e296]:
+                - generic [ref=f3e297]:
+                  - generic [ref=f3e298]: Auto-optimise Media Library Uploads
+                  - generic [ref=f3e299]: Automatically send new media library image uploads to Image Engine after WordPress finishes generating their attachment metadata.
+                - generic [ref=f3e300]:
+                  - generic [ref=f3e301] [cursor=pointer]:
+                    - radio "Enabled" [checked]
+                    - text: Enabled
+                  - generic [ref=f3e302] [cursor=pointer]:
+                    - radio "Disabled"
+                    - text: Disabled
+              - generic [ref=f3e303]:
+                - generic [ref=f3e304]:
+                  - generic [ref=f3e305]: Front-end Rewriting
+                  - generic [ref=f3e306]: Rewrites full page HTML so Elementor output, theme markup, and inline background images can be matched by URL instead of only standard wp-image classes.
+                - generic [ref=f3e307]:
+                  - generic [ref=f3e308] [cursor=pointer]:
+                    - radio "Enabled" [checked]
+                    - text: Enabled
+                  - generic [ref=f3e309] [cursor=pointer]:
+                    - radio "Disabled"
+                    - text: Disabled
+              - generic [ref=f3e310]:
+                - generic [ref=f3e311]:
+                  - generic [ref=f3e312]: Selected Directories or URLs
+                  - generic [ref=f3e313]: Only attempt broad front-end rewrites for image URLs that contain one of these values. Leave blank to use uploads plus the active theme directories.
+                - generic [ref=f3e314]:
+                  - textbox "Selected Directories or URLs" [ref=f3e315]
+                  - paragraph [ref=f3e316]: "Examples: /wp-content/uploads/, /wp-content/themes/your-theme/assets/, https://example.com/wp-content/uploads/hero/"
+              - generic [ref=f3e317]:
+                - generic [ref=f3e318]:
+                  - generic [ref=f3e319]: Rewrite Only On Page URLs
+                  - generic [ref=f3e320]: Optional request URL filters for the full-page rewrite pass. Add one path or URL fragment per line to limit where broader detection runs.
+                - generic [ref=f3e321]:
+                  - textbox "Rewrite Only On Page URLs" [ref=f3e322]
+                  - paragraph [ref=f3e323]: "Examples: /shop/, /landing-pages/, https://example.com/pricing"
+            - generic [ref=f3e324]:
+              - generic [ref=f3e325]: API Connection
+              - generic [ref=f3e326]:
+                - generic [ref=f3e327]:
+                  - generic [ref=f3e328]: API Key
+                  - generic [ref=f3e329]: ⚠ No API key saved — requests will be rejected with 401.
+                - generic [ref=f3e330]:
+                  - textbox "API Key" [ref=f3e331]:
+                    - /placeholder: ""
+                  - button "Show / hide" [ref=f3e332] [cursor=pointer]
+            - button "Save Settings" [ref=f3e337] [cursor=pointer]
+          - generic [ref=f3e338]:
+            - generic [ref=f3e339]: Danger Zone
+            - generic [ref=f3e344]:
+              - generic [ref=f3e345]:
+                - generic [ref=f3e346]: Restore Original Images
+                - generic [ref=f3e347]: Reverts images with preserved originals back to their original files by deleting optimised variants
+              - button "Restore Originals" [disabled] [ref=f3e348]
+            - generic [ref=f3e349]:
+              - generic [ref=f3e350]:
+                - generic [ref=f3e351]: Remove Original Images Permanently
+                - generic [ref=f3e352]: Permanently deletes original files and keeps only optimised images to save disk space. Deleted originals cannot be restored later.
+              - button "Delete Originals" [disabled] [ref=f3e353]
+  - contentinfo [ref=f3e354]:
+    - paragraph [ref=f3e355]:
+      - generic [ref=f3e356]:
+        - text: Thank you for creating with
+        - link "WordPress" [ref=f3e357] [cursor=pointer]:
+          - /url: https://wordpress.org/
+        - text: .
+    - paragraph [ref=f3e358]: Version 7.0.1

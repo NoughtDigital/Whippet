@@ -9,5 +9,12 @@ node_modules/
 # ignore PHPUnit cache
 .phpunit.result.cache
 
-# ignore dist directories
-dist/
+# ignore dist build junk but keep shipped CSS/JS artefacts
+dist/*
+!dist/css/
+!dist/css/**
+!dist/js/
+!dist/js/**
+!dist/mix-manifest.json
+!dist/img/
+!dist/img/**

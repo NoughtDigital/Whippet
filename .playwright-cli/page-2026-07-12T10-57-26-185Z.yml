@@ -1,0 +1,237 @@
+- generic [ref=f15e2]:
+  - navigation "Main menu":
+    - link "Skip to main content" [ref=f15e3] [cursor=pointer]:
+      - /url: "#wpbody-content"
+    - link "Skip to toolbar" [ref=f15e4] [cursor=pointer]:
+      - /url: "#wp-toolbar"
+    - list [ref=f15e7]:
+      - listitem [ref=f15e8]:
+        - link "Dashboard" [ref=f15e9] [cursor=pointer]:
+          - /url: index.php
+          - generic [ref=f15e10]: 
+        - list [ref=f15e12]:
+          - listitem [ref=f15e13]:
+            - link "Home" [ref=f15e14] [cursor=pointer]:
+              - /url: index.php
+          - listitem [ref=f15e15]:
+            - link "Updates" [ref=f15e16] [cursor=pointer]:
+              - /url: update-core.php
+      - listitem [ref=f15e17]
+      - listitem [ref=f15e19]:
+        - link "Posts" [ref=f15e20] [cursor=pointer]:
+          - /url: edit.php
+          - generic [ref=f15e21]: 
+        - list [ref=f15e23]:
+          - listitem [ref=f15e24]:
+            - link "All Posts" [ref=f15e25] [cursor=pointer]:
+              - /url: edit.php
+          - listitem [ref=f15e26]:
+            - link "Add Post" [ref=f15e27] [cursor=pointer]:
+              - /url: post-new.php
+          - listitem [ref=f15e28]:
+            - link "Categories" [ref=f15e29] [cursor=pointer]:
+              - /url: edit-tags.php?taxonomy=category
+          - listitem [ref=f15e30]:
+            - link "Tags" [ref=f15e31] [cursor=pointer]:
+              - /url: edit-tags.php?taxonomy=post_tag
+      - listitem [ref=f15e32]:
+        - link "Media" [ref=f15e33] [cursor=pointer]:
+          - /url: upload.php
+          - generic [ref=f15e34]: 
+        - list [ref=f15e36]:
+          - listitem [ref=f15e37]:
+            - link "Library" [ref=f15e38] [cursor=pointer]:
+              - /url: upload.php
+          - listitem [ref=f15e39]:
+            - link "Add Media File" [ref=f15e40] [cursor=pointer]:
+              - /url: media-new.php
+      - listitem [ref=f15e41]:
+        - link "Pages" [ref=f15e42] [cursor=pointer]:
+          - /url: edit.php?post_type=page
+          - generic [ref=f15e43]: 
+        - list [ref=f15e45]:
+          - listitem [ref=f15e46]:
+            - link "All Pages" [ref=f15e47] [cursor=pointer]:
+              - /url: edit.php?post_type=page
+          - listitem [ref=f15e48]:
+            - link "Add Page" [ref=f15e49] [cursor=pointer]:
+              - /url: post-new.php?post_type=page
+      - listitem [ref=f15e50]:
+        - link "Comments" [ref=f15e51] [cursor=pointer]:
+          - /url: edit-comments.php
+          - generic [ref=f15e52]: 
+      - listitem [ref=f15e54]
+      - listitem [ref=f15e56]:
+        - link "Appearance" [ref=f15e57] [cursor=pointer]:
+          - /url: themes.php
+          - generic [ref=f15e58]: 
+        - list [ref=f15e60]:
+          - listitem [ref=f15e61]:
+            - link "Themes" [ref=f15e62] [cursor=pointer]:
+              - /url: themes.php
+          - listitem [ref=f15e63]:
+            - link "Editor" [ref=f15e64] [cursor=pointer]:
+              - /url: site-editor.php
+          - listitem [ref=f15e65]:
+            - link "Fonts" [ref=f15e66] [cursor=pointer]:
+              - /url: font-library.php
+      - listitem [ref=f15e67]:
+        - link "Plugins" [ref=f15e68] [cursor=pointer]:
+          - /url: plugins.php
+          - generic [ref=f15e69]: 
+        - list [ref=f15e71]:
+          - listitem [ref=f15e72]:
+            - link "Installed Plugins" [ref=f15e73] [cursor=pointer]:
+              - /url: plugins.php
+          - listitem [ref=f15e74]:
+            - link "Add Plugin" [ref=f15e75] [cursor=pointer]:
+              - /url: plugin-install.php
+      - listitem [ref=f15e76]:
+        - link "Users" [ref=f15e77] [cursor=pointer]:
+          - /url: users.php
+          - generic [ref=f15e78]: 
+        - list [ref=f15e80]:
+          - listitem [ref=f15e81]:
+            - link "All Users" [ref=f15e82] [cursor=pointer]:
+              - /url: users.php
+          - listitem [ref=f15e83]:
+            - link "Add User" [ref=f15e84] [cursor=pointer]:
+              - /url: user-new.php
+          - listitem [ref=f15e85]:
+            - link "Profile" [ref=f15e86] [cursor=pointer]:
+              - /url: profile.php
+      - listitem [ref=f15e87]:
+        - link "Tools" [ref=f15e88] [cursor=pointer]:
+          - /url: tools.php
+          - generic [ref=f15e89]: 
+        - list [ref=f15e91]:
+          - listitem [ref=f15e92]:
+            - link "Available Tools" [ref=f15e93] [cursor=pointer]:
+              - /url: tools.php
+          - listitem [ref=f15e94]:
+            - link "Import" [ref=f15e95] [cursor=pointer]:
+              - /url: import.php
+          - listitem [ref=f15e96]:
+            - link "Export" [ref=f15e97] [cursor=pointer]:
+              - /url: export.php
+          - listitem [ref=f15e98]:
+            - link "Site Health" [ref=f15e99] [cursor=pointer]:
+              - /url: site-health.php
+          - listitem [ref=f15e100]:
+            - link "Export Personal Data" [ref=f15e101] [cursor=pointer]:
+              - /url: export-personal-data.php
+          - listitem [ref=f15e102]:
+            - link "Erase Personal Data" [ref=f15e103] [cursor=pointer]:
+              - /url: erase-personal-data.php
+          - listitem [ref=f15e104]:
+            - link "Whippet" [ref=f15e105] [cursor=pointer]:
+              - /url: tools.php?page=whippet
+          - listitem [ref=f15e106]:
+            - link "Theme file editor" [ref=f15e107] [cursor=pointer]:
+              - /url: theme-editor.php
+          - listitem [ref=f15e108]:
+            - link "Plugin file editor" [ref=f15e109] [cursor=pointer]:
+              - /url: plugin-editor.php
+      - listitem [ref=f15e110]:
+        - link "Settings" [ref=f15e111] [cursor=pointer]:
+          - /url: options-general.php
+          - generic [ref=f15e112]: 
+        - list [ref=f15e114]:
+          - listitem [ref=f15e115]:
+            - link "General" [ref=f15e116] [cursor=pointer]:
+              - /url: options-general.php
+          - listitem [ref=f15e117]:
+            - link "Connectors" [ref=f15e118] [cursor=pointer]:
+              - /url: options-connectors.php
+          - listitem [ref=f15e119]:
+            - link "Writing" [ref=f15e120] [cursor=pointer]:
+              - /url: options-writing.php
+          - listitem [ref=f15e121]:
+            - link "Reading" [ref=f15e122] [cursor=pointer]:
+              - /url: options-reading.php
+          - listitem [ref=f15e123]:
+            - link "Discussion" [ref=f15e124] [cursor=pointer]:
+              - /url: options-discussion.php
+          - listitem [ref=f15e125]:
+            - link "Media" [ref=f15e126] [cursor=pointer]:
+              - /url: options-media.php
+          - listitem [ref=f15e127]:
+            - link "Permalinks" [ref=f15e128] [cursor=pointer]:
+              - /url: options-permalink.php
+          - listitem [ref=f15e129]:
+            - link "Privacy" [ref=f15e130] [cursor=pointer]:
+              - /url: options-privacy.php
+      - listitem [ref=f15e131]:
+        - button "Collapse Main menu" [expanded] [ref=f15e132] [cursor=pointer]:
+          - generic [ref=f15e134]: Collapse Menu
+  - generic [ref=f15e135]:
+    - generic [ref=f15e136]:
+      - navigation "Toolbar":
+        - menu:
+          - group [ref=f15e137]:
+            - menuitem "About WordPress" [ref=f15e138] [cursor=pointer]
+          - group [ref=f15e141]:
+            - menuitem "WhippetWP" [ref=f15e142] [cursor=pointer]
+          - group [ref=f15e143]:
+            - menuitem "⌘K Open command palette" [ref=f15e144] [cursor=pointer]:
+              - generic [ref=f15e146]:
+                - text: ⌘K
+                - generic [ref=f15e147]: Open command palette
+          - group [ref=f15e148]:
+            - menuitem "0 Comments in moderation" [ref=f15e149] [cursor=pointer]:
+              - generic [ref=f15e151]: "0"
+          - group [ref=f15e153]:
+            - menuitem "New" [ref=f15e154] [cursor=pointer]
+        - menu [ref=f15e157]:
+          - group [ref=f15e158]:
+            - menuitem "Hi, jake" [ref=f15e159] [cursor=pointer]
+    - main [ref=f15e160]:
+      - generic [ref=f15e163]:
+        - complementary [ref=f15e164]:
+          - generic [ref=f15e169]:
+            - generic [ref=f15e170]: Whippet
+            - generic [ref=f15e171]: v1.1.0
+          - navigation [ref=f15e172]:
+            - button "Dashboard" [ref=f15e173] [cursor=pointer]
+            - button "Performance" [ref=f15e180] [cursor=pointer]
+            - button "Analytics" [ref=f15e184] [cursor=pointer]
+            - button "Fonts" [ref=f15e188] [cursor=pointer]
+            - button "Lazy Load" [ref=f15e192] [cursor=pointer]
+            - button "Preload" [ref=f15e198] [cursor=pointer]
+            - button "Script Manager" [ref=f15e202] [cursor=pointer]
+            - button "Snippets" [ref=f15e207] [cursor=pointer]
+            - button "Extras" [ref=f15e213] [cursor=pointer]
+            - button "Tools" [ref=f15e217] [cursor=pointer]
+            - button "Import / Export" [ref=f15e223] [cursor=pointer]
+            - button "Docs" [ref=f15e228] [cursor=pointer]
+            - button "Premium" [ref=f15e234] [cursor=pointer]
+        - generic [ref=f15e239]:
+          - generic [ref=f15e240]:
+            - heading "Analytics" [level=2] [ref=f15e241]
+            - paragraph [ref=f15e242]: Configure your local analytics settings for improved privacy and performance.
+          - generic [ref=f15e244]:
+            - text: Google Analytics Tracking ID
+            - textbox "G-XXXXXXXXXX" [ref=f15e245]: G-TESTWHIPPET2
+            - paragraph [ref=f15e246]:
+              - link "Where to find tracking ID?" [ref=f15e247] [cursor=pointer]:
+                - /url: https://support.google.com/analytics/answer/9539598?hl=en
+            - text: Tracking script
+            - generic [ref=f15e248] [cursor=pointer]:
+              - radio "Gtag.js (90KB)" [checked] [ref=f15e249]
+              - text: Gtag.js (90KB)
+            - generic [ref=f15e250] [cursor=pointer]:
+              - radio "Minimal Analytics.js (1.4KB)" [ref=f15e251]
+              - text: Minimal Analytics.js (1.4KB)
+            - paragraph [ref=f15e252]: Minimal Analytics is lightweight; Gtag.js supports advanced features like AdWords.
+            - text: Disable for logged in admins
+            - checkbox [checked] [ref=f15e253] [cursor=pointer]
+            - paragraph [ref=f15e254]:
+              - button "Save Changes" [ref=f15e255] [cursor=pointer]
+  - contentinfo [ref=f15e256]:
+    - paragraph [ref=f15e257]:
+      - generic [ref=f15e258]:
+        - text: Thank you for creating with
+        - link "WordPress" [ref=f15e259] [cursor=pointer]:
+          - /url: https://wordpress.org/
+        - text: .
+    - paragraph [ref=f15e260]: Version 7.0.1

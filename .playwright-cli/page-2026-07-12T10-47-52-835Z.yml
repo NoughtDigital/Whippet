@@ -1,0 +1,245 @@
+- generic [ref=f8e2]:
+  - navigation "Main menu":
+    - link "Skip to main content" [ref=f8e3] [cursor=pointer]:
+      - /url: "#wpbody-content"
+    - link "Skip to toolbar" [ref=f8e4] [cursor=pointer]:
+      - /url: "#wp-toolbar"
+    - list [ref=f8e7]:
+      - listitem [ref=f8e8]:
+        - link "Dashboard" [ref=f8e9] [cursor=pointer]:
+          - /url: index.php
+          - generic [ref=f8e10]: 
+        - list [ref=f8e12]:
+          - listitem [ref=f8e13]:
+            - link "Home" [ref=f8e14] [cursor=pointer]:
+              - /url: index.php
+          - listitem [ref=f8e15]:
+            - link "Updates" [ref=f8e16] [cursor=pointer]:
+              - /url: update-core.php
+      - listitem [ref=f8e17]
+      - listitem [ref=f8e19]:
+        - link "Posts" [ref=f8e20] [cursor=pointer]:
+          - /url: edit.php
+          - generic [ref=f8e21]: 
+        - list [ref=f8e23]:
+          - listitem [ref=f8e24]:
+            - link "All Posts" [ref=f8e25] [cursor=pointer]:
+              - /url: edit.php
+          - listitem [ref=f8e26]:
+            - link "Add Post" [ref=f8e27] [cursor=pointer]:
+              - /url: post-new.php
+          - listitem [ref=f8e28]:
+            - link "Categories" [ref=f8e29] [cursor=pointer]:
+              - /url: edit-tags.php?taxonomy=category
+          - listitem [ref=f8e30]:
+            - link "Tags" [ref=f8e31] [cursor=pointer]:
+              - /url: edit-tags.php?taxonomy=post_tag
+      - listitem [ref=f8e32]:
+        - link "Media" [ref=f8e33] [cursor=pointer]:
+          - /url: upload.php
+          - generic [ref=f8e34]: 
+        - list [ref=f8e36]:
+          - listitem [ref=f8e37]:
+            - link "Library" [ref=f8e38] [cursor=pointer]:
+              - /url: upload.php
+          - listitem [ref=f8e39]:
+            - link "Add Media File" [ref=f8e40] [cursor=pointer]:
+              - /url: media-new.php
+      - listitem [ref=f8e41]:
+        - link "Pages" [ref=f8e42] [cursor=pointer]:
+          - /url: edit.php?post_type=page
+          - generic [ref=f8e43]: 
+        - list [ref=f8e45]:
+          - listitem [ref=f8e46]:
+            - link "All Pages" [ref=f8e47] [cursor=pointer]:
+              - /url: edit.php?post_type=page
+          - listitem [ref=f8e48]:
+            - link "Add Page" [ref=f8e49] [cursor=pointer]:
+              - /url: post-new.php?post_type=page
+      - listitem [ref=f8e50]:
+        - link "Comments" [ref=f8e51] [cursor=pointer]:
+          - /url: edit-comments.php
+          - generic [ref=f8e52]: 
+      - listitem [ref=f8e54]
+      - listitem [ref=f8e56]:
+        - link "Appearance" [ref=f8e57] [cursor=pointer]:
+          - /url: themes.php
+          - generic [ref=f8e58]: 
+        - list [ref=f8e60]:
+          - listitem [ref=f8e61]:
+            - link "Themes" [ref=f8e62] [cursor=pointer]:
+              - /url: themes.php
+          - listitem [ref=f8e63]:
+            - link "Editor" [ref=f8e64] [cursor=pointer]:
+              - /url: site-editor.php
+          - listitem [ref=f8e65]:
+            - link "Fonts" [ref=f8e66] [cursor=pointer]:
+              - /url: font-library.php
+      - listitem [ref=f8e67]:
+        - link "Plugins" [ref=f8e68] [cursor=pointer]:
+          - /url: plugins.php
+          - generic [ref=f8e69]: 
+        - list [ref=f8e71]:
+          - listitem [ref=f8e72]:
+            - link "Installed Plugins" [ref=f8e73] [cursor=pointer]:
+              - /url: plugins.php
+          - listitem [ref=f8e74]:
+            - link "Add Plugin" [ref=f8e75] [cursor=pointer]:
+              - /url: plugin-install.php
+      - listitem [ref=f8e76]:
+        - link "Users" [ref=f8e77] [cursor=pointer]:
+          - /url: users.php
+          - generic [ref=f8e78]: 
+        - list [ref=f8e80]:
+          - listitem [ref=f8e81]:
+            - link "All Users" [ref=f8e82] [cursor=pointer]:
+              - /url: users.php
+          - listitem [ref=f8e83]:
+            - link "Add User" [ref=f8e84] [cursor=pointer]:
+              - /url: user-new.php
+          - listitem [ref=f8e85]:
+            - link "Profile" [ref=f8e86] [cursor=pointer]:
+              - /url: profile.php
+      - listitem [ref=f8e87]:
+        - link "Tools" [ref=f8e88] [cursor=pointer]:
+          - /url: tools.php
+          - generic [ref=f8e89]: 
+        - list [ref=f8e91]:
+          - listitem [ref=f8e92]:
+            - link "Available Tools" [ref=f8e93] [cursor=pointer]:
+              - /url: tools.php
+          - listitem [ref=f8e94]:
+            - link "Import" [ref=f8e95] [cursor=pointer]:
+              - /url: import.php
+          - listitem [ref=f8e96]:
+            - link "Export" [ref=f8e97] [cursor=pointer]:
+              - /url: export.php
+          - listitem [ref=f8e98]:
+            - link "Site Health" [ref=f8e99] [cursor=pointer]:
+              - /url: site-health.php
+          - listitem [ref=f8e100]:
+            - link "Export Personal Data" [ref=f8e101] [cursor=pointer]:
+              - /url: export-personal-data.php
+          - listitem [ref=f8e102]:
+            - link "Erase Personal Data" [ref=f8e103] [cursor=pointer]:
+              - /url: erase-personal-data.php
+          - listitem [ref=f8e104]:
+            - link "Whippet" [ref=f8e105] [cursor=pointer]:
+              - /url: tools.php?page=whippet
+          - listitem [ref=f8e106]:
+            - link "Theme file editor" [ref=f8e107] [cursor=pointer]:
+              - /url: theme-editor.php
+          - listitem [ref=f8e108]:
+            - link "Plugin file editor" [ref=f8e109] [cursor=pointer]:
+              - /url: plugin-editor.php
+      - listitem [ref=f8e110]:
+        - link "Settings" [ref=f8e111] [cursor=pointer]:
+          - /url: options-general.php
+          - generic [ref=f8e112]: 
+        - list [ref=f8e114]:
+          - listitem [ref=f8e115]:
+            - link "General" [ref=f8e116] [cursor=pointer]:
+              - /url: options-general.php
+          - listitem [ref=f8e117]:
+            - link "Connectors" [ref=f8e118] [cursor=pointer]:
+              - /url: options-connectors.php
+          - listitem [ref=f8e119]:
+            - link "Writing" [ref=f8e120] [cursor=pointer]:
+              - /url: options-writing.php
+          - listitem [ref=f8e121]:
+            - link "Reading" [ref=f8e122] [cursor=pointer]:
+              - /url: options-reading.php
+          - listitem [ref=f8e123]:
+            - link "Discussion" [ref=f8e124] [cursor=pointer]:
+              - /url: options-discussion.php
+          - listitem [ref=f8e125]:
+            - link "Media" [ref=f8e126] [cursor=pointer]:
+              - /url: options-media.php
+          - listitem [ref=f8e127]:
+            - link "Permalinks" [ref=f8e128] [cursor=pointer]:
+              - /url: options-permalink.php
+          - listitem [ref=f8e129]:
+            - link "Privacy" [ref=f8e130] [cursor=pointer]:
+              - /url: options-privacy.php
+      - listitem [ref=f8e131]:
+        - button "Collapse Main menu" [expanded] [ref=f8e132] [cursor=pointer]:
+          - generic [ref=f8e134]: Collapse Menu
+  - generic [ref=f8e135]:
+    - generic [ref=f8e136]:
+      - navigation "Toolbar":
+        - menu:
+          - group [ref=f8e137]:
+            - menuitem "About WordPress" [ref=f8e138] [cursor=pointer]
+          - group [ref=f8e141]:
+            - menuitem "WhippetWP" [ref=f8e142] [cursor=pointer]
+          - group [ref=f8e143]:
+            - menuitem "⌘K Open command palette" [ref=f8e144] [cursor=pointer]:
+              - generic [ref=f8e146]:
+                - text: ⌘K
+                - generic [ref=f8e147]: Open command palette
+          - group [ref=f8e148]:
+            - menuitem "0 Comments in moderation" [ref=f8e149] [cursor=pointer]:
+              - generic [ref=f8e151]: "0"
+          - group [ref=f8e153]:
+            - menuitem "New" [ref=f8e154] [cursor=pointer]
+        - menu [ref=f8e157]:
+          - group [ref=f8e158]:
+            - menuitem "Hi, jake" [ref=f8e159] [cursor=pointer]
+    - main [ref=f8e160]:
+      - generic [ref=f8e163]:
+        - complementary [ref=f8e164]:
+          - generic [ref=f8e169]:
+            - generic [ref=f8e170]: Whippet
+            - generic [ref=f8e171]: v1.1.0
+          - navigation [ref=f8e172]:
+            - button "Dashboard" [ref=f8e173] [cursor=pointer]
+            - button "Performance" [ref=f8e180] [cursor=pointer]
+            - button "Analytics" [ref=f8e184] [cursor=pointer]
+            - button "Fonts" [ref=f8e188] [cursor=pointer]
+            - button "Lazy Load" [ref=f8e192] [cursor=pointer]
+            - button "Preload" [ref=f8e198] [cursor=pointer]
+            - button "Script Manager" [ref=f8e202] [cursor=pointer]
+            - button "Snippets" [ref=f8e207] [cursor=pointer]
+            - button "Extras" [ref=f8e213] [cursor=pointer]
+            - button "Tools" [ref=f8e217] [cursor=pointer]
+            - button "Import / Export" [ref=f8e223] [cursor=pointer]
+            - button "Docs" [ref=f8e228] [cursor=pointer]
+            - button "Premium" [ref=f8e234] [cursor=pointer]
+        - generic [ref=f8e239]:
+          - generic [ref=f8e240]:
+            - heading "Lazy Load" [level=2] [ref=f8e241]
+            - paragraph [ref=f8e242]: Lazy load images and optimise delivery.
+          - generic [ref=f8e243]:
+            - link "Lazy Load" [ref=f8e244] [cursor=pointer]:
+              - /url: http://localhost:10029/wp-admin/tools.php?page=whippet&whippet_ltab=lazyload#lazyload
+            - link "CDN" [ref=f8e245] [cursor=pointer]:
+              - /url: http://localhost:10029/wp-admin/tools.php?page=whippet&whippet_ltab=cdn#lazyload
+            - link "Responsiveness" [ref=f8e246] [cursor=pointer]:
+              - /url: http://localhost:10029/wp-admin/tools.php?page=whippet&whippet_ltab=responsiveness#lazyload
+            - link "Compression" [ref=f8e247] [cursor=pointer]:
+              - /url: http://localhost:10029/wp-admin/tools.php?page=whippet&whippet_ltab=compression#lazyload
+            - link "WebP" [ref=f8e248] [cursor=pointer]:
+              - /url: http://localhost:10029/wp-admin/tools.php?page=whippet&whippet_ltab=webp#lazyload
+          - generic [ref=f8e250]:
+            - text: Enable CDN
+            - checkbox [checked] [ref=f8e251] [cursor=pointer]
+            - paragraph [ref=f8e252]:
+              - text: Use
+              - link "wsrv.nl" [ref=f8e253] [cursor=pointer]:
+                - /url: https://wsrv.nl
+              - text: CDN to deliver images
+            - text: Exclude Keywords
+            - textbox [ref=f8e254]
+            - paragraph [ref=f8e255]: The list of keywords that should be excluded from adding CDN. Add keywords in new lines
+            - paragraph [ref=f8e256]:
+              - button "Save Changes" [ref=f8e257] [cursor=pointer]
+              - link "wsrv.nl CDN Info" [ref=f8e258] [cursor=pointer]:
+                - /url: https://wsrv.nl
+  - contentinfo [ref=f8e259]:
+    - paragraph [ref=f8e260]:
+      - generic [ref=f8e261]:
+        - text: Thank you for creating with
+        - link "WordPress" [ref=f8e262] [cursor=pointer]:
+          - /url: https://wordpress.org/
+        - text: .
+    - paragraph [ref=f8e263]: Version 7.0.1

@@ -14,7 +14,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 if ( ! defined( 'WHIPPET_IE_API_URL' ) ) {
-	define( 'WHIPPET_IE_API_URL', 'http://localhost:3100' );
+	// Production Whippet Cloud Image Engine. Override in wp-config.php for local/dev.
+	define( 'WHIPPET_IE_API_URL', 'https://api.whippetwp.com/image-engine' );
 }
 
 class Whippet_Image_Engine {
@@ -53,7 +54,10 @@ class Whippet_Image_Engine {
 	// =========================================================================
 
 	private function api_base(): string {
-		return rtrim( WHIPPET_IE_API_URL, '/' ) . '/api/v1/wp';
+		$option_url = trim( (string) get_option( 'ie_api_url', '' ) );
+		$base       = $option_url !== '' ? $option_url : WHIPPET_IE_API_URL;
+		$base       = (string) apply_filters( 'whippet_ie_api_url', $base );
+		return rtrim( $base, '/' ) . '/api/v1/wp';
 	}
 
 	private function api_key(): string {

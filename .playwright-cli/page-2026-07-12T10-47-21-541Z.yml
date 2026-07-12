@@ -1,0 +1,380 @@
+- generic [ref=f7e2]:
+  - navigation "Main menu":
+    - link "Skip to main content" [ref=f7e3] [cursor=pointer]:
+      - /url: "#wpbody-content"
+    - link "Skip to toolbar" [ref=f7e4] [cursor=pointer]:
+      - /url: "#wp-toolbar"
+    - list [ref=f7e7]:
+      - listitem [ref=f7e8]:
+        - link "Dashboard" [ref=f7e9] [cursor=pointer]:
+          - /url: index.php
+          - generic [ref=f7e10]: 
+        - list [ref=f7e12]:
+          - listitem [ref=f7e13]:
+            - link "Home" [ref=f7e14] [cursor=pointer]:
+              - /url: index.php
+          - listitem [ref=f7e15]:
+            - link "Updates" [ref=f7e16] [cursor=pointer]:
+              - /url: update-core.php
+      - listitem [ref=f7e17]
+      - listitem [ref=f7e19]:
+        - link "Posts" [ref=f7e20] [cursor=pointer]:
+          - /url: edit.php
+          - generic [ref=f7e21]: 
+        - list [ref=f7e23]:
+          - listitem [ref=f7e24]:
+            - link "All Posts" [ref=f7e25] [cursor=pointer]:
+              - /url: edit.php
+          - listitem [ref=f7e26]:
+            - link "Add Post" [ref=f7e27] [cursor=pointer]:
+              - /url: post-new.php
+          - listitem [ref=f7e28]:
+            - link "Categories" [ref=f7e29] [cursor=pointer]:
+              - /url: edit-tags.php?taxonomy=category
+          - listitem [ref=f7e30]:
+            - link "Tags" [ref=f7e31] [cursor=pointer]:
+              - /url: edit-tags.php?taxonomy=post_tag
+      - listitem [ref=f7e32]:
+        - link "Media" [ref=f7e33] [cursor=pointer]:
+          - /url: upload.php
+          - generic [ref=f7e34]: 
+        - list [ref=f7e36]:
+          - listitem [ref=f7e37]:
+            - link "Library" [ref=f7e38] [cursor=pointer]:
+              - /url: upload.php
+          - listitem [ref=f7e39]:
+            - link "Add Media File" [ref=f7e40] [cursor=pointer]:
+              - /url: media-new.php
+      - listitem [ref=f7e41]:
+        - link "Pages" [ref=f7e42] [cursor=pointer]:
+          - /url: edit.php?post_type=page
+          - generic [ref=f7e43]: 
+        - list [ref=f7e45]:
+          - listitem [ref=f7e46]:
+            - link "All Pages" [ref=f7e47] [cursor=pointer]:
+              - /url: edit.php?post_type=page
+          - listitem [ref=f7e48]:
+            - link "Add Page" [ref=f7e49] [cursor=pointer]:
+              - /url: post-new.php?post_type=page
+      - listitem [ref=f7e50]:
+        - link "Comments" [ref=f7e51] [cursor=pointer]:
+          - /url: edit-comments.php
+          - generic [ref=f7e52]: 
+      - listitem [ref=f7e54]
+      - listitem [ref=f7e56]:
+        - link "Appearance" [ref=f7e57] [cursor=pointer]:
+          - /url: themes.php
+          - generic [ref=f7e58]: 
+        - list [ref=f7e60]:
+          - listitem [ref=f7e61]:
+            - link "Themes" [ref=f7e62] [cursor=pointer]:
+              - /url: themes.php
+          - listitem [ref=f7e63]:
+            - link "Editor" [ref=f7e64] [cursor=pointer]:
+              - /url: site-editor.php
+          - listitem [ref=f7e65]:
+            - link "Fonts" [ref=f7e66] [cursor=pointer]:
+              - /url: font-library.php
+      - listitem [ref=f7e67]:
+        - link "Plugins" [ref=f7e68] [cursor=pointer]:
+          - /url: plugins.php
+          - generic [ref=f7e69]: 
+        - list [ref=f7e71]:
+          - listitem [ref=f7e72]:
+            - link "Installed Plugins" [ref=f7e73] [cursor=pointer]:
+              - /url: plugins.php
+          - listitem [ref=f7e74]:
+            - link "Add Plugin" [ref=f7e75] [cursor=pointer]:
+              - /url: plugin-install.php
+      - listitem [ref=f7e76]:
+        - link "Users" [ref=f7e77] [cursor=pointer]:
+          - /url: users.php
+          - generic [ref=f7e78]: 
+        - list [ref=f7e80]:
+          - listitem [ref=f7e81]:
+            - link "All Users" [ref=f7e82] [cursor=pointer]:
+              - /url: users.php
+          - listitem [ref=f7e83]:
+            - link "Add User" [ref=f7e84] [cursor=pointer]:
+              - /url: user-new.php
+          - listitem [ref=f7e85]:
+            - link "Profile" [ref=f7e86] [cursor=pointer]:
+              - /url: profile.php
+      - listitem [ref=f7e87]:
+        - link "Tools" [ref=f7e88] [cursor=pointer]:
+          - /url: tools.php
+          - generic [ref=f7e89]: 
+        - list [ref=f7e91]:
+          - listitem [ref=f7e92]:
+            - link "Available Tools" [ref=f7e93] [cursor=pointer]:
+              - /url: tools.php
+          - listitem [ref=f7e94]:
+            - link "Import" [ref=f7e95] [cursor=pointer]:
+              - /url: import.php
+          - listitem [ref=f7e96]:
+            - link "Export" [ref=f7e97] [cursor=pointer]:
+              - /url: export.php
+          - listitem [ref=f7e98]:
+            - link "Site Health" [ref=f7e99] [cursor=pointer]:
+              - /url: site-health.php
+          - listitem [ref=f7e100]:
+            - link "Export Personal Data" [ref=f7e101] [cursor=pointer]:
+              - /url: export-personal-data.php
+          - listitem [ref=f7e102]:
+            - link "Erase Personal Data" [ref=f7e103] [cursor=pointer]:
+              - /url: erase-personal-data.php
+          - listitem [ref=f7e104]:
+            - link "Whippet" [ref=f7e105] [cursor=pointer]:
+              - /url: tools.php?page=whippet
+          - listitem [ref=f7e106]:
+            - link "Theme file editor" [ref=f7e107] [cursor=pointer]:
+              - /url: theme-editor.php
+          - listitem [ref=f7e108]:
+            - link "Plugin file editor" [ref=f7e109] [cursor=pointer]:
+              - /url: plugin-editor.php
+      - listitem [ref=f7e110]:
+        - link "Settings" [ref=f7e111] [cursor=pointer]:
+          - /url: options-general.php
+          - generic [ref=f7e112]: 
+        - list [ref=f7e114]:
+          - listitem [ref=f7e115]:
+            - link "General" [ref=f7e116] [cursor=pointer]:
+              - /url: options-general.php
+          - listitem [ref=f7e117]:
+            - link "Connectors" [ref=f7e118] [cursor=pointer]:
+              - /url: options-connectors.php
+          - listitem [ref=f7e119]:
+            - link "Writing" [ref=f7e120] [cursor=pointer]:
+              - /url: options-writing.php
+          - listitem [ref=f7e121]:
+            - link "Reading" [ref=f7e122] [cursor=pointer]:
+              - /url: options-reading.php
+          - listitem [ref=f7e123]:
+            - link "Discussion" [ref=f7e124] [cursor=pointer]:
+              - /url: options-discussion.php
+          - listitem [ref=f7e125]:
+            - link "Media" [ref=f7e126] [cursor=pointer]:
+              - /url: options-media.php
+          - listitem [ref=f7e127]:
+            - link "Permalinks" [ref=f7e128] [cursor=pointer]:
+              - /url: options-permalink.php
+          - listitem [ref=f7e129]:
+            - link "Privacy" [ref=f7e130] [cursor=pointer]:
+              - /url: options-privacy.php
+      - listitem [ref=f7e131]:
+        - button "Collapse Main menu" [expanded] [ref=f7e132] [cursor=pointer]:
+          - generic [ref=f7e134]: Collapse Menu
+  - generic [ref=f7e135]:
+    - generic [ref=f7e136]:
+      - navigation "Toolbar":
+        - menu:
+          - group [ref=f7e137]:
+            - menuitem "About WordPress" [ref=f7e138] [cursor=pointer]
+          - group [ref=f7e141]:
+            - menuitem "WhippetWP" [ref=f7e142] [cursor=pointer]
+          - group [ref=f7e143]:
+            - menuitem "⌘K Open command palette" [ref=f7e144] [cursor=pointer]:
+              - generic [ref=f7e146]:
+                - text: ⌘K
+                - generic [ref=f7e147]: Open command palette
+          - group [ref=f7e148]:
+            - menuitem "0 Comments in moderation" [ref=f7e149] [cursor=pointer]:
+              - generic [ref=f7e151]: "0"
+          - group [ref=f7e153]:
+            - menuitem "New" [ref=f7e154] [cursor=pointer]
+        - menu [ref=f7e157]:
+          - group [ref=f7e158]:
+            - menuitem "Hi, jake" [ref=f7e159] [cursor=pointer]
+    - main [ref=f7e160]:
+      - generic [ref=f7e163]:
+        - complementary [ref=f7e164]:
+          - generic [ref=f7e169]:
+            - generic [ref=f7e170]: Whippet
+            - generic [ref=f7e171]: v1.1.0
+          - navigation [ref=f7e172]:
+            - button "Dashboard" [ref=f7e173] [cursor=pointer]
+            - button "Performance" [ref=f7e180] [cursor=pointer]
+            - button "Analytics" [ref=f7e184] [cursor=pointer]
+            - button "Fonts" [ref=f7e188] [cursor=pointer]
+            - button "Lazy Load" [ref=f7e192] [cursor=pointer]
+            - button "Preload" [ref=f7e198] [cursor=pointer]
+            - button "Script Manager" [ref=f7e202] [cursor=pointer]
+            - button "Snippets" [ref=f7e207] [cursor=pointer]
+            - button "Extras" [ref=f7e213] [cursor=pointer]
+            - button "Tools" [ref=f7e217] [cursor=pointer]
+            - button "Import / Export" [ref=f7e223] [cursor=pointer]
+            - button "Docs" [ref=f7e228] [cursor=pointer]
+            - button "Premium" [ref=f7e234] [cursor=pointer]
+        - generic [ref=f7e239]:
+          - generic [ref=f7e240]:
+            - heading "Performance" [level=2] [ref=f7e241]
+            - paragraph [ref=f7e242]: Page caching, compression, image optimisation, database cleanup and server tuning.
+          - generic [ref=f7e244]:
+            - heading "Admin" [level=2] [ref=f7e245]
+            - paragraph [ref=f7e246]: Select which performance options you would like to enable.
+            - text: Limit Post Revisions
+            - combobox "Limit Post Revisions" [ref=f7e248] [cursor=pointer]:
+              - option "Default" [selected]
+              - option "Disable Post Revisions"
+              - option "1"
+              - option "2"
+              - option "3"
+              - option "4"
+              - option "5"
+              - option "10"
+              - option "15"
+              - option "20"
+              - option "25"
+              - option "30"
+            - text: Autosave Interval
+            - combobox "Autosave Interval" [ref=f7e250] [cursor=pointer]:
+              - option "1 Minute (Default)" [selected]
+              - option "2 Minutes"
+              - option "3 Minutes"
+              - option "4 Minutes"
+              - option "5 Minutes"
+            - text: Disable Heartbeat
+            - combobox "Disable Heartbeat" [ref=f7e252] [cursor=pointer]:
+              - option "Default" [selected]
+              - option "Disable Everywhere"
+              - option "Only Allow When Editing Posts/Pages"
+            - text: Heartbeat Frequency
+            - combobox "Heartbeat Frequency" [ref=f7e254] [cursor=pointer]:
+              - option "15 Seconds (Default)" [selected]
+              - option "30 Seconds"
+              - option "45 Seconds"
+              - option "60 Seconds"
+            - text: Disable Admin Bar
+            - checkbox "Disable Admin Bar" [ref=f7e256] [cursor=pointer]
+            - heading "Performance" [level=2] [ref=f7e257]
+            - paragraph [ref=f7e258]: "Core performance features: caching, compression, image quality and font preloading."
+            - text: Page Caching
+            - checkbox "Page Caching" [checked] [ref=f7e260] [cursor=pointer]
+            - text: Cache Expiry
+            - combobox "Cache Expiry" [ref=f7e262] [cursor=pointer]:
+              - option "1 Hour" [selected]
+              - option "6 Hours"
+              - option "12 Hours"
+              - option "24 Hours (Default)"
+              - option "1 Week"
+            - text: Separate Mobile Cache
+            - checkbox "Separate Mobile Cache" [ref=f7e264] [cursor=pointer]
+            - text: Cache Preloading
+            - checkbox "Cache Preloading" [ref=f7e266] [cursor=pointer]
+            - text: Apache Direct-Serve (.htaccess)
+            - checkbox "Apache Direct-Serve (.htaccess)" [ref=f7e268] [cursor=pointer]
+            - text: Exclude URLs from Cache
+            - textbox "Exclude URLs from Cache" [ref=f7e269]:
+              - /placeholder: "/my-account/\n/checkout/\n/cart/"
+            - paragraph [ref=f7e270]: One URL path per line (partial match). Pages containing these strings will never be cached.
+            - text: Bypass Cache for Cookies
+            - textbox "Bypass Cache for Cookies" [ref=f7e271]:
+              - /placeholder: "my_plugin_cart\nlogged_in_user"
+            - paragraph [ref=f7e272]: One cookie name per line. If any of these cookies are set, the cache will be bypassed for that visitor. WooCommerce cart/checkout cookies are always bypassed automatically.
+            - text: Cache Controls
+            - generic [ref=f7e273]: "Cached pages: 0 — Total size: 0 B"
+            - generic [ref=f7e274]:
+              - button "Clear Cache Now" [ref=f7e275] [cursor=pointer]
+              - button "Clear & Preload Cache" [ref=f7e276] [cursor=pointer]
+            - text: Browser Cache Headers
+            - checkbox "Browser Cache Headers" [checked] [ref=f7e278] [cursor=pointer]
+            - text: Browser Cache Duration
+            - combobox "Browser Cache Duration" [ref=f7e280] [cursor=pointer]:
+              - option "1 Hour" [selected]
+              - option "1 Day (Default)"
+              - option "1 Week"
+              - option "1 Month"
+            - text: Gzip Compression
+            - generic [ref=f7e281]:
+              - checkbox "Gzip Compression" [checked] [ref=f7e283] [cursor=pointer]
+              - paragraph [ref=f7e284]: Enables PHP Gzip for dynamic (uncached) HTML responses.
+              - paragraph [ref=f7e285]: Brotli is not used for live responses. Install php-brotli to store compressed cache files only.
+            - text: Minify CSS
+            - checkbox "Minify CSS" [checked] [ref=f7e287] [cursor=pointer]
+            - text: Minify CSS exclusions
+            - textbox "Minify CSS exclusions" [ref=f7e288]:
+              - /placeholder: "admin-bar\nelementor"
+            - paragraph [ref=f7e289]: One handle or URL keyword per line.
+            - text: Minify JavaScript
+            - checkbox "Minify JavaScript" [checked] [ref=f7e291] [cursor=pointer]
+            - text: Minify JS exclusions
+            - textbox "Minify JS exclusions" [ref=f7e292]:
+              - /placeholder: "jquery\nrecaptcha"
+            - paragraph [ref=f7e293]: One handle or URL keyword per line.
+            - text: Defer JavaScript
+            - checkbox "Defer JavaScript" [checked] [ref=f7e295] [cursor=pointer]
+            - text: Defer JS exclusions
+            - textbox "Defer JS exclusions" [ref=f7e296]:
+              - /placeholder: "jquery\nwp-polyfill"
+            - paragraph [ref=f7e297]: One handle or URL keyword per line. jQuery is excluded by default.
+            - text: CDN rewrite
+            - checkbox "CDN rewrite" [ref=f7e299] [cursor=pointer]
+            - text: CDN URL
+            - textbox "CDN URL" [ref=f7e300]:
+              - /placeholder: https://cdn.example.com
+            - paragraph [ref=f7e301]: Rewrite static asset URLs to this CDN origin (no trailing slash required).
+            - text: Speculative Loading
+            - checkbox "Speculative Loading" [checked] [ref=f7e303] [cursor=pointer]
+            - text: Speculation eagerness
+            - combobox "Speculation eagerness" [ref=f7e305] [cursor=pointer]:
+              - option "Conservative" [selected]
+              - option "Moderate (Default)"
+              - option "Eager"
+            - text: Resource hints
+            - textbox "Resource hints" [ref=f7e306]:
+              - /placeholder: "preconnect|https://fonts.gstatic.com\ndns-prefetch|https://www.google-analytics.com"
+              - text: preconnect|https://fonts.gstatic.com dns-prefetch|https://www.google-analytics.com
+            - paragraph [ref=f7e307]: "One per line as type|url. Types: preconnect, dns-prefetch, prefetch, preload."
+            - text: YouTube / Vimeo facades
+            - checkbox "YouTube / Vimeo facades" [checked] [ref=f7e309] [cursor=pointer]
+            - text: LCP image priority
+            - checkbox "LCP image priority" [checked] [ref=f7e311] [cursor=pointer]
+            - text: Lazy render HTML
+            - checkbox "Lazy render HTML" [checked] [ref=f7e313] [cursor=pointer]
+            - text: Lazy render selectors
+            - textbox "Lazy render selectors" [ref=f7e314]:
+              - /placeholder: "footer\n.site-footer\n#comments\n.related-posts"
+            - paragraph [ref=f7e315]: "One CSS selector per line (tag, #id, or .class). Leave blank for built-in defaults. Uses content-visibility for offscreen sections."
+            - text: Image Compression Quality
+            - combobox "Image Compression Quality" [ref=f7e317] [cursor=pointer]:
+              - option "Default (82)" [selected]
+              - option "50 — Aggressive"
+              - option "60 — High"
+              - option "70 — Good"
+              - option "80 — Balanced"
+              - option "90 — Light"
+            - text: WebP Conversion
+            - checkbox "WebP Conversion" [ref=f7e319] [cursor=pointer]
+            - text: WebP Quality
+            - combobox "WebP Quality" [ref=f7e321] [cursor=pointer]:
+              - option "60 — Aggressive" [selected]
+              - option "70 — Good"
+              - option "80 — Balanced (Default)"
+              - option "90 — Light"
+            - text: Bulk Image Compress
+            - generic [ref=f7e322]:
+              - button "Preview" [ref=f7e323] [cursor=pointer]
+              - button "Run Bulk Compress" [disabled] [ref=f7e324] [cursor=pointer]
+            - text: Preload Fonts
+            - textbox "Preload Fonts" [ref=f7e325]:
+              - /placeholder: https://example.com/fonts/myfont.woff2
+            - paragraph [ref=f7e326]: One font URL per line. Injects <link rel="preload"> tags in <head>.
+            - text: Auto DB Cleanup
+            - combobox "Auto DB Cleanup" [ref=f7e328] [cursor=pointer]:
+              - option "Manual Only" [selected]
+              - option "Daily"
+              - option "Weekly"
+              - option "Monthly"
+            - text: Database Cleanup
+            - generic [ref=f7e329]:
+              - button "Preview" [ref=f7e330] [cursor=pointer]
+              - button "Run DB Cleanup" [ref=f7e331] [cursor=pointer]
+            - button "Save Settings" [ref=f7e333] [cursor=pointer]
+  - contentinfo [ref=f7e334]:
+    - paragraph [ref=f7e335]:
+      - generic [ref=f7e336]:
+        - text: Thank you for creating with
+        - link "WordPress" [ref=f7e337] [cursor=pointer]:
+          - /url: https://wordpress.org/
+        - text: .
+    - paragraph [ref=f7e338]: Version 7.0.1

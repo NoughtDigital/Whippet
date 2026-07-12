@@ -105,6 +105,10 @@ class Plugin {
 		require_once WHIPPET_PATH . 'inc/cache.php';
 		require_once WHIPPET_PATH . 'inc/db-cleanup.php';
 		require_once WHIPPET_PATH . 'inc/image-optimizer.php';
+		require_once WHIPPET_PATH . 'inc/minify.php';
+		require_once WHIPPET_PATH . 'inc/cdn-rewrite.php';
+		require_once WHIPPET_PATH . 'inc/speculative-loading.php';
+		require_once WHIPPET_PATH . 'inc/lazy-render.php';
 		require_once WHIPPET_PATH . 'inc/script-manager.php';
 		require_once WHIPPET_PATH . 'inc/import-export.php';
 		require_once WHIPPET_PATH . 'inc/tutorials.php';

@@ -50,6 +50,12 @@ jobs:
           test -f analytics/js/minimal-analytics.js
           test -f pages/whippet-pages.min.js
           test -f resources/js/vendor/alpine.min.js
+          test -f js/editor.js
+          test -f dist/css/admin.css
+          test -f inc/minify.php
+          test -f inc/cdn-rewrite.php
+          test -f inc/speculative-loading.php
+          test -f inc/lazy-render.php
 
       - name: Build assets
         run: npm run prod

@@ -1,0 +1,332 @@
+- generic [ref=f13e2]:
+  - navigation "Main menu":
+    - link "Skip to main content" [ref=f13e3] [cursor=pointer]:
+      - /url: "#wpbody-content"
+    - link "Skip to toolbar" [ref=f13e4] [cursor=pointer]:
+      - /url: "#wp-toolbar"
+    - list [ref=f13e7]:
+      - listitem [ref=f13e8]:
+        - link "Dashboard" [ref=f13e9] [cursor=pointer]:
+          - /url: index.php
+          - generic [ref=f13e10]: 
+        - list [ref=f13e12]:
+          - listitem [ref=f13e13]:
+            - link "Home" [ref=f13e14] [cursor=pointer]:
+              - /url: index.php
+          - listitem [ref=f13e15]:
+            - link "Updates" [ref=f13e16] [cursor=pointer]:
+              - /url: update-core.php
+      - listitem [ref=f13e17]
+      - listitem [ref=f13e19]:
+        - link "Posts" [ref=f13e20] [cursor=pointer]:
+          - /url: edit.php
+          - generic [ref=f13e21]: 
+        - list [ref=f13e23]:
+          - listitem [ref=f13e24]:
+            - link "All Posts" [ref=f13e25] [cursor=pointer]:
+              - /url: edit.php
+          - listitem [ref=f13e26]:
+            - link "Add Post" [ref=f13e27] [cursor=pointer]:
+              - /url: post-new.php
+          - listitem [ref=f13e28]:
+            - link "Categories" [ref=f13e29] [cursor=pointer]:
+              - /url: edit-tags.php?taxonomy=category
+          - listitem [ref=f13e30]:
+            - link "Tags" [ref=f13e31] [cursor=pointer]:
+              - /url: edit-tags.php?taxonomy=post_tag
+      - listitem [ref=f13e32]:
+        - link "Media" [ref=f13e33] [cursor=pointer]:
+          - /url: upload.php
+          - generic [ref=f13e34]: 
+        - list [ref=f13e36]:
+          - listitem [ref=f13e37]:
+            - link "Library" [ref=f13e38] [cursor=pointer]:
+              - /url: upload.php
+          - listitem [ref=f13e39]:
+            - link "Add Media File" [ref=f13e40] [cursor=pointer]:
+              - /url: media-new.php
+      - listitem [ref=f13e41]:
+        - link "Pages" [ref=f13e42] [cursor=pointer]:
+          - /url: edit.php?post_type=page
+          - generic [ref=f13e43]: 
+        - list [ref=f13e45]:
+          - listitem [ref=f13e46]:
+            - link "All Pages" [ref=f13e47] [cursor=pointer]:
+              - /url: edit.php?post_type=page
+          - listitem [ref=f13e48]:
+            - link "Add Page" [ref=f13e49] [cursor=pointer]:
+              - /url: post-new.php?post_type=page
+      - listitem [ref=f13e50]:
+        - link "Comments" [ref=f13e51] [cursor=pointer]:
+          - /url: edit-comments.php
+          - generic [ref=f13e52]: 
+      - listitem [ref=f13e54]
+      - listitem [ref=f13e56]:
+        - link "Appearance" [ref=f13e57] [cursor=pointer]:
+          - /url: themes.php
+          - generic [ref=f13e58]: 
+        - list [ref=f13e60]:
+          - listitem [ref=f13e61]:
+            - link "Themes" [ref=f13e62] [cursor=pointer]:
+              - /url: themes.php
+          - listitem [ref=f13e63]:
+            - link "Editor" [ref=f13e64] [cursor=pointer]:
+              - /url: site-editor.php
+          - listitem [ref=f13e65]:
+            - link "Fonts" [ref=f13e66] [cursor=pointer]:
+              - /url: font-library.php
+      - listitem [ref=f13e67]:
+        - link "Plugins" [ref=f13e68] [cursor=pointer]:
+          - /url: plugins.php
+          - generic [ref=f13e69]: 
+        - list [ref=f13e71]:
+          - listitem [ref=f13e72]:
+            - link "Installed Plugins" [ref=f13e73] [cursor=pointer]:
+              - /url: plugins.php
+          - listitem [ref=f13e74]:
+            - link "Add Plugin" [ref=f13e75] [cursor=pointer]:
+              - /url: plugin-install.php
+      - listitem [ref=f13e76]:
+        - link "Users" [ref=f13e77] [cursor=pointer]:
+          - /url: users.php
+          - generic [ref=f13e78]: 
+        - list [ref=f13e80]:
+          - listitem [ref=f13e81]:
+            - link "All Users" [ref=f13e82] [cursor=pointer]:
+              - /url: users.php
+          - listitem [ref=f13e83]:
+            - link "Add User" [ref=f13e84] [cursor=pointer]:
+              - /url: user-new.php
+          - listitem [ref=f13e85]:
+            - link "Profile" [ref=f13e86] [cursor=pointer]:
+              - /url: profile.php
+      - listitem [ref=f13e87]:
+        - link "Tools" [ref=f13e88] [cursor=pointer]:
+          - /url: tools.php
+          - generic [ref=f13e89]: 
+        - list [ref=f13e91]:
+          - listitem [ref=f13e92]:
+            - link "Available Tools" [ref=f13e93] [cursor=pointer]:
+              - /url: tools.php
+          - listitem [ref=f13e94]:
+            - link "Import" [ref=f13e95] [cursor=pointer]:
+              - /url: import.php
+          - listitem [ref=f13e96]:
+            - link "Export" [ref=f13e97] [cursor=pointer]:
+              - /url: export.php
+          - listitem [ref=f13e98]:
+            - link "Site Health" [ref=f13e99] [cursor=pointer]:
+              - /url: site-health.php
+          - listitem [ref=f13e100]:
+            - link "Export Personal Data" [ref=f13e101] [cursor=pointer]:
+              - /url: export-personal-data.php
+          - listitem [ref=f13e102]:
+            - link "Erase Personal Data" [ref=f13e103] [cursor=pointer]:
+              - /url: erase-personal-data.php
+          - listitem [ref=f13e104]:
+            - link "Whippet" [ref=f13e105] [cursor=pointer]:
+              - /url: tools.php?page=whippet
+          - listitem [ref=f13e106]:
+            - link "Theme file editor" [ref=f13e107] [cursor=pointer]:
+              - /url: theme-editor.php
+          - listitem [ref=f13e108]:
+            - link "Plugin file editor" [ref=f13e109] [cursor=pointer]:
+              - /url: plugin-editor.php
+      - listitem [ref=f13e110]:
+        - link "Settings" [ref=f13e111] [cursor=pointer]:
+          - /url: options-general.php
+          - generic [ref=f13e112]: 
+        - list [ref=f13e114]:
+          - listitem [ref=f13e115]:
+            - link "General" [ref=f13e116] [cursor=pointer]:
+              - /url: options-general.php
+          - listitem [ref=f13e117]:
+            - link "Connectors" [ref=f13e118] [cursor=pointer]:
+              - /url: options-connectors.php
+          - listitem [ref=f13e119]:
+            - link "Writing" [ref=f13e120] [cursor=pointer]:
+              - /url: options-writing.php
+          - listitem [ref=f13e121]:
+            - link "Reading" [ref=f13e122] [cursor=pointer]:
+              - /url: options-reading.php
+          - listitem [ref=f13e123]:
+            - link "Discussion" [ref=f13e124] [cursor=pointer]:
+              - /url: options-discussion.php
+          - listitem [ref=f13e125]:
+            - link "Media" [ref=f13e126] [cursor=pointer]:
+              - /url: options-media.php
+          - listitem [ref=f13e127]:
+            - link "Permalinks" [ref=f13e128] [cursor=pointer]:
+              - /url: options-permalink.php
+          - listitem [ref=f13e129]:
+            - link "Privacy" [ref=f13e130] [cursor=pointer]:
+              - /url: options-privacy.php
+      - listitem [ref=f13e131]:
+        - button "Collapse Main menu" [expanded] [ref=f13e132] [cursor=pointer]:
+          - generic [ref=f13e134]: Collapse Menu
+  - generic [ref=f13e135]:
+    - generic [ref=f13e136]:
+      - navigation "Toolbar":
+        - menu:
+          - group [ref=f13e137]:
+            - menuitem "About WordPress" [ref=f13e138] [cursor=pointer]
+          - group [ref=f13e141]:
+            - menuitem "WhippetWP" [ref=f13e142] [cursor=pointer]
+          - group [ref=f13e143]:
+            - menuitem "⌘K Open command palette" [ref=f13e144] [cursor=pointer]:
+              - generic [ref=f13e146]:
+                - text: ⌘K
+                - generic [ref=f13e147]: Open command palette
+          - group [ref=f13e148]:
+            - menuitem "0 Comments in moderation" [ref=f13e149] [cursor=pointer]:
+              - generic [ref=f13e151]: "0"
+          - group [ref=f13e153]:
+            - menuitem "New" [ref=f13e154] [cursor=pointer]
+        - menu [ref=f13e157]:
+          - group [ref=f13e158]:
+            - menuitem "Hi, jake" [ref=f13e159] [cursor=pointer]
+    - main [ref=f13e160]:
+      - generic [ref=f13e163]:
+        - complementary [ref=f13e164]:
+          - generic [ref=f13e169]:
+            - generic [ref=f13e170]: Whippet
+            - generic [ref=f13e171]: v1.1.0
+          - navigation [ref=f13e172]:
+            - button "Dashboard" [ref=f13e173] [cursor=pointer]
+            - button "Performance" [ref=f13e180] [cursor=pointer]
+            - button "Analytics" [ref=f13e184] [cursor=pointer]
+            - button "Fonts" [ref=f13e188] [cursor=pointer]
+            - button "Lazy Load" [ref=f13e192] [cursor=pointer]
+            - button "Preload" [ref=f13e198] [cursor=pointer]
+            - button "Script Manager" [ref=f13e202] [cursor=pointer]
+            - button "Snippets" [ref=f13e207] [cursor=pointer]
+            - button "Extras" [ref=f13e213] [cursor=pointer]
+            - button "Tools" [ref=f13e217] [cursor=pointer]
+            - button "Import / Export" [ref=f13e223] [cursor=pointer]
+            - button "Docs" [ref=f13e228] [cursor=pointer]
+            - button "Premium" [ref=f13e234] [cursor=pointer]
+        - generic [ref=f13e239]:
+          - generic [ref=f13e240]:
+            - heading "Tools" [level=2] [ref=f13e241]
+            - paragraph [ref=f13e242]: Site health checks and server capability diagnostics.
+          - generic [ref=f13e243]:
+            - generic [ref=f13e244]:
+              - generic [ref=f13e245]: ✗
+              - generic [ref=f13e246]:
+                - generic [ref=f13e247]: HTTPS
+                - generic [ref=f13e248]: HTTPS not detected. Required for HTTP/2 and improved performance.
+            - generic [ref=f13e249]:
+              - generic [ref=f13e250]: ✗
+              - generic [ref=f13e251]:
+                - generic [ref=f13e252]: PHP Brotli
+                - generic [ref=f13e253]: php-brotli not installed. Gzip will be used instead.
+            - generic [ref=f13e254]:
+              - generic [ref=f13e255]: ✓
+              - generic [ref=f13e256]:
+                - generic [ref=f13e257]: WebP (GD / Imagick)
+                - generic [ref=f13e258]: WebP available via GD + Imagick.
+          - generic [ref=f13e259]:
+            - generic [ref=f13e260]: Server Info
+            - text: PHP
+            - code [ref=f13e261]: 8.5.3
+            - text: WordPress
+            - code [ref=f13e262]: 7.0.1
+            - text: WP-Cron
+            - code [ref=f13e263]: Enabled via site traffic — for large sites, disable WP-Cron and use a real system cron hitting wp-cron.php
+            - text: GD
+            - code [ref=f13e264]: bundled (2.1.0 compatible)
+            - text: Imagick
+            - code [ref=f13e265]: ImageMagick 7.1.1-15 Q16 aarch64 98eceff6a:20230729 https://imagemagick.org
+            - text: Gzip
+            - code [ref=f13e266]: 1.2.12
+            - text: Brotli
+            - code [ref=f13e267]: not available
+          - generic [ref=f13e268]:
+            - generic [ref=f13e269]: Cache-Control Header
+            - paragraph [ref=f13e271]: ✓ "no-store" not found — caching is not blocked by your server.
+          - generic [ref=f13e272]:
+            - generic [ref=f13e273]: Asset integrity
+            - paragraph [ref=f13e275]: All required Whippet assets are present.
+          - generic [ref=f13e276]:
+            - generic [ref=f13e277]: Settings snapshots
+            - list [ref=f13e279]:
+              - listitem [ref=f13e280]:
+                - strong [ref=f13e281]: 12 July 2026, 11:55
+                - text: — before settings update
+                - button "Restore" [ref=f13e282] [cursor=pointer]
+              - listitem [ref=f13e283]:
+                - strong [ref=f13e284]: 12 July 2026, 11:46
+                - text: — before settings update
+                - button "Restore" [ref=f13e285] [cursor=pointer]
+              - listitem [ref=f13e286]:
+                - strong [ref=f13e287]: 12 July 2026, 11:40
+                - text: — before settings update
+                - button "Restore" [ref=f13e288] [cursor=pointer]
+              - listitem [ref=f13e289]:
+                - strong [ref=f13e290]: 12 July 2026, 11:39
+                - text: — before settings update
+                - button "Restore" [ref=f13e291] [cursor=pointer]
+              - listitem [ref=f13e292]:
+                - strong [ref=f13e293]: 12 July 2026, 11:38
+                - text: — before settings update
+                - button "Restore" [ref=f13e294] [cursor=pointer]
+          - generic [ref=f13e295]:
+            - generic [ref=f13e296]: Recovery mode
+            - generic [ref=f13e297]:
+              - paragraph [ref=f13e298]: This private URL temporarily bypasses Whippet page caching and front-end rewrites for one hour.
+              - textbox [ref=f13e299]: http://localhost:10029/?whippet_recovery=1&token=b3AJTgYKTPtm171VB17pRttManxY7Ohj
+              - button "Copy recovery URL" [ref=f13e300] [cursor=pointer]
+          - generic [ref=f13e301]:
+            - generic [ref=f13e302]: CDN integrations
+            - generic [ref=f13e303]:
+              - table [ref=f13e304]:
+                - rowgroup [ref=f13e305]:
+                  - row [ref=f13e306]:
+                    - rowheader "Cloudflare zone ID" [ref=f13e307]
+                    - cell [ref=f13e308]:
+                      - textbox "Cloudflare zone ID" [ref=f13e309]:
+                        - /placeholder: ""
+                  - row [ref=f13e310]:
+                    - rowheader "Cloudflare API token" [ref=f13e311]
+                    - cell [ref=f13e312]:
+                      - textbox "Cloudflare API token" [ref=f13e313]:
+                        - /placeholder: ""
+                  - row [ref=f13e314]:
+                    - rowheader "Bunny API key" [ref=f13e315]
+                    - cell [ref=f13e316]:
+                      - textbox "Bunny API key" [ref=f13e317]:
+                        - /placeholder: ""
+                  - row [ref=f13e318]:
+                    - rowheader "Bunny pull zone ID" [ref=f13e319]
+                    - cell [ref=f13e320]:
+                      - textbox "Bunny pull zone ID" [ref=f13e321]:
+                        - /placeholder: ""
+              - button "Save CDN settings" [ref=f13e323] [cursor=pointer]
+          - generic [ref=f13e324]:
+            - generic [ref=f13e325]: Anomaly alerts
+            - generic [ref=f13e327]:
+              - generic [ref=f13e328] [cursor=pointer]:
+                - checkbox "Email the site administrator when failures are detected" [ref=f13e329]
+                - generic [ref=f13e330]: Email the site administrator when failures are detected
+              - generic [ref=f13e331]:
+                - generic [ref=f13e332]: Slack webhook URL
+                - textbox "Slack webhook URL" [ref=f13e333]:
+                  - /placeholder: ""
+              - button "Save alert settings" [ref=f13e334] [cursor=pointer]
+          - generic [ref=f13e335]:
+            - generic [ref=f13e336]: Rule intelligence
+            - generic [ref=f13e337]:
+              - paragraph [ref=f13e338]: Optional telemetry sends only a one-way hash of active plugin slugs, disabled asset handles and a date. It never sends page URLs, content, user details, IP addresses or cookies.
+              - generic [ref=f13e339]:
+                - generic [ref=f13e340] [cursor=pointer]:
+                  - checkbox "Share anonymised rule patterns" [ref=f13e341]
+                  - generic [ref=f13e342]: Share anonymised rule patterns
+                - button "Save privacy setting" [ref=f13e343] [cursor=pointer]
+  - contentinfo [ref=f13e344]:
+    - paragraph [ref=f13e345]:
+      - generic [ref=f13e346]:
+        - text: Thank you for creating with
+        - link "WordPress" [ref=f13e347] [cursor=pointer]:
+          - /url: https://wordpress.org/
+        - text: .
+    - paragraph [ref=f13e348]: Version 7.0.1

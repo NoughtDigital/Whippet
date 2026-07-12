@@ -305,6 +305,10 @@ class Functions {
 	 */
 	public static function disable_embeds_enqueue_block_editor_assets() {
 		$plugin_path = dirname( dirname( __FILE__ ) );
+		$editor_js   = $plugin_path . '/js/editor.js';
+		if ( ! is_readable( $editor_js ) ) {
+			return;
+		}
 		wp_enqueue_script(
 			'disable-embeds',
 			plugins_url( 'js/editor.js', $plugin_path . '/whippet.php' ),
@@ -316,6 +320,14 @@ class Functions {
 			'20181202',
 			true
 		);
+	}
+
+	/**
+	 * Hide the “Show Toolbar when viewing site” option on the profile screen
+	 * when the admin bar is disabled globally.
+	 */
+	public static function whippet_disable_admin_bar() {
+		echo '<style type="text/css">.show-admin-bar{display:none!important;}</style>';
 	}
 	/**
 	 * Removes wp-embed dependency of core packages.

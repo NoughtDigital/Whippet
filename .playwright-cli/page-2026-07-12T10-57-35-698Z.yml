@@ -1,0 +1,296 @@
+- generic [ref=f17e2]:
+  - navigation "Main menu":
+    - link "Skip to main content" [ref=f17e3] [cursor=pointer]:
+      - /url: "#wpbody-content"
+    - link "Skip to toolbar" [ref=f17e4] [cursor=pointer]:
+      - /url: "#wp-toolbar"
+    - list [ref=f17e7]:
+      - listitem [ref=f17e8]:
+        - link "Dashboard" [ref=f17e9] [cursor=pointer]:
+          - /url: index.php
+          - generic [ref=f17e10]: 
+        - list [ref=f17e12]:
+          - listitem [ref=f17e13]:
+            - link "Home" [ref=f17e14] [cursor=pointer]:
+              - /url: index.php
+          - listitem [ref=f17e15]:
+            - link "Updates" [ref=f17e16] [cursor=pointer]:
+              - /url: update-core.php
+      - listitem [ref=f17e17]
+      - listitem [ref=f17e19]:
+        - link "Posts" [ref=f17e20] [cursor=pointer]:
+          - /url: edit.php
+          - generic [ref=f17e21]: 
+        - list [ref=f17e23]:
+          - listitem [ref=f17e24]:
+            - link "All Posts" [ref=f17e25] [cursor=pointer]:
+              - /url: edit.php
+          - listitem [ref=f17e26]:
+            - link "Add Post" [ref=f17e27] [cursor=pointer]:
+              - /url: post-new.php
+          - listitem [ref=f17e28]:
+            - link "Categories" [ref=f17e29] [cursor=pointer]:
+              - /url: edit-tags.php?taxonomy=category
+          - listitem [ref=f17e30]:
+            - link "Tags" [ref=f17e31] [cursor=pointer]:
+              - /url: edit-tags.php?taxonomy=post_tag
+      - listitem [ref=f17e32]:
+        - link "Media" [ref=f17e33] [cursor=pointer]:
+          - /url: upload.php
+          - generic [ref=f17e34]: 
+        - list [ref=f17e36]:
+          - listitem [ref=f17e37]:
+            - link "Library" [ref=f17e38] [cursor=pointer]:
+              - /url: upload.php
+          - listitem [ref=f17e39]:
+            - link "Add Media File" [ref=f17e40] [cursor=pointer]:
+              - /url: media-new.php
+      - listitem [ref=f17e41]:
+        - link "Pages" [ref=f17e42] [cursor=pointer]:
+          - /url: edit.php?post_type=page
+          - generic [ref=f17e43]: 
+        - list [ref=f17e45]:
+          - listitem [ref=f17e46]:
+            - link "All Pages" [ref=f17e47] [cursor=pointer]:
+              - /url: edit.php?post_type=page
+          - listitem [ref=f17e48]:
+            - link "Add Page" [ref=f17e49] [cursor=pointer]:
+              - /url: post-new.php?post_type=page
+      - listitem [ref=f17e50]:
+        - link "Comments" [ref=f17e51] [cursor=pointer]:
+          - /url: edit-comments.php
+          - generic [ref=f17e52]: 
+      - listitem [ref=f17e54]
+      - listitem [ref=f17e56]:
+        - link "Appearance" [ref=f17e57] [cursor=pointer]:
+          - /url: themes.php
+          - generic [ref=f17e58]: 
+        - list [ref=f17e60]:
+          - listitem [ref=f17e61]:
+            - link "Themes" [ref=f17e62] [cursor=pointer]:
+              - /url: themes.php
+          - listitem [ref=f17e63]:
+            - link "Editor" [ref=f17e64] [cursor=pointer]:
+              - /url: site-editor.php
+          - listitem [ref=f17e65]:
+            - link "Fonts" [ref=f17e66] [cursor=pointer]:
+              - /url: font-library.php
+      - listitem [ref=f17e67]:
+        - link "Plugins" [ref=f17e68] [cursor=pointer]:
+          - /url: plugins.php
+          - generic [ref=f17e69]: 
+        - list [ref=f17e71]:
+          - listitem [ref=f17e72]:
+            - link "Installed Plugins" [ref=f17e73] [cursor=pointer]:
+              - /url: plugins.php
+          - listitem [ref=f17e74]:
+            - link "Add Plugin" [ref=f17e75] [cursor=pointer]:
+              - /url: plugin-install.php
+      - listitem [ref=f17e76]:
+        - link "Users" [ref=f17e77] [cursor=pointer]:
+          - /url: users.php
+          - generic [ref=f17e78]: 
+        - list [ref=f17e80]:
+          - listitem [ref=f17e81]:
+            - link "All Users" [ref=f17e82] [cursor=pointer]:
+              - /url: users.php
+          - listitem [ref=f17e83]:
+            - link "Add User" [ref=f17e84] [cursor=pointer]:
+              - /url: user-new.php
+          - listitem [ref=f17e85]:
+            - link "Profile" [ref=f17e86] [cursor=pointer]:
+              - /url: profile.php
+      - listitem [ref=f17e87]:
+        - link "Tools" [ref=f17e88] [cursor=pointer]:
+          - /url: tools.php
+          - generic [ref=f17e89]: 
+        - list [ref=f17e91]:
+          - listitem [ref=f17e92]:
+            - link "Available Tools" [ref=f17e93] [cursor=pointer]:
+              - /url: tools.php
+          - listitem [ref=f17e94]:
+            - link "Import" [ref=f17e95] [cursor=pointer]:
+              - /url: import.php
+          - listitem [ref=f17e96]:
+            - link "Export" [ref=f17e97] [cursor=pointer]:
+              - /url: export.php
+          - listitem [ref=f17e98]:
+            - link "Site Health" [ref=f17e99] [cursor=pointer]:
+              - /url: site-health.php
+          - listitem [ref=f17e100]:
+            - link "Export Personal Data" [ref=f17e101] [cursor=pointer]:
+              - /url: export-personal-data.php
+          - listitem [ref=f17e102]:
+            - link "Erase Personal Data" [ref=f17e103] [cursor=pointer]:
+              - /url: erase-personal-data.php
+          - listitem [ref=f17e104]:
+            - link "Whippet" [ref=f17e105] [cursor=pointer]:
+              - /url: tools.php?page=whippet
+          - listitem [ref=f17e106]:
+            - link "Theme file editor" [ref=f17e107] [cursor=pointer]:
+              - /url: theme-editor.php
+          - listitem [ref=f17e108]:
+            - link "Plugin file editor" [ref=f17e109] [cursor=pointer]:
+              - /url: plugin-editor.php
+      - listitem [ref=f17e110]:
+        - link "Settings" [ref=f17e111] [cursor=pointer]:
+          - /url: options-general.php
+          - generic [ref=f17e112]: 
+        - list [ref=f17e114]:
+          - listitem [ref=f17e115]:
+            - link "General" [ref=f17e116] [cursor=pointer]:
+              - /url: options-general.php
+          - listitem [ref=f17e117]:
+            - link "Connectors" [ref=f17e118] [cursor=pointer]:
+              - /url: options-connectors.php
+          - listitem [ref=f17e119]:
+            - link "Writing" [ref=f17e120] [cursor=pointer]:
+              - /url: options-writing.php
+          - listitem [ref=f17e121]:
+            - link "Reading" [ref=f17e122] [cursor=pointer]:
+              - /url: options-reading.php
+          - listitem [ref=f17e123]:
+            - link "Discussion" [ref=f17e124] [cursor=pointer]:
+              - /url: options-discussion.php
+          - listitem [ref=f17e125]:
+            - link "Media" [ref=f17e126] [cursor=pointer]:
+              - /url: options-media.php
+          - listitem [ref=f17e127]:
+            - link "Permalinks" [ref=f17e128] [cursor=pointer]:
+              - /url: options-permalink.php
+          - listitem [ref=f17e129]:
+            - link "Privacy" [ref=f17e130] [cursor=pointer]:
+              - /url: options-privacy.php
+      - listitem [ref=f17e131]:
+        - button "Collapse Main menu" [expanded] [ref=f17e132] [cursor=pointer]:
+          - generic [ref=f17e134]: Collapse Menu
+  - generic [ref=f17e135]:
+    - generic [ref=f17e136]:
+      - navigation "Toolbar":
+        - menu:
+          - group [ref=f17e137]:
+            - menuitem "About WordPress" [ref=f17e138] [cursor=pointer]
+          - group [ref=f17e141]:
+            - menuitem "WhippetWP" [ref=f17e142] [cursor=pointer]
+          - group [ref=f17e143]:
+            - menuitem "⌘K Open command palette" [ref=f17e144] [cursor=pointer]:
+              - generic [ref=f17e146]:
+                - text: ⌘K
+                - generic [ref=f17e147]: Open command palette
+          - group [ref=f17e148]:
+            - menuitem "0 Comments in moderation" [ref=f17e149] [cursor=pointer]:
+              - generic [ref=f17e151]: "0"
+          - group [ref=f17e153]:
+            - menuitem "New" [ref=f17e154] [cursor=pointer]
+        - menu [ref=f17e157]:
+          - group [ref=f17e158]:
+            - menuitem "Hi, jake" [ref=f17e159] [cursor=pointer]
+    - main [ref=f17e160]:
+      - generic [ref=f17e163]:
+        - complementary [ref=f17e164]:
+          - generic [ref=f17e169]:
+            - generic [ref=f17e170]: Whippet
+            - generic [ref=f17e171]: v1.1.0
+          - navigation [ref=f17e172]:
+            - button "Dashboard" [ref=f17e173] [cursor=pointer]
+            - button "Performance" [ref=f17e180] [cursor=pointer]
+            - button "Analytics" [ref=f17e184] [cursor=pointer]
+            - button "Fonts" [ref=f17e188] [cursor=pointer]
+            - button "Lazy Load" [ref=f17e192] [cursor=pointer]
+            - button "Preload" [ref=f17e198] [cursor=pointer]
+            - button "Script Manager" [ref=f17e202] [cursor=pointer]
+            - button "Snippets" [ref=f17e207] [cursor=pointer]
+            - button "Extras" [ref=f17e213] [cursor=pointer]
+            - button "Tools" [ref=f17e217] [cursor=pointer]
+            - button "Import / Export" [ref=f17e223] [cursor=pointer]
+            - button "Docs" [ref=f17e228] [cursor=pointer]
+            - button "Premium" [ref=f17e234] [cursor=pointer]
+        - generic [ref=f17e239]:
+          - generic [ref=f17e240]:
+            - heading "Code Snippets" [level=2] [ref=f17e241]
+            - paragraph [ref=f17e242]: Add and manage PHP, CSS, JS, and HTML snippets with file or inline delivery, optimization flags, conditions, and safe mode.
+          - generic [ref=f17e243]:
+            - link "Add New Snippet" [ref=f17e244] [cursor=pointer]:
+              - /url: http://localhost:10029/wp-admin/tools.php?page=whippet&whippet_stab=editor#snippets
+            - link "Snippets" [ref=f17e245] [cursor=pointer]:
+              - /url: http://localhost:10029/wp-admin/tools.php?page=whippet&whippet_stab=list#snippets
+          - generic [ref=f17e247]:
+            - paragraph [ref=f17e248]: Flat-file snippets stored in uploads/whippet-snippets for fast, zero-query frontend loading. On multisite, each site uses its own snippet file.
+            - generic [ref=f17e249]:
+              - generic [ref=f17e250]:
+                - 'checkbox "Allow PHP snippet execution Dangerous: PHP snippets run on every matching front-end request. Leave this disabled unless you fully trust the code. Default is off." [ref=f17e251] [cursor=pointer]'
+                - generic [ref=f17e252]:
+                  - strong [ref=f17e253]: Allow PHP snippet execution
+                  - generic [ref=f17e254]: "Dangerous: PHP snippets run on every matching front-end request. Leave this disabled unless you fully trust the code. Default is off."
+              - paragraph [ref=f17e255]:
+                - button "Save PHP setting" [ref=f17e256] [cursor=pointer]
+            - link "Enable Safe Mode (1 hour)" [ref=f17e258] [cursor=pointer]:
+              - /url: http://localhost:10029/wp-admin/tools.php?page=whippet&whippet_safe_mode=1&_wpnonce=8a6c8e7c70#snippets
+            - generic [ref=f17e260]:
+              - heading "Add New Snippet" [level=3] [ref=f17e261]
+              - paragraph [ref=f17e262]: Create a new snippet and choose where and when it should run.
+            - generic [ref=f17e263]:
+              - text: Title
+              - textbox "Title" [ref=f17e264]
+              - text: Description
+              - textbox "Description" [ref=f17e265]
+              - text: Tags
+              - textbox "Tags" [ref=f17e266]
+              - paragraph [ref=f17e267]: Comma-separated.
+              - text: Type
+              - combobox [ref=f17e268] [cursor=pointer]:
+                - option "PHP"
+                - option "CSS"
+                - option "JS" [selected]
+                - option "HTML"
+              - text: Location
+              - combobox [ref=f17e269] [cursor=pointer]:
+                - option "Head"
+                - option "Body Open"
+                - option "Footer" [selected]
+              - text: Priority
+              - spinbutton [ref=f17e270]: "10"
+              - text: Delivery
+              - combobox [ref=f17e271] [cursor=pointer]:
+                - option "Inline" [selected]
+                - option "File"
+              - text: Conditions
+              - combobox [ref=f17e272] [cursor=pointer]:
+                - option "Match all rules" [selected]
+                - option "Match any rule"
+              - textbox "is_front_page url_contains:/checkout" [ref=f17e273]:
+                - /placeholder: "is_front_page\nurl_contains:/checkout"
+              - paragraph [ref=f17e274]: "Rule examples: is_front_page, is_home, is_singular, is_page:contact, post_type:product, url_contains:/shop, user_logged_in, user_logged_out"
+              - text: Code
+              - textbox "Code" [ref=f17e275]
+              - text: Optimisations
+              - generic [ref=f17e276] [cursor=pointer]:
+                - checkbox "Enabled" [checked] [ref=f17e277]
+                - text: Enabled
+              - generic [ref=f17e278] [cursor=pointer]:
+                - checkbox "Minify" [ref=f17e279]
+                - text: Minify
+              - generic [ref=f17e280] [cursor=pointer]:
+                - checkbox "Defer (JS)" [ref=f17e281]
+                - text: Defer (JS)
+              - generic [ref=f17e282] [cursor=pointer]:
+                - checkbox "Async (JS)" [ref=f17e283]
+                - text: Async (JS)
+              - generic [ref=f17e284] [cursor=pointer]:
+                - checkbox "Delay until interaction (JS)" [ref=f17e285]
+                - text: Delay until interaction (JS)
+              - generic [ref=f17e286] [cursor=pointer]:
+                - checkbox "Preload (CSS file)" [ref=f17e287]
+                - text: Preload (CSS file)
+              - paragraph [ref=f17e288]:
+                - button "Save Snippet" [ref=f17e289] [cursor=pointer]
+                - link "View Snippets" [ref=f17e290] [cursor=pointer]:
+                  - /url: http://localhost:10029/wp-admin/tools.php?page=whippet&whippet_stab=list#snippets
+  - contentinfo [ref=f17e291]:
+    - paragraph [ref=f17e292]:
+      - generic [ref=f17e293]:
+        - text: Thank you for creating with
+        - link "WordPress" [ref=f17e294] [cursor=pointer]:
+          - /url: https://wordpress.org/
+        - text: .
+    - paragraph [ref=f17e295]: Version 7.0.1

@@ -1,0 +1,284 @@
+- generic [ref=f6e2]:
+  - navigation "Main menu":
+    - link "Skip to main content" [ref=f6e3] [cursor=pointer]:
+      - /url: "#wpbody-content"
+    - link "Skip to toolbar" [ref=f6e4] [cursor=pointer]:
+      - /url: "#wp-toolbar"
+    - list [ref=f6e7]:
+      - listitem [ref=f6e8]:
+        - link "Dashboard" [ref=f6e9] [cursor=pointer]:
+          - /url: index.php
+          - generic [ref=f6e10]: 
+        - list [ref=f6e12]:
+          - listitem [ref=f6e13]:
+            - link "Home" [ref=f6e14] [cursor=pointer]:
+              - /url: index.php
+          - listitem [ref=f6e15]:
+            - link "Updates" [ref=f6e16] [cursor=pointer]:
+              - /url: update-core.php
+      - listitem [ref=f6e17]
+      - listitem [ref=f6e19]:
+        - link "Posts" [ref=f6e20] [cursor=pointer]:
+          - /url: edit.php
+          - generic [ref=f6e21]: 
+        - list [ref=f6e23]:
+          - listitem [ref=f6e24]:
+            - link "All Posts" [ref=f6e25] [cursor=pointer]:
+              - /url: edit.php
+          - listitem [ref=f6e26]:
+            - link "Add Post" [ref=f6e27] [cursor=pointer]:
+              - /url: post-new.php
+          - listitem [ref=f6e28]:
+            - link "Categories" [ref=f6e29] [cursor=pointer]:
+              - /url: edit-tags.php?taxonomy=category
+          - listitem [ref=f6e30]:
+            - link "Tags" [ref=f6e31] [cursor=pointer]:
+              - /url: edit-tags.php?taxonomy=post_tag
+      - listitem [ref=f6e32]:
+        - link "Media" [ref=f6e33] [cursor=pointer]:
+          - /url: upload.php
+          - generic [ref=f6e34]: 
+        - list [ref=f6e36]:
+          - listitem [ref=f6e37]:
+            - link "Library" [ref=f6e38] [cursor=pointer]:
+              - /url: upload.php
+          - listitem [ref=f6e39]:
+            - link "Add Media File" [ref=f6e40] [cursor=pointer]:
+              - /url: media-new.php
+      - listitem [ref=f6e41]:
+        - link "Pages" [ref=f6e42] [cursor=pointer]:
+          - /url: edit.php?post_type=page
+          - generic [ref=f6e43]: 
+        - list [ref=f6e45]:
+          - listitem [ref=f6e46]:
+            - link "All Pages" [ref=f6e47] [cursor=pointer]:
+              - /url: edit.php?post_type=page
+          - listitem [ref=f6e48]:
+            - link "Add Page" [ref=f6e49] [cursor=pointer]:
+              - /url: post-new.php?post_type=page
+      - listitem [ref=f6e50]:
+        - link "Comments" [ref=f6e51] [cursor=pointer]:
+          - /url: edit-comments.php
+          - generic [ref=f6e52]: 
+      - listitem [ref=f6e54]
+      - listitem [ref=f6e56]:
+        - link "Appearance" [ref=f6e57] [cursor=pointer]:
+          - /url: themes.php
+          - generic [ref=f6e58]: 
+        - list [ref=f6e60]:
+          - listitem [ref=f6e61]:
+            - link "Themes" [ref=f6e62] [cursor=pointer]:
+              - /url: themes.php
+          - listitem [ref=f6e63]:
+            - link "Editor" [ref=f6e64] [cursor=pointer]:
+              - /url: site-editor.php
+          - listitem [ref=f6e65]:
+            - link "Fonts" [ref=f6e66] [cursor=pointer]:
+              - /url: font-library.php
+      - listitem [ref=f6e67]:
+        - link "Plugins" [ref=f6e68] [cursor=pointer]:
+          - /url: plugins.php
+          - generic [ref=f6e69]: 
+        - list [ref=f6e71]:
+          - listitem [ref=f6e72]:
+            - link "Installed Plugins" [ref=f6e73] [cursor=pointer]:
+              - /url: plugins.php
+          - listitem [ref=f6e74]:
+            - link "Add Plugin" [ref=f6e75] [cursor=pointer]:
+              - /url: plugin-install.php
+      - listitem [ref=f6e76]:
+        - link "Users" [ref=f6e77] [cursor=pointer]:
+          - /url: users.php
+          - generic [ref=f6e78]: 
+        - list [ref=f6e80]:
+          - listitem [ref=f6e81]:
+            - link "All Users" [ref=f6e82] [cursor=pointer]:
+              - /url: users.php
+          - listitem [ref=f6e83]:
+            - link "Add User" [ref=f6e84] [cursor=pointer]:
+              - /url: user-new.php
+          - listitem [ref=f6e85]:
+            - link "Profile" [ref=f6e86] [cursor=pointer]:
+              - /url: profile.php
+      - listitem [ref=f6e87]:
+        - link "Tools" [ref=f6e88] [cursor=pointer]:
+          - /url: tools.php
+          - generic [ref=f6e89]: 
+        - list [ref=f6e91]:
+          - listitem [ref=f6e92]:
+            - link "Available Tools" [ref=f6e93] [cursor=pointer]:
+              - /url: tools.php
+          - listitem [ref=f6e94]:
+            - link "Import" [ref=f6e95] [cursor=pointer]:
+              - /url: import.php
+          - listitem [ref=f6e96]:
+            - link "Export" [ref=f6e97] [cursor=pointer]:
+              - /url: export.php
+          - listitem [ref=f6e98]:
+            - link "Site Health" [ref=f6e99] [cursor=pointer]:
+              - /url: site-health.php
+          - listitem [ref=f6e100]:
+            - link "Export Personal Data" [ref=f6e101] [cursor=pointer]:
+              - /url: export-personal-data.php
+          - listitem [ref=f6e102]:
+            - link "Erase Personal Data" [ref=f6e103] [cursor=pointer]:
+              - /url: erase-personal-data.php
+          - listitem [ref=f6e104]:
+            - link "Whippet" [ref=f6e105] [cursor=pointer]:
+              - /url: tools.php?page=whippet
+          - listitem [ref=f6e106]:
+            - link "Theme file editor" [ref=f6e107] [cursor=pointer]:
+              - /url: theme-editor.php
+          - listitem [ref=f6e108]:
+            - link "Plugin file editor" [ref=f6e109] [cursor=pointer]:
+              - /url: plugin-editor.php
+      - listitem [ref=f6e110]:
+        - link "Settings" [ref=f6e111] [cursor=pointer]:
+          - /url: options-general.php
+          - generic [ref=f6e112]: 
+        - list [ref=f6e114]:
+          - listitem [ref=f6e115]:
+            - link "General" [ref=f6e116] [cursor=pointer]:
+              - /url: options-general.php
+          - listitem [ref=f6e117]:
+            - link "Connectors" [ref=f6e118] [cursor=pointer]:
+              - /url: options-connectors.php
+          - listitem [ref=f6e119]:
+            - link "Writing" [ref=f6e120] [cursor=pointer]:
+              - /url: options-writing.php
+          - listitem [ref=f6e121]:
+            - link "Reading" [ref=f6e122] [cursor=pointer]:
+              - /url: options-reading.php
+          - listitem [ref=f6e123]:
+            - link "Discussion" [ref=f6e124] [cursor=pointer]:
+              - /url: options-discussion.php
+          - listitem [ref=f6e125]:
+            - link "Media" [ref=f6e126] [cursor=pointer]:
+              - /url: options-media.php
+          - listitem [ref=f6e127]:
+            - link "Permalinks" [ref=f6e128] [cursor=pointer]:
+              - /url: options-permalink.php
+          - listitem [ref=f6e129]:
+            - link "Privacy" [ref=f6e130] [cursor=pointer]:
+              - /url: options-privacy.php
+      - listitem [ref=f6e131]:
+        - button "Collapse Main menu" [expanded] [ref=f6e132] [cursor=pointer]:
+          - generic [ref=f6e134]: Collapse Menu
+  - generic [ref=f6e135]:
+    - generic [ref=f6e136]:
+      - navigation "Toolbar":
+        - menu:
+          - group [ref=f6e137]:
+            - menuitem "About WordPress" [ref=f6e138] [cursor=pointer]
+          - group [ref=f6e141]:
+            - menuitem "WhippetWP" [ref=f6e142] [cursor=pointer]
+          - group [ref=f6e143]:
+            - menuitem "⌘K Open command palette" [ref=f6e144] [cursor=pointer]:
+              - generic [ref=f6e146]:
+                - text: ⌘K
+                - generic [ref=f6e147]: Open command palette
+          - group [ref=f6e148]:
+            - menuitem "0 Comments in moderation" [ref=f6e149] [cursor=pointer]:
+              - generic [ref=f6e151]: "0"
+          - group [ref=f6e153]:
+            - menuitem "New" [ref=f6e154] [cursor=pointer]
+        - menu [ref=f6e157]:
+          - group [ref=f6e158]:
+            - menuitem "Hi, jake" [ref=f6e159] [cursor=pointer]
+    - main [ref=f6e160]:
+      - generic [ref=f6e163]:
+        - complementary [ref=f6e164]:
+          - generic [ref=f6e169]:
+            - generic [ref=f6e170]: Whippet
+            - generic [ref=f6e171]: v1.1.0
+          - navigation [ref=f6e172]:
+            - button "Dashboard" [ref=f6e173] [cursor=pointer]
+            - button "Performance" [ref=f6e180] [cursor=pointer]
+            - button "Analytics" [ref=f6e184] [cursor=pointer]
+            - button "Fonts" [ref=f6e188] [cursor=pointer]
+            - button "Lazy Load" [ref=f6e192] [cursor=pointer]
+            - button "Preload" [ref=f6e198] [cursor=pointer]
+            - button "Script Manager" [ref=f6e202] [cursor=pointer]
+            - button "Snippets" [ref=f6e207] [cursor=pointer]
+            - button "Extras" [ref=f6e213] [cursor=pointer]
+            - button "Tools" [ref=f6e217] [cursor=pointer]
+            - button "Import / Export" [ref=f6e223] [cursor=pointer]
+            - button "Docs" [ref=f6e228] [cursor=pointer]
+            - button "Premium" [ref=f6e234] [cursor=pointer]
+        - generic [ref=f6e239]:
+          - generic [ref=f6e240]:
+            - heading "Premium Premium" [level=2] [ref=f6e241]:
+              - text: Premium
+              - generic [ref=f6e242]: Premium
+            - paragraph [ref=f6e243]: Premium features for advanced performance — image optimisation, delivery, and critical CSS generation.
+          - generic [ref=f6e244]:
+            - generic [ref=f6e245]: Whippet Cloud
+            - generic [ref=f6e246]:
+              - generic [ref=f6e248]:
+                - textbox [ref=f6e249]
+                - button "Save connection" [ref=f6e250] [cursor=pointer]
+              - paragraph [ref=f6e251]: "Status: not connected. Plan: free."
+              - button "Test connection" [ref=f6e252] [cursor=pointer]
+          - generic [ref=f6e253]:
+            - link "Image Engine" [ref=f6e254] [cursor=pointer]:
+              - /url: http://localhost:10029/wp-admin/tools.php?page=whippet&whippet_ptab=image-engine#premium
+            - link "Critical CSS" [ref=f6e255] [cursor=pointer]:
+              - /url: http://localhost:10029/wp-admin/tools.php?page=whippet&whippet_ptab=critical-css#premium
+          - generic [ref=f6e260]:
+            - heading "Critical CSS Engine" [level=3] [ref=f6e261]
+            - paragraph [ref=f6e262]: Generates and injects above-the-fold CSS for every post/page template, served via your self-hosted Critical CSS Engine service.
+          - generic [ref=f6e263]:
+            - strong [ref=f6e264]: "Service status:"
+            - text: Unreachable — ensure the service is running
+          - generic [ref=f6e265]:
+            - generic [ref=f6e266]: Settings
+            - generic [ref=f6e267]:
+              - text: Enable Critical CSS
+              - generic [ref=f6e268] [cursor=pointer]:
+                - checkbox "Inject critical CSS on the front end" [checked] [ref=f6e269]
+                - text: Inject critical CSS on the front end
+              - text: Remove Unused CSS
+              - generic [ref=f6e270] [cursor=pointer]:
+                - checkbox "Defer non-critical stylesheets when critical CSS is available" [ref=f6e271]
+                - text: Defer non-critical stylesheets when critical CSS is available
+              - paragraph [ref=f6e272]: Requires Critical CSS for the page. Stylesheets matching the safelist are kept.
+              - text: CSS safelist
+              - textbox "CSS safelist" [ref=f6e273]:
+                - /placeholder: "admin-bar\nelementor\nwoocommerce"
+              - paragraph [ref=f6e274]: One handle or URL keyword per line. Matching stylesheets are never deferred.
+              - text: API Key
+              - generic [ref=f6e275]:
+                - textbox "API Key" [ref=f6e276]:
+                  - /placeholder: ""
+                - button "Show / hide" [ref=f6e277] [cursor=pointer]
+              - paragraph [ref=f6e281]: ⚠ No API key saved — requests will be rejected with 401.
+              - text: Post Types
+              - group [ref=f6e282]:
+                - generic [ref=f6e283] [cursor=pointer]:
+                  - checkbox "Post" [checked] [ref=f6e284]
+                  - text: Post
+                - generic [ref=f6e285] [cursor=pointer]:
+                  - checkbox "Page" [checked] [ref=f6e286]
+                  - text: Page
+              - paragraph [ref=f6e287]: Critical CSS will only be auto-generated on save for the checked post types.
+              - generic [ref=f6e288]:
+                - button "Save Settings" [ref=f6e289] [cursor=pointer]
+                - button "Test Connection" [ref=f6e290] [cursor=pointer]
+          - generic [ref=f6e291]:
+            - generic [ref=f6e292]: Full Site Scan
+            - generic [ref=f6e293]:
+              - paragraph [ref=f6e294]: Crawls every page, clusters templates, and generates critical CSS in bulk — one file per template cluster.
+              - button "Start Full Scan" [disabled] [ref=f6e296] [cursor=pointer]
+          - generic [ref=f6e297]:
+            - generic [ref=f6e298]: Regenerate All
+            - generic [ref=f6e299]:
+              - paragraph [ref=f6e300]: Re-queue a fresh critical CSS job for every published post and page. Use after a theme update or major layout change.
+              - button "Regenerate All Posts" [disabled] [ref=f6e302] [cursor=pointer]
+  - contentinfo [ref=f6e303]:
+    - paragraph [ref=f6e304]:
+      - generic [ref=f6e305]:
+        - text: Thank you for creating with
+        - link "WordPress" [ref=f6e306] [cursor=pointer]:
+          - /url: https://wordpress.org/
+        - text: .
+    - paragraph [ref=f6e307]: Version 7.0.1

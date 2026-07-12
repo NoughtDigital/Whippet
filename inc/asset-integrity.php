@@ -22,6 +22,7 @@ class AssetIntegrity {
 			'analytics/js/minimal-analytics.js',
 			'pages/whippet-pages.min.js',
 			'dist/css/admin.css',
+			'js/editor.js',
 		);
 	}
 
