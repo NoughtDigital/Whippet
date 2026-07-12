@@ -11,6 +11,13 @@ function whippet_analytics_settings() {
         update_option( 'whippet_analytics_method', sanitize_text_field( wp_unslash( $_POST['method'] ?? '' ) ) );
         update_option( 'whippet_analytics_disable_on_login', ! empty( $_POST['disable_on_login'] ) ? 1 : 0 );
 
+        set_transient( 'whippet_analytics_saved_' . get_current_user_id(), 1, 60 );
+        wp_safe_redirect( admin_url( 'tools.php?page=whippet&whippet_tab=analytics#analytics' ) );
+        exit;
+    }
+
+    if ( get_transient( 'whippet_analytics_saved_' . get_current_user_id() ) ) {
+        delete_transient( 'whippet_analytics_saved_' . get_current_user_id() );
         echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__( 'Settings have been saved! Please clear cache if you\'re using a cache plugin.', 'whippet' ) . '</p></div>';
     }
 

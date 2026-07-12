@@ -27,7 +27,17 @@ if ( ! in_array( $whippet_active_tab, $whippet_valid_tabs, true ) ) {
 	setTab(tab) {
 		this.activeTab = tab;
 		localStorage.setItem('whippet_tab', tab);
-		window.location.hash = tab;
+		// Drop sticky Lazy Load subtab query when leaving that panel.
+		try {
+			var url = new URL(window.location.href);
+			if (tab !== 'lazyload' && url.searchParams.has('whippet_ltab')) {
+				url.searchParams.delete('whippet_ltab');
+			}
+			url.hash = tab;
+			window.history.replaceState({}, '', url.toString());
+		} catch (e) {
+			window.location.hash = tab;
+		}
 	},
 	selectAllDashboard() {
 		var form = document.getElementById('whippet-dashboard-form');
@@ -247,12 +257,32 @@ if ( ! in_array( $whippet_active_tab, $whippet_valid_tabs, true ) ) {
 
 			<?php
 			if ( isset( $_POST['whippet_fonts_save'] ) && check_admin_referer( 'whippet_fonts', 'whippet_fonts_nonce' ) ) {
-				update_option( 'whippet_fonts_enabled', ! empty( $_POST['whippet_fonts_enabled'] ) );
+				$remove    = ! empty( $_POST['whippet_fonts_enabled'] );
+				$self_host = ! empty( $_POST['whippet_fonts_self_host'] );
+				// Remove and self-host are mutually exclusive — remove wins if both checked.
+				if ( $remove ) {
+					$self_host = false;
+				}
+				update_option( 'whippet_fonts_enabled', $remove );
+				update_option( 'whippet_fonts_self_host', $self_host );
 				update_option( 'whippet_fonts_display_swap', ! empty( $_POST['whippet_fonts_display_swap'] ) );
-				echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__( 'Settings saved.', 'whippet' ) . '</p></div>';
+				$notice = __( 'Settings saved.', 'whippet' );
+				if ( ! empty( $_POST['whippet_fonts_clear_cache'] ) && function_exists( 'whippet_fonts_clear_cache' ) ) {
+					$cleared = whippet_fonts_clear_cache();
+					$notice  = sprintf( __( 'Font cache cleared (%d files). Settings saved.', 'whippet' ), $cleared );
+				}
+				set_transient( 'whippet_fonts_saved_' . get_current_user_id(), $notice, 60 );
+				wp_safe_redirect( admin_url( 'tools.php?page=whippet&whippet_tab=fonts#fonts' ) );
+				exit;
+			}
+			$fonts_notice = get_transient( 'whippet_fonts_saved_' . get_current_user_id() );
+			if ( $fonts_notice ) {
+				delete_transient( 'whippet_fonts_saved_' . get_current_user_id() );
+				echo '<div class="notice notice-success is-dismissible"><p>' . esc_html( $fonts_notice ) . '</p></div>';
 			}
 			$fonts_enabled = get_option( 'whippet_fonts_enabled', true );
 			$fonts_swap    = get_option( 'whippet_fonts_display_swap', false );
+			$fonts_host    = get_option( 'whippet_fonts_self_host', false );
 			?>
 
 			<div class="wa-card">
@@ -268,10 +298,26 @@ if ( ! in_array( $whippet_active_tab, $whippet_valid_tabs, true ) ) {
 							</td>
 						</tr>
 						<tr>
+							<th scope="row"><label for="whippet_fonts_self_host"><?php esc_html_e( 'Self-host Google Fonts', 'whippet' ); ?></label></th>
+							<td>
+								<input type="checkbox" name="whippet_fonts_self_host" id="whippet_fonts_self_host" value="1" <?php checked( $fonts_host ); ?> <?php disabled( $fonts_enabled ); ?> />
+								<p class="description"><?php esc_html_e( 'Download Google Fonts CSS and font files to your uploads folder and rewrite front-end links. Disabled while Remove Google Fonts is on.', 'whippet' ); ?></p>
+							</td>
+						</tr>
+						<tr>
 							<th scope="row"><label for="whippet_fonts_display_swap"><?php esc_html_e( 'font-display: swap', 'whippet' ); ?></label></th>
 							<td>
 								<input type="checkbox" name="whippet_fonts_display_swap" id="whippet_fonts_display_swap" value="1" <?php checked( $fonts_swap ); ?> />
-								<p class="description"><?php esc_html_e( 'Keeps text visible during font load. Only applies when Remove Google Fonts is off.', 'whippet' ); ?></p>
+								<p class="description"><?php esc_html_e( 'Keeps text visible during font load. Applied when removing is off (and always when self-hosting).', 'whippet' ); ?></p>
+							</td>
+						</tr>
+						<tr>
+							<th scope="row"><?php esc_html_e( 'Font cache', 'whippet' ); ?></th>
+							<td>
+								<label>
+									<input type="checkbox" name="whippet_fonts_clear_cache" value="1" />
+									<?php esc_html_e( 'Clear self-hosted font cache on save', 'whippet' ); ?>
+								</label>
 							</td>
 						</tr>
 						</tbody>
@@ -1022,6 +1068,8 @@ if ( ! in_array( $whippet_active_tab, $whippet_valid_tabs, true ) ) {
 		<?php elseif ( 'critical-css' === $whippet_ptab ) :
 
 		$cce_enabled     = get_option( 'cce_enabled', 1 );
+		$cce_rucss       = get_option( 'cce_remove_unused_css', 0 );
+		$cce_safelist    = (string) get_option( 'cce_rucss_safelist', '' );
 		$cce_api_key     = get_option( 'cce_api_key', '' );
 		$cce_healthy     = CCE_API::health();
 		$cce_site_id     = get_option( 'cce_site_id', '' );
@@ -1063,6 +1111,23 @@ if ( ! in_array( $whippet_active_tab, $whippet_valid_tabs, true ) ) {
 								<input type="checkbox" name="cce_enabled" value="1" <?php checked( $cce_enabled ); ?>>
 								<?php esc_html_e( 'Inject critical CSS on the front end', 'whippet' ); ?>
 							</label>
+						</td>
+					</tr>
+					<tr>
+						<th scope="row"><?php esc_html_e( 'Remove Unused CSS', 'whippet' ); ?></th>
+						<td>
+							<label>
+								<input type="checkbox" name="cce_remove_unused_css" value="1" <?php checked( $cce_rucss ); ?>>
+								<?php esc_html_e( 'Defer non-critical stylesheets when critical CSS is available', 'whippet' ); ?>
+							</label>
+							<p class="description"><?php esc_html_e( 'Requires Critical CSS for the page. Stylesheets matching the safelist are kept.', 'whippet' ); ?></p>
+						</td>
+					</tr>
+					<tr>
+						<th scope="row"><label for="cce_rucss_safelist"><?php esc_html_e( 'CSS safelist', 'whippet' ); ?></label></th>
+						<td>
+							<textarea id="cce_rucss_safelist" name="cce_rucss_safelist" rows="4" class="large-text code" placeholder="admin-bar&#10;elementor&#10;woocommerce"><?php echo esc_textarea( $cce_safelist ); ?></textarea>
+							<p class="description"><?php esc_html_e( 'One handle or URL keyword per line. Matching stylesheets are never deferred.', 'whippet' ); ?></p>
 						</td>
 					</tr>
 				<tr>

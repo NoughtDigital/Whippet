@@ -86,6 +86,7 @@ function whippet_process_settings_export() {
 
 	$whippet_fonts = array(
 		'whippet_fonts_enabled'      => get_option( 'whippet_fonts_enabled', true ),
+		'whippet_fonts_self_host'    => get_option( 'whippet_fonts_self_host', false ),
 		'whippet_fonts_display_swap' => get_option( 'whippet_fonts_display_swap', false ),
 	);
 
@@ -118,6 +119,9 @@ function whippet_process_settings_export() {
 		'whippet_scripts_regex_operator'       => get_option( 'whippet_scripts_regex_operator' ),
 		'whippet_scripts_mu_mode'              => get_option( 'whippet_scripts_mu_mode' ),
 		'whippet_scripts_testing_mode'         => get_option( 'whippet_scripts_testing_mode' ),
+		'whippet_scripts_display_archives'     => get_option( 'whippet_scripts_display_archives' ),
+		'whippet_scripts_display_deps'         => get_option( 'whippet_scripts_display_deps' ),
+		'whippet_scripts_hide_disclaimer'      => get_option( 'whippet_scripts_hide_disclaimer' ),
 	);
 
 	$whippet_options = array(
