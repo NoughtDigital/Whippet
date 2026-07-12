@@ -204,6 +204,9 @@ function whippet_images_add_lazy_load($images) {
     // Get options
     $lazymethod = get_option('whippet_images_lazymethod');
     $exclude_keywords = get_option('whippet_images_exclude_keywords');
+    if ( ! is_array( $exclude_keywords ) ) {
+        $exclude_keywords = array();
+    }
 
     $default_exclude_keywords = [
         'data-src=',
@@ -221,11 +224,13 @@ function whippet_images_add_lazy_load($images) {
         'class="ls-bg',
         'soliloquy-image',
         'loading="eager"',
+        'fetchpriority="high"',
         'swatch-img',
         'data-height-percentage',
         'data-large_image',
         'avia-bg-style-fixed',
         'skip-lazy',
+        'whippet-lcp',
     ];
     $exclude_keywords = array_merge($exclude_keywords, $default_exclude_keywords);
 
@@ -336,6 +341,134 @@ function whippet_images_process_woocommerce_thumbnails($images, $compression_ena
     }
 }
 
+/**
+ * Mark the first meaningful content image as LCP: fetchpriority=high, eager load, skip lazy.
+ *
+ * @param object $dom Parsed DOM.
+ */
+function whippet_images_prioritise_lcp( $dom ) {
+	$opts = get_option( 'whippet_options', array() );
+	// Default on unless explicitly disabled.
+	if ( isset( $opts['enable_lcp_priority'] ) && '0' === (string) $opts['enable_lcp_priority'] ) {
+		return;
+	}
+
+	$images = $dom->find( 'img' );
+	foreach ( $images as $image ) {
+		$src = (string) $image->src;
+		if ( '' === $src || 0 === strpos( $src, 'data:image' ) ) {
+			continue;
+		}
+		if ( false !== stripos( (string) $image->class, 'avatar' ) || false !== stripos( (string) $image->class, 'emoji' ) ) {
+			continue;
+		}
+		$image->setAttribute( 'fetchpriority', 'high' );
+		$image->setAttribute( 'loading', 'eager' );
+		$image->setAttribute( 'decoding', 'async' );
+		$class = trim( (string) $image->class . ' whippet-lcp' );
+		$image->setAttribute( 'class', $class );
+		break;
+	}
+}
+
+/**
+ * Replace YouTube / Vimeo iframes with lightweight click-to-load facades.
+ *
+ * @param object $dom Parsed DOM.
+ */
+function whippet_images_youtube_facades( $dom ) {
+	if ( ! apply_filters( 'whippet_youtube_facade_enabled', true ) ) {
+		return;
+	}
+	$opts = get_option( 'whippet_options', array() );
+	if ( empty( $opts['enable_youtube_facade'] ) || '1' !== (string) $opts['enable_youtube_facade'] ) {
+		return;
+	}
+
+	$iframes = $dom->find( 'iframe' );
+	foreach ( $iframes as $iframe ) {
+		$src = (string) $iframe->src;
+		if ( '' === $src ) {
+			$src = (string) $iframe->getAttribute( 'data-src' );
+		}
+		if ( '' === $src ) {
+			continue;
+		}
+
+		$provider = '';
+		$id       = '';
+		if ( preg_match( '#(?:youtube\.com/embed/|youtube-nocookie\.com/embed/|youtu\.be/)([A-Za-z0-9_-]{6,})#i', $src, $m ) ) {
+			$provider = 'youtube';
+			$id       = $m[1];
+		} elseif ( preg_match( '#player\.vimeo\.com/video/(\d+)#i', $src, $m ) ) {
+			$provider = 'vimeo';
+			$id       = $m[1];
+		}
+		if ( ! $provider || ! $id ) {
+			continue;
+		}
+
+		$thumb = 'youtube' === $provider
+			? 'https://i.ytimg.com/vi/' . rawurlencode( $id ) . '/hqdefault.jpg'
+			: 'https://vumbnail.com/' . rawurlencode( $id ) . '.jpg';
+
+		$title = $iframe->title ? esc_attr( $iframe->title ) : esc_attr__( 'Play video', 'whippet' );
+		$facade = '<div class="whippet-video-facade" data-provider="' . esc_attr( $provider ) . '" data-id="' . esc_attr( $id ) . '" style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;background:#000;cursor:pointer;" role="button" tabindex="0" aria-label="' . $title . '">'
+			. '<img src="' . esc_url( $thumb ) . '" alt="" loading="lazy" decoding="async" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;" />'
+			. '<span style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:68px;height:48px;background:rgba(0,0,0,.6);border-radius:12px;display:flex;align-items:center;justify-content:center;">'
+			. '<svg width="24" height="24" viewBox="0 0 24 24" fill="#fff"><path d="M8 5v14l11-7z"/></svg></span>'
+			. '</div>';
+
+		$iframe->outertext = $facade;
+	}
+}
+
+/**
+ * Footer script for video facade activation.
+ */
+function whippet_images_facade_script() {
+	if ( ! apply_filters( 'whippet_youtube_facade_enabled', true ) ) {
+		return;
+	}
+	$opts = get_option( 'whippet_options', array() );
+	if ( empty( $opts['enable_youtube_facade'] ) || '1' !== (string) $opts['enable_youtube_facade'] ) {
+		return;
+	}
+	?>
+	<script id="whippet-video-facade">
+	(function(){
+		function activate(el){
+			if(!el||el.getAttribute('data-activated')){return;}
+			el.setAttribute('data-activated','1');
+			var id=el.getAttribute('data-id');
+			var provider=el.getAttribute('data-provider');
+			var src='';
+			if(provider==='youtube'){src='https://www.youtube-nocookie.com/embed/'+encodeURIComponent(id)+'?autoplay=1&rel=0';}
+			else if(provider==='vimeo'){src='https://player.vimeo.com/video/'+encodeURIComponent(id)+'?autoplay=1';}
+			else{return;}
+			var iframe=document.createElement('iframe');
+			iframe.src=src;
+			iframe.allow='accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture';
+			iframe.allowFullscreen=true;
+			iframe.style.cssText='position:absolute;inset:0;width:100%;height:100%;border:0;';
+			el.innerHTML='';
+			el.appendChild(iframe);
+		}
+		document.addEventListener('click',function(e){
+			var el=e.target.closest('.whippet-video-facade');
+			if(el){activate(el);}
+		});
+		document.addEventListener('keydown',function(e){
+			if(e.key!=='Enter'&&e.key!==' '){return;}
+			var el=e.target.closest&&e.target.closest('.whippet-video-facade');
+			if(el){e.preventDefault();activate(el);}
+		});
+	})();
+	</script>
+	<?php
+}
+add_action( 'wp_footer', 'whippet_images_facade_script', 20 );
+
 function whippet_images_rewrite_html($html) {
     try {
         // Process only GET requests
@@ -382,6 +515,10 @@ function whippet_images_rewrite_html($html) {
         // Process normal images with img tag
         $images = $newHtml->find('img');
 
+        // LCP priority before lazy-load so the first image is excluded.
+        whippet_images_prioritise_lcp( $newHtml );
+        $images = $newHtml->find('img');
+
         // CDN rewriting must run first so subsequent params are appended as
         // top-level wsrv.nl query params rather than embedded in the url= value.
         if($cdn_enabled) {
@@ -404,14 +541,13 @@ function whippet_images_rewrite_html($html) {
 
         if($lazy_loading_enabled) {
             whippet_images_add_lazy_load($images);
-
-            // $elementor_background_divs = $newHtml->find('[data-settings*=background_background]');
-            // whippet_images_lazy_load_elementor_bg_images($elementor_background_divs);
         }
 
         // Process background images
         $background_images = $newHtml->find('[style*=background]');
         whippet_images_process_background_images($background_images, $cdn_enabled, $compression_enabled, $quality, $lazy_loading_enabled);
+
+        whippet_images_youtube_facades( $newHtml );
         
         return $newHtml;
 

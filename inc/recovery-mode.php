@@ -22,6 +22,11 @@ class RecoveryMode {
 		add_filter( 'whippet_images_output_buffer', array( __CLASS__, 'disable_when_active' ) );
 		add_filter( 'whippet_cce_inject_enabled', array( __CLASS__, 'disable_when_active' ) );
 		add_filter( 'whippet_ie_rewrite_enabled', array( __CLASS__, 'disable_when_active' ) );
+		add_filter( 'whippet_minify_enabled', array( __CLASS__, 'disable_when_active' ) );
+		add_filter( 'whippet_cdn_rewrite_enabled', array( __CLASS__, 'disable_when_active' ) );
+		add_filter( 'whippet_speculation_enabled', array( __CLASS__, 'disable_when_active' ) );
+		add_filter( 'whippet_lazy_render_enabled', array( __CLASS__, 'disable_when_active' ) );
+		add_filter( 'whippet_youtube_facade_enabled', array( __CLASS__, 'disable_when_active' ) );
 	}
 
 	public static function maybe_activate() {

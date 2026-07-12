@@ -298,6 +298,20 @@ public function whippet_settings() {
 	);
 
 	/**
+	 * Disable admin bar for all users on the front end.
+	 */
+	add_settings_field(
+		'disable_admin_bar',
+		$this->whippet_title( __( 'Disable Admin Bar', 'whippet' ), 'disable_admin_bar' ),
+		array( $this, 'whippet_print_input' ),
+		'whippet_performance',
+		'whippet_admin',
+		array(
+			'id' => 'disable_admin_bar',
+		)
+	);
+
+	/**
 	* Misc Primary Section
 	* @var [type]
 	*/
@@ -511,7 +525,7 @@ public function whippet_settings() {
 		'cache_exclude_urls',
 		$this->whippet_title( __( 'Exclude URLs from Cache', 'whippet' ), 'cache_exclude_urls' ),
 		array( $this, 'whippet_render_cache_exclude_urls' ),
-		'whippet_options',
+		'whippet_performance',
 		'whippet_performance'
 	);
 
@@ -522,7 +536,7 @@ public function whippet_settings() {
 		'cache_exclude_cookies',
 		$this->whippet_title( __( 'Bypass Cache for Cookies', 'whippet' ), 'cache_exclude_cookies' ),
 		array( $this, 'whippet_render_cache_exclude_cookies' ),
-		'whippet_options',
+		'whippet_performance',
 		'whippet_performance'
 	);
 
@@ -533,7 +547,7 @@ public function whippet_settings() {
 		'whippet_cache_controls',
 		__( 'Cache Controls', 'whippet' ),
 		array( $this, 'whippet_render_cache_controls' ),
-		'whippet_options',
+		'whippet_performance',
 		'whippet_performance'
 	);
 
@@ -571,14 +585,184 @@ public function whippet_settings() {
 	);
 
 	/**
-	* Enable Gzip / Brotli
+	* Enable Gzip (runtime) — cached pages may also store Brotli variants separately
 	*/
 	add_settings_field(
 		'enable_gzip',
-		$this->whippet_title( __( 'Gzip / Brotli Compression', 'whippet' ), 'enable_gzip' ),
+		$this->whippet_title( __( 'Gzip Compression', 'whippet' ), 'enable_gzip' ),
 		array( $this, 'whippet_render_gzip_field' ),
-		'whippet_options',
+		'whippet_performance',
 		'whippet_performance'
+	);
+
+	/**
+	 * Minify CSS
+	 */
+	add_settings_field(
+		'enable_minify_css',
+		$this->whippet_title( __( 'Minify CSS', 'whippet' ), 'enable_minify_css' ),
+		array( $this, 'whippet_print_input' ),
+		'whippet_performance',
+		'whippet_performance',
+		array( 'id' => 'enable_minify_css' )
+	);
+
+	add_settings_field(
+		'minify_css_exclude',
+		$this->whippet_title( __( 'Minify CSS exclusions', 'whippet' ), 'minify_css_exclude' ),
+		array( $this, 'whippet_render_textarea_option' ),
+		'whippet_performance',
+		'whippet_performance',
+		array(
+			'id'          => 'minify_css_exclude',
+			'placeholder' => "admin-bar\nelementor",
+			'description' => __( 'One handle or URL keyword per line.', 'whippet' ),
+		)
+	);
+
+	add_settings_field(
+		'enable_minify_js',
+		$this->whippet_title( __( 'Minify JavaScript', 'whippet' ), 'enable_minify_js' ),
+		array( $this, 'whippet_print_input' ),
+		'whippet_performance',
+		'whippet_performance',
+		array( 'id' => 'enable_minify_js' )
+	);
+
+	add_settings_field(
+		'minify_js_exclude',
+		$this->whippet_title( __( 'Minify JS exclusions', 'whippet' ), 'minify_js_exclude' ),
+		array( $this, 'whippet_render_textarea_option' ),
+		'whippet_performance',
+		'whippet_performance',
+		array(
+			'id'          => 'minify_js_exclude',
+			'placeholder' => "jquery\nrecaptcha",
+			'description' => __( 'One handle or URL keyword per line.', 'whippet' ),
+		)
+	);
+
+	add_settings_field(
+		'enable_defer_js',
+		$this->whippet_title( __( 'Defer JavaScript', 'whippet' ), 'enable_defer_js' ),
+		array( $this, 'whippet_print_input' ),
+		'whippet_performance',
+		'whippet_performance',
+		array( 'id' => 'enable_defer_js' )
+	);
+
+	add_settings_field(
+		'defer_js_exclude',
+		$this->whippet_title( __( 'Defer JS exclusions', 'whippet' ), 'defer_js_exclude' ),
+		array( $this, 'whippet_render_textarea_option' ),
+		'whippet_performance',
+		'whippet_performance',
+		array(
+			'id'          => 'defer_js_exclude',
+			'placeholder' => "jquery\nwp-polyfill",
+			'description' => __( 'One handle or URL keyword per line. jQuery is excluded by default.', 'whippet' ),
+		)
+	);
+
+	add_settings_field(
+		'enable_cdn_rewrite',
+		$this->whippet_title( __( 'CDN rewrite', 'whippet' ), 'enable_cdn_rewrite' ),
+		array( $this, 'whippet_print_input' ),
+		'whippet_performance',
+		'whippet_performance',
+		array( 'id' => 'enable_cdn_rewrite' )
+	);
+
+	add_settings_field(
+		'cdn_url',
+		$this->whippet_title( __( 'CDN URL', 'whippet' ), 'cdn_url' ),
+		array( $this, 'whippet_render_text_option' ),
+		'whippet_performance',
+		'whippet_performance',
+		array(
+			'id'          => 'cdn_url',
+			'placeholder' => 'https://cdn.example.com',
+			'description' => __( 'Rewrite static asset URLs to this CDN origin (no trailing slash required).', 'whippet' ),
+		)
+	);
+
+	add_settings_field(
+		'enable_speculation',
+		$this->whippet_title( __( 'Speculative Loading', 'whippet' ), 'enable_speculation' ),
+		array( $this, 'whippet_print_input' ),
+		'whippet_performance',
+		'whippet_performance',
+		array( 'id' => 'enable_speculation' )
+	);
+
+	add_settings_field(
+		'speculation_eagerness',
+		$this->whippet_title( __( 'Speculation eagerness', 'whippet' ), 'speculation_eagerness' ),
+		array( $this, 'whippet_print_input' ),
+		'whippet_performance',
+		'whippet_performance',
+		array(
+			'id'      => 'speculation_eagerness',
+			'input'   => 'select',
+			'options' => array(
+				'conservative' => 'Conservative',
+				'moderate'     => 'Moderate (Default)',
+				'eager'        => 'Eager',
+			),
+		)
+	);
+
+	add_settings_field(
+		'resource_hints',
+		$this->whippet_title( __( 'Resource hints', 'whippet' ), 'resource_hints' ),
+		array( $this, 'whippet_render_textarea_option' ),
+		'whippet_performance',
+		'whippet_performance',
+		array(
+			'id'          => 'resource_hints',
+			'placeholder' => "preconnect|https://fonts.gstatic.com\ndns-prefetch|https://www.google-analytics.com",
+			'description' => __( 'One per line as type|url. Types: preconnect, dns-prefetch, prefetch, preload.', 'whippet' ),
+		)
+	);
+
+	add_settings_field(
+		'enable_youtube_facade',
+		$this->whippet_title( __( 'YouTube / Vimeo facades', 'whippet' ), 'enable_youtube_facade' ),
+		array( $this, 'whippet_print_input' ),
+		'whippet_performance',
+		'whippet_performance',
+		array( 'id' => 'enable_youtube_facade' )
+	);
+
+	add_settings_field(
+		'enable_lcp_priority',
+		$this->whippet_title( __( 'LCP image priority', 'whippet' ), 'enable_lcp_priority' ),
+		array( $this, 'whippet_print_input' ),
+		'whippet_performance',
+		'whippet_performance',
+		array( 'id' => 'enable_lcp_priority' )
+	);
+
+	add_settings_field(
+		'enable_lazy_render',
+		$this->whippet_title( __( 'Lazy render HTML', 'whippet' ), 'enable_lazy_render' ),
+		array( $this, 'whippet_print_input' ),
+		'whippet_performance',
+		'whippet_performance',
+		array( 'id' => 'enable_lazy_render' )
+	);
+
+	add_settings_field(
+		'lazy_render_selectors',
+		$this->whippet_title( __( 'Lazy render selectors', 'whippet' ), 'lazy_render_selectors' ),
+		array( $this, 'whippet_render_textarea_option' ),
+		'whippet_performance',
+		'whippet_performance',
+		array(
+			'id'          => 'lazy_render_selectors',
+			'placeholder' => "footer\n.site-footer\n#comments\n.related-posts",
+			'description' => __( 'One CSS selector per line (tag, #id, or .class). Leave blank for built-in defaults. Uses content-visibility for offscreen sections.', 'whippet' ),
+		)
 	);
 
 	/**
@@ -644,7 +828,7 @@ public function whippet_settings() {
 		'whippet_bulk_compress_btn',
 		__( 'Bulk Image Compress', 'whippet' ),
 		array( $this, 'whippet_render_bulk_compress_button' ),
-		'whippet_options',
+		'whippet_performance',
 		'whippet_performance'
 	);
 
@@ -655,7 +839,7 @@ public function whippet_settings() {
 		'preload_fonts',
 		$this->whippet_title( __( 'Preload Fonts', 'whippet' ), 'preload_fonts' ),
 		array( $this, 'whippet_render_preload_fonts_textarea' ),
-		'whippet_options',
+		'whippet_performance',
 		'whippet_performance'
 	);
 
@@ -687,7 +871,7 @@ public function whippet_settings() {
 		'whippet_db_cleanup_btn',
 		__( 'Database Cleanup', 'whippet' ),
 		array( $this, 'whippet_render_db_cleanup_button' ),
-		'whippet_options',
+		'whippet_performance',
 		'whippet_performance'
 	);
 
@@ -735,6 +919,22 @@ public function whippet_default_options() {
 		'enable_browser_cache'    => '0',
 		'browser_cache_ttl'       => '86400',
 		'enable_gzip'             => '0',
+		'enable_minify_css'       => '0',
+		'minify_css_exclude'      => '',
+		'enable_minify_js'        => '0',
+		'minify_js_exclude'       => '',
+		'enable_defer_js'         => '0',
+		'defer_js_exclude'        => '',
+		'enable_cdn_rewrite'      => '0',
+		'cdn_url'                 => '',
+		'enable_speculation'      => '0',
+		'speculation_eagerness'   => 'moderate',
+		'resource_hints'          => '',
+		'enable_youtube_facade'    => '0',
+		'enable_lcp_priority'     => '1',
+		'enable_lazy_render'      => '0',
+		'lazy_render_selectors'   => '',
+		'disable_admin_bar'       => '0',
 		'image_quality'           => '',
 		'enable_webp_conversion'  => '0',
 		'webp_quality'            => '80',
@@ -936,7 +1136,86 @@ public static function whippet_sanitize_extras($values) {
 		$values['cache_exclude_cookies'] = implode( "\n", $clean );
 	}
 
-	return $values;
+	$textarea_keys = array( 'minify_css_exclude', 'minify_js_exclude', 'defer_js_exclude', 'resource_hints', 'lazy_render_selectors' );
+	foreach ( $textarea_keys as $key ) {
+		if ( isset( $values[ $key ] ) ) {
+			$lines = explode( "\n", (string) $values[ $key ] );
+			$clean = array_filter( array_map( static function ( $l ) {
+				return sanitize_text_field( trim( $l ) );
+			}, $lines ) );
+			$values[ $key ] = implode( "\n", $clean );
+		}
+	}
+
+	if ( isset( $values['cdn_url'] ) ) {
+		$values['cdn_url'] = esc_url_raw( trim( (string) $values['cdn_url'] ) );
+	}
+
+	if ( isset( $values['speculation_eagerness'] ) ) {
+		$allowed = array( 'conservative', 'moderate', 'eager' );
+		$val     = sanitize_key( $values['speculation_eagerness'] );
+		$values['speculation_eagerness'] = in_array( $val, $allowed, true ) ? $val : 'moderate';
+	}
+
+	// Normalise checkboxes so unchecked fields persist as "0" for the tab being saved.
+	$dashboard_checkboxes = array(
+		'disable_emojis',
+		'remove_query_strings',
+		'remove_comments',
+		'disable_embeds',
+		'disable_google_maps',
+		'remove_jquery_migrate',
+		'remove_rsd_link',
+		'remove_shortlink',
+		'remove_rest_api_links',
+		'remove_wlwmanifest_link',
+		'remove_feed_links',
+		'disable_self_pingbacks',
+		'disable_rss_feeds',
+		'disable_xmlrpc',
+		'hide_wp_version',
+		'disable_woocommerce_scripts',
+		'disable_woocommerce_cart_fragmentation',
+		'disable_woocommerce_status',
+		'disable_woocommerce_widgets',
+	);
+	$performance_checkboxes = array(
+		'enable_minify_css',
+		'enable_minify_js',
+		'enable_defer_js',
+		'enable_cdn_rewrite',
+		'enable_speculation',
+		'enable_youtube_facade',
+		'enable_lcp_priority',
+		'enable_lazy_render',
+		'disable_admin_bar',
+		'enable_gzip',
+		'enable_page_cache',
+		'enable_browser_cache',
+		'enable_webp_conversion',
+		'cache_mobile_separate',
+		'cache_preload',
+		'cache_htaccess',
+		'disable_heartbeat',
+	);
+
+	$option_page = isset( $_POST['option_page'] ) ? sanitize_text_field( wp_unslash( $_POST['option_page'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Missing
+	$tab_checkboxes = array();
+	if ( 'whippet_options' === $option_page ) {
+		$tab_checkboxes = $dashboard_checkboxes;
+	} elseif ( 'whippet_performance' === $option_page ) {
+		$tab_checkboxes = $performance_checkboxes;
+	}
+
+	foreach ( $tab_checkboxes as $cb ) {
+		$values[ $cb ] = ( ! empty( $values[ $cb ] ) && '0' !== (string) $values[ $cb ] ) ? '1' : '0';
+	}
+
+	// Merge so Dashboard / Performance / Extras partial saves do not wipe each other.
+	if ( ! is_array( $values ) ) {
+		$values = array();
+	}
+	return array_merge( $existing, $values );
 }
 
 /**
@@ -1072,7 +1351,7 @@ public function whippet_render_db_cleanup_button() {
 }
 
 /**
- * Render the Gzip / Brotli field with a note about Brotli availability.
+ * Render the Gzip field — runtime uses Gzip; Brotli applies only to cached HTML files.
  */
 public function whippet_render_gzip_field() {
 	$options = get_option( 'whippet_options', array() );
@@ -1081,12 +1360,48 @@ public function whippet_render_gzip_field() {
 	echo "<div style='display:table;width:100%;'><div class='whippet-input-wrapper'>";
 	echo "<input type='checkbox' id='enable_gzip' name='whippet_options[enable_gzip]' value='1' style='display:block;margin:0;'" . $checked . ">";
 	echo "</div>";
+	echo '<p style="font-size:12px;font-style:italic;color:#6b7280;">' . esc_html__( 'Enables PHP Gzip for dynamic (uncached) HTML responses.', 'whippet' ) . '</p>';
 	if ( $brotli ) {
-		echo '<p style="font-size:12px;font-style:italic;color:#16a34a;">' . esc_html__( 'Brotli extension detected — cached pages will also be saved as .br files for maximum compression.', 'whippet' ) . '</p>';
+		echo '<p style="font-size:12px;font-style:italic;color:#16a34a;">' . esc_html__( 'php-brotli detected — page cache will also write .html.br variants for Apache/Nginx to serve when Accept-Encoding includes br.', 'whippet' ) . '</p>';
 	} else {
-		echo '<p style="font-size:12px;font-style:italic;color:#6b7280;">' . esc_html__( 'PHP Gzip only. For Brotli support install the php-brotli PECL extension on your server.', 'whippet' ) . '</p>';
+		echo '<p style="font-size:12px;font-style:italic;color:#6b7280;">' . esc_html__( 'Brotli is not used for live responses. Install php-brotli to store compressed cache files only.', 'whippet' ) . '</p>';
 	}
 	echo "</div>";
+}
+
+/**
+ * Render a simple text option.
+ *
+ * @param array $args Field args.
+ */
+public function whippet_render_text_option( $args ) {
+	$options = get_option( 'whippet_options', array() );
+	$id      = $args['id'];
+	$value   = isset( $options[ $id ] ) ? $options[ $id ] : '';
+	$ph      = ! empty( $args['placeholder'] ) ? $args['placeholder'] : '';
+	echo '<input type="url" class="regular-text" id="' . esc_attr( $id ) . '" name="whippet_options[' . esc_attr( $id ) . ']" value="' . esc_attr( $value ) . '" placeholder="' . esc_attr( $ph ) . '" />';
+	if ( ! empty( $args['description'] ) ) {
+		echo '<p class="description">' . esc_html( $args['description'] ) . '</p>';
+	}
+}
+
+/**
+ * Render a textarea option (string stored with newlines).
+ *
+ * @param array $args Field args.
+ */
+public function whippet_render_textarea_option( $args ) {
+	$options = get_option( 'whippet_options', array() );
+	$id      = $args['id'];
+	$value   = isset( $options[ $id ] ) ? $options[ $id ] : '';
+	if ( is_array( $value ) ) {
+		$value = implode( "\n", $value );
+	}
+	$ph = ! empty( $args['placeholder'] ) ? $args['placeholder'] : '';
+	echo '<textarea id="' . esc_attr( $id ) . '" name="whippet_options[' . esc_attr( $id ) . ']" rows="4" cols="60" class="large-text code" placeholder="' . esc_attr( $ph ) . '">' . esc_textarea( $value ) . '</textarea>';
+	if ( ! empty( $args['description'] ) ) {
+		echo '<p class="description">' . esc_html( $args['description'] ) . '</p>';
+	}
 }
 
 /**

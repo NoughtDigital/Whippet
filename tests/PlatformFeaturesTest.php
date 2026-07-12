@@ -58,6 +58,58 @@ class PlatformFeaturesTest extends TestCase {
 		$this->assertTrue( RecoveryMode::disable_when_active( true ) );
 	}
 
+	public function test_recovery_mode_registers_facade_filter(): void {
+		$source = file_get_contents( dirname( __DIR__ ) . '/inc/recovery-mode.php' );
+		$this->assertStringContainsString( 'whippet_youtube_facade_enabled', $source );
+	}
+
+	public function test_sanitize_merges_partial_tab_saves(): void {
+		if ( ! function_exists( 'add_option' ) ) {
+			function add_option( $key, $value ) { // phpcs:ignore
+				return update_option( $key, $value );
+			}
+		}
+		if ( ! function_exists( 'add_settings_section' ) ) {
+			function add_settings_section() { return true; }
+		}
+		if ( ! function_exists( 'add_settings_field' ) ) {
+			function add_settings_field() { return true; }
+		}
+		if ( ! function_exists( 'register_setting' ) ) {
+			function register_setting() { return true; }
+		}
+		require_once dirname( __DIR__ ) . '/inc/settings.php';
+		update_option(
+			'whippet_options',
+			array(
+				'disable_emojis'    => '1',
+				'enable_page_cache' => '1',
+				'enable_minify_css' => '1',
+			)
+		);
+		$_POST['option_page'] = 'whippet_options';
+		$out                  = \Whippet\Settings::whippet_sanitize_extras(
+			array(
+				'disable_emojis'  => '1',
+				'hide_wp_version' => '1',
+			)
+		);
+		$this->assertSame( '1', $out['disable_emojis'] );
+		$this->assertSame( '1', $out['hide_wp_version'] );
+		$this->assertSame( '1', $out['enable_page_cache'], 'Performance keys must survive a Dashboard save' );
+		$this->assertSame( '1', $out['enable_minify_css'] );
+		unset( $_POST['option_page'] );
+	}
+
+	public function test_cache_controls_registered_on_performance_page(): void {
+		$source = file_get_contents( dirname( __DIR__ ) . '/inc/settings.php' );
+		$this->assertMatchesRegularExpression(
+			"/whippet_cache_controls'[\s\S]{0,200}'whippet_performance'/",
+			$source
+		);
+		$this->assertStringContainsString( 'array_merge( $existing, $values )', $source );
+	}
+
 	public function test_cce_api_calls_include_sslverify(): void {
 		$source = file_get_contents( dirname( __DIR__ ) . '/inc/critical-css.php' );
 		$this->assertNotFalse( $source );
@@ -71,6 +123,38 @@ class PlatformFeaturesTest extends TestCase {
 		$this->assertFileExists( $root . '/analytics/js/gtag.js' );
 		$this->assertFileExists( $root . '/analytics/js/minimal-analytics.js' );
 		$this->assertFileExists( $root . '/pages/whippet-pages.min.js' );
+		$this->assertFileExists( $root . '/js/editor.js' );
+		$this->assertFileExists( $root . '/inc/minify.php' );
+		$this->assertFileExists( $root . '/inc/cdn-rewrite.php' );
+		$this->assertFileExists( $root . '/inc/speculative-loading.php' );
+		$this->assertFileExists( $root . '/inc/lazy-render.php' );
+	}
+
+	public function test_core_allowlist_includes_new_performance_keys(): void {
+		$keys = Helper::allowed_core_option_keys();
+		$this->assertContains( 'enable_minify_css', $keys );
+		$this->assertContains( 'enable_defer_js', $keys );
+		$this->assertContains( 'enable_cdn_rewrite', $keys );
+		$this->assertContains( 'enable_speculation', $keys );
+		$this->assertContains( 'enable_youtube_facade', $keys );
+		$this->assertContains( 'enable_lazy_render', $keys );
+		$this->assertContains( 'disable_admin_bar', $keys );
+	}
+
+	public function test_lazy_render_rewrites_footer(): void {
+		require_once dirname( __DIR__ ) . '/inc/lazy-render.php';
+		$html = '<html><body><footer id="colophon" class="site-footer"><p>x</p></footer></body></html>';
+		update_option( 'whippet_options', array( 'enable_lazy_render' => '1' ) );
+		$out = \Whippet\LazyRender::rewrite( $html );
+		$this->assertStringContainsString( 'whippet-lazy-render', $out );
+	}
+
+	public function test_cloud_defaults_are_production(): void {
+		$cce = file_get_contents( dirname( __DIR__ ) . '/inc/critical-css.php' );
+		$ie  = file_get_contents( dirname( __DIR__ ) . '/inc/image-engine.php' );
+		$this->assertStringContainsString( 'https://api.whippetwp.com/critical-css', $cce );
+		$this->assertStringContainsString( 'https://api.whippetwp.com/image-engine', $ie );
+		$this->assertStringNotContainsString( "DEFAULT_BASE_URL = 'http://localhost:3000'", $cce );
 	}
 
 	public function test_conflict_detector_page_cache_flag(): void {
