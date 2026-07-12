@@ -1,1 +1,695 @@
-(()=>{var e,t={508:()=>{},604:()=>{},652:()=>{},988:()=>{var e={state:{restoreAfterSubmitKey:"whippetRestoreAfterSubmit",activeViewKey:"whippetActiveView",getStorage:function(){"use strict";try{return window.sessionStorage}catch(e){return null}},setValue:function(t,r){"use strict";var a=e.state.getStorage();a&&a.setItem(t,r)},getValue:function(t){"use strict";var r=e.state.getStorage();return r&&r.getItem(t)||""},setRestoreAfterSubmit:function(){"use strict";e.state.setValue(e.state.restoreAfterSubmitKey,"1")},getRestoreAfterSubmit:function(){"use strict";return"1"===e.state.getValue(e.state.restoreAfterSubmitKey)},clearRestoreAfterSubmit:function(){"use strict";var t=e.state.getStorage();t&&t.removeItem(e.state.restoreAfterSubmitKey)},setActiveView:function(t){"use strict";t&&e.state.setValue(e.state.activeViewKey,t)},getActiveView:function(){"use strict";return e.state.getValue(e.state.activeViewKey)},applyActiveView:function(e,t){"use strict";var r,a;e&&t&&(r=e.querySelectorAll("[data-whippet-view-target]"),Array.prototype.forEach.call(r,function(e){e.classList.toggle("is-active",e.getAttribute("data-whippet-view-target")===t),e.setAttribute("aria-pressed",e.getAttribute("data-whippet-view-target")===t?"true":"false")}),a=e.querySelectorAll("[data-whippet-view]"),Array.prototype.forEach.call(a,function(e){e.classList.toggle("is-active",e.getAttribute("data-whippet-view")===t)}))},getCurrentActiveView:function(e){"use strict";var t=e?e.querySelector("[data-whippet-view].is-active"):null;return t&&t.getAttribute("data-whippet-view")||""},restore:function(t){"use strict";t&&e.state.getRestoreAfterSubmit()&&(t.style.display="block",e.state.applyActiveView(t,e.state.getActiveView()||"script-manager"),e.state.clearRestoreAfterSubmit())}},menu:{init:function(){"use strict";document.addEventListener("click",function(e){if(e.target&&e.target.closest?e.target.closest("#wp-admin-bar-whippet"):null){e.preventDefault();var t=document.getElementById("whippet");t&&("none"===t.style.display?t.style.display="block":t.style.display="none")}})}},UI:{init:function(){"use strict";var t,r=document.getElementById("whippet");e.state.restore(r),t=document.querySelectorAll("#whippet input[type=checkbox]"),Array.prototype.forEach.call(t,function(e){e.addEventListener("change",function(){document.whippetChanged=!0})}),t=document.querySelectorAll("#whippet select"),Array.prototype.forEach.call(t,function(t){t.addEventListener("change",function(){var t=this.closest?this.closest("td"):null;if(t&&t.classList&&t.classList.contains("option-everwhere")){var r,a=(r="td"===this.parentNode.tagName.toLowerCase()?this.parentNode.parentNode:this.parentNode.parentNode.parentNode).querySelector(".g-cond"),i=r.querySelector(".g-excp"),n=r.querySelector(".g-regex"),s=r.querySelector(".g-cond input[type=radio]:checked");if("e"===this.value){if(e.helper.addClass("g-disabled",a),e.helper.addClass("g-disabled",i),n&&e.helper.addClass("g-disabled",n),a&&e.helper.clearSelected(a),s){s.checked=!1;var o=this.parentNode.parentNode.parentNode.querySelector(".g-excp");e.helper.clearSelected(o)}}else e.helper.removeClass("g-disabled",a),s?"everywhere"===s.value?(n&&e.helper.addClass("g-disabled",n),e.helper.removeClass("g-disabled",i)):s&&"regex"===s.value&&(e.helper.addClass("g-disabled",i),n&&e.helper.removeClass("g-disabled",n)):(i&&e.helper.addClass("g-disabled",i),n&&e.helper.addClass("g-disabled",n));document.whippetChanged=!0}else document.whippetChanged=!0})}),t=document.querySelectorAll("#whippet .g-cond input[type=radio]"),Array.prototype.forEach.call(t,function(t){t.addEventListener("change",function(){var t=this.parentNode.parentNode.parentNode,r=t.querySelector(".g-excp"),a=t.querySelector(".g-regex");"here"===this.value?(e.helper.addClass("g-disabled",r),a&&e.helper.addClass("g-disabled",a),e.helper.clearSelected(r),a&&e.helper.clearSelected(a)):"everywhere"===this.value?(a&&e.helper.addClass("g-disabled",a),e.helper.removeClass("g-disabled",r)):"regex"===this.value&&(e.helper.addClass("g-disabled",r),a&&e.helper.removeClass("g-disabled",a)),document.whippetChanged=!0})});var a=document.getElementById("submit-whippet");a&&a.addEventListener("click",function(){var t=document.getElementById("whippet");document.whippetChanged=!1,e.state.setRestoreAfterSubmit(),e.state.setActiveView(e.state.getCurrentActiveView(t)||"script-manager")}),document.addEventListener("click",function(t){var r,a,i,n=t.target&&t.target.closest?t.target.closest("#whippet [data-whippet-view-target]"):null,s=t.target&&t.target.closest?t.target.closest("#whippet .whippet-global-view__cleanup"):null,o=t.target&&t.target.closest?t.target.closest("#whippet .whippet-global-view__delete"):null;if(n){if(r=document.getElementById("whippet"),a=n.getAttribute("data-whippet-view-target"),!r||!a)return;return e.state.applyActiveView(r,a),void e.state.setActiveView(a)}if(s){if(!(i=document.getElementById("whippet-global-view-deletions")))return;return e.helper.appendDeleteRules(i,s.getAttribute("data-whippet-delete-rules")||""),e.helper.removeRowsByKeys(s.getAttribute("data-whippet-delete-row-keys")||""),s.disabled=!0,s.textContent="Outdated post IDs queued",void(document.whippetChanged=!0)}o&&(i=document.getElementById("whippet-global-view-deletions"))&&window.confirm('Are you sure you want to delete the rule for "'+(o.getAttribute("data-whippet-delete-label")||"this item")+'"?')&&(e.helper.appendDeleteRule(i,o.getAttribute("data-whippet-delete-rule")||""),e.helper.removeRuleRow(o.closest("tr")),document.whippetChanged=!0)});var i=document.getElementById("whippet-frontend-reset-btn"),n=document.getElementById("whippet-frontend-reset-msg");i&&i.addEventListener("click",function(){window.confirm("Are you sure? This will remove all Script Manager disabled/enabled rules. This cannot be undone.")&&(i.disabled=!0,n&&(n.textContent="Resetting...",n.style.color="#64748b"),fetch(i.getAttribute("data-whippet-ajax-url"),{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded"},body:new URLSearchParams({action:"whippet_scripts_reset",nonce:i.getAttribute("data-whippet-reset-nonce")||""})}).then(function(e){return e.json()}).then(function(e){i.disabled=!1,n&&(e.success?(n.style.color="#00a32a",n.textContent=e.data.message):(n.style.color="#d63638",n.textContent=e.data||"Reset failed."))}).catch(function(){i.disabled=!1,n&&(n.style.color="#d63638",n.textContent="Request failed.")}))})},protection:function(){"use strict";window.addEventListener("beforeunload",function(e){if(document.whippetChanged){var t="It looks like you have been editing configuration and tried to leave page without saving. Press cancel to stay on page.";return(e||window.event).returnValue=t,t}})}},helper:{addClass:function(e,t){"use strict";t&&(t.classList?t.classList.add(e):t.className+=" "+e)},removeClass:function(e,t){"use strict";t&&(t.classList?t.classList.remove(e):t.className=t.className.replace(new RegExp("(^|\\b)"+e.split(" ").join("|")+"(\\b|$)","gi")," "))},clearSelected:function(e){"use strict";if(e){var t=e.querySelectorAll("input[type=checkbox]");Array.prototype.forEach.call(t,function(e){e.checked=!1});var r=e.querySelectorAll("textarea");Array.prototype.forEach.call(r,function(e){e.value=""});var a=e.querySelectorAll('input[type="text"]');Array.prototype.forEach.call(a,function(e){e.value=""});var i=e.querySelectorAll("select");Array.prototype.forEach.call(i,function(e){e.selectedIndex=0})}},appendDeleteRule:function(e,t){"use strict";var r;e&&t&&((r=document.createElement("input")).type="hidden",r.name="whippet_delete_rules[]",r.value=t,e.appendChild(r))},appendDeleteRules:function(t,r){"use strict";var a;try{a=JSON.parse(window.atob(r||""))}catch(e){return}Array.isArray(a)&&Array.prototype.forEach.call(a,function(r){e.helper.appendDeleteRule(t,r)})},ensureEmptyState:function(e){"use strict";var t;e&&!e.querySelector("tr")&&((t=document.createElement("tr")).className="whippet-global-view__empty-row",t.innerHTML='<td colspan="4">No rules found in this section.</td>',e.appendChild(t))},removeRuleRow:function(t){"use strict";var r,a;t&&t.parentNode&&(a=(r=t.parentNode).parentNode.nextElementSibling,t.parentNode.removeChild(t),e.helper.ensureEmptyState(r),a&&a.classList&&a.classList.contains("whippet-global-view__footer")&&!r.querySelector("tr.is-outdated")&&a.parentNode.removeChild(a))},removeRowsByKeys:function(t){"use strict";var r;try{r=JSON.parse(window.atob(t||""))}catch(e){return}Array.isArray(r)&&Array.prototype.forEach.call(r,function(t){var r=document.querySelector('#whippet [data-whippet-row-key="'+t+'"]');e.helper.removeRuleRow(r)})}},ready:function(e){"use strict";"loading"!==document.readyState?e():document.addEventListener("DOMContentLoaded",e)},init:function(){"use strict";e.ready(e.menu.init),e.ready(e.UI.init),e.ready(e.UI.protection)}};setTimeout(function(){e.init()},100)}},r={};function a(e){var i=r[e];if(void 0!==i)return i.exports;var n=r[e]={exports:{}};return t[e](n,n.exports,a),n.exports}a.m=t,e=[],a.O=(t,r,i,n)=>{if(!r){var s=1/0;for(d=0;d<e.length;d++){for(var[r,i,n]=e[d],o=!0,l=0;l<r.length;l++)(!1&n||s>=n)&&Object.keys(a.O).every(e=>a.O[e](r[l]))?r.splice(l--,1):(o=!1,n<s&&(s=n));if(o){e.splice(d--,1);var c=i();void 0!==c&&(t=c)}}return t}n=n||0;for(var d=e.length;d>0&&e[d-1][2]>n;d--)e[d]=e[d-1];e[d]=[r,i,n]},a.o=(e,t)=>Object.prototype.hasOwnProperty.call(e,t),(()=>{var e={847:0,364:0,266:0,220:0};a.O.j=t=>0===e[t];var t=(t,r)=>{var i,n,[s,o,l]=r,c=0;if(s.some(t=>0!==e[t])){for(i in o)a.o(o,i)&&(a.m[i]=o[i]);if(l)var d=l(a)}for(t&&t(r);c<s.length;c++)n=s[c],a.o(e,n)&&e[n]&&e[n][0](),e[n]=0;return a.O(d)},r=self.webpackChunk=self.webpackChunk||[];r.forEach(t.bind(null,0)),r.push=t.bind(null,r.push.bind(r))})(),a.O(void 0,[364,266,220],()=>a(988)),a.O(void 0,[364,266,220],()=>a(508)),a.O(void 0,[364,266,220],()=>a(604));var i=a.O(void 0,[364,266,220],()=>a(652));i=a.O(i)})();
+/******/ (() => { // webpackBootstrap
+/******/ 	var __webpack_modules__ = ({
+
+/***/ "./resources/js/app.js":
+/*!*****************************!*\
+  !*** ./resources/js/app.js ***!
+  \*****************************/
+/***/ (() => {
+
+/*jslint browser: true*/
+//Revision: 2018.02.13
+
+var whippet = {
+  state: {
+    restoreAfterSubmitKey: "whippetRestoreAfterSubmit",
+    activeViewKey: "whippetActiveView",
+    getStorage: function getStorage() {
+      "use strict";
+
+      try {
+        return window.sessionStorage;
+      } catch (error) {
+        return null;
+      }
+    },
+    setValue: function setValue(key, value) {
+      "use strict";
+
+      var storage = whippet.state.getStorage();
+      if (!storage) {
+        return;
+      }
+      storage.setItem(key, value);
+    },
+    getValue: function getValue(key) {
+      "use strict";
+
+      var storage = whippet.state.getStorage();
+      if (!storage) {
+        return "";
+      }
+      return storage.getItem(key) || "";
+    },
+    setRestoreAfterSubmit: function setRestoreAfterSubmit() {
+      "use strict";
+
+      whippet.state.setValue(whippet.state.restoreAfterSubmitKey, "1");
+    },
+    getRestoreAfterSubmit: function getRestoreAfterSubmit() {
+      "use strict";
+
+      return whippet.state.getValue(whippet.state.restoreAfterSubmitKey) === "1";
+    },
+    clearRestoreAfterSubmit: function clearRestoreAfterSubmit() {
+      "use strict";
+
+      var storage = whippet.state.getStorage();
+      if (!storage) {
+        return;
+      }
+      storage.removeItem(whippet.state.restoreAfterSubmitKey);
+    },
+    setActiveView: function setActiveView(viewName) {
+      "use strict";
+
+      if (!viewName) {
+        return;
+      }
+      whippet.state.setValue(whippet.state.activeViewKey, viewName);
+    },
+    getActiveView: function getActiveView() {
+      "use strict";
+
+      return whippet.state.getValue(whippet.state.activeViewKey);
+    },
+    applyActiveView: function applyActiveView(panel, targetView) {
+      "use strict";
+
+      var buttons;
+      var views;
+      if (!panel || !targetView) {
+        return;
+      }
+      buttons = panel.querySelectorAll("[data-whippet-view-target]");
+      Array.prototype.forEach.call(buttons, function (button) {
+        button.classList.toggle("is-active", button.getAttribute("data-whippet-view-target") === targetView);
+        button.setAttribute("aria-pressed", button.getAttribute("data-whippet-view-target") === targetView ? "true" : "false");
+      });
+      views = panel.querySelectorAll("[data-whippet-view]");
+      Array.prototype.forEach.call(views, function (view) {
+        view.classList.toggle("is-active", view.getAttribute("data-whippet-view") === targetView);
+      });
+    },
+    getCurrentActiveView: function getCurrentActiveView(panel) {
+      "use strict";
+
+      var activeView = panel ? panel.querySelector("[data-whippet-view].is-active") : null;
+      return activeView ? activeView.getAttribute("data-whippet-view") || "" : "";
+    },
+    restore: function restore(panel) {
+      "use strict";
+
+      if (!panel) {
+        return;
+      }
+      if (!whippet.state.getRestoreAfterSubmit()) {
+        return;
+      }
+      panel.style.display = "block";
+      whippet.state.applyActiveView(panel, whippet.state.getActiveView() || "script-manager");
+      whippet.state.clearRestoreAfterSubmit();
+    }
+  },
+  menu: {
+    init: function init() {
+      "use strict";
+
+      document.addEventListener("click", function (e) {
+        var menuItem = e.target && e.target.closest ? e.target.closest("#wp-admin-bar-whippet") : null;
+        if (!menuItem) {
+          return;
+        }
+        e.preventDefault();
+        var panel = document.getElementById("whippet");
+        if (panel) {
+          if (panel.style.display === "none") {
+            panel.style.display = "block";
+          } else {
+            panel.style.display = "none";
+          }
+        }
+      });
+    }
+  },
+  UI: {
+    init: function init() {
+      "use strict";
+
+      var elements;
+      var panel = document.getElementById("whippet");
+      whippet.state.restore(panel);
+      elements = document.querySelectorAll("#whippet input[type=checkbox]");
+      Array.prototype.forEach.call(elements, function (el) {
+        el.addEventListener("change", function () {
+          document.whippetChanged = true;
+        });
+      });
+      elements = document.querySelectorAll("#whippet select");
+      Array.prototype.forEach.call(elements, function (el) {
+        el.addEventListener("change", function () {
+          var selectCell = this.closest ? this.closest("td") : null;
+          if (!selectCell || !selectCell.classList || !selectCell.classList.contains("option-everwhere")) {
+            document.whippetChanged = true;
+            return;
+          }
+
+          //look for wrappers
+          var tr;
+          if (this.parentNode.tagName.toLowerCase() === "td") {
+            tr = this.parentNode.parentNode;
+          } else {
+            tr = this.parentNode.parentNode.parentNode; //probably wrapper around select
+          }
+          var sectionCond = tr.querySelector(".g-cond");
+          var sectionExcp = tr.querySelector(".g-excp");
+          var sectionRegex = tr.querySelector(".g-regex");
+          var checkedRadio = tr.querySelector(".g-cond input[type=radio]:checked");
+          if (this.value === "e") {
+            /**
+             * State = Enable
+             */
+
+            //ukrywanie sekcji "Where" i "Exceptions"
+            whippet.helper.addClass("g-disabled", sectionCond);
+            whippet.helper.addClass("g-disabled", sectionExcp);
+            if (sectionRegex) {
+              whippet.helper.addClass("g-disabled", sectionRegex);
+            }
+            if (sectionCond) {
+              whippet.helper.clearSelected(sectionCond);
+            }
+            if (checkedRadio) {
+              //odznaczanie stanu "Where"
+              checkedRadio.checked = false;
+
+              //odznaczanie "Exceptions"
+              var tr2 = this.parentNode.parentNode.parentNode;
+              var section = tr2.querySelector(".g-excp");
+              whippet.helper.clearSelected(section);
+            }
+          } else {
+            /**
+             * State = Disable
+             */
+
+            //pokazywanie sekcji "where"
+            whippet.helper.removeClass("g-disabled", sectionCond);
+
+            // Asset rows now use a single disable panel; plugin rows still use radios.
+            if (!checkedRadio) {
+              if (sectionExcp) {
+                whippet.helper.addClass("g-disabled", sectionExcp);
+              }
+              if (sectionRegex) {
+                whippet.helper.addClass("g-disabled", sectionRegex);
+              }
+            } else if (checkedRadio.value === "everywhere") {
+              //jeśli zaznaczono "Everywhere" pokaż tą sekcję
+              if (sectionRegex) {
+                whippet.helper.addClass("g-disabled", sectionRegex);
+              }
+              whippet.helper.removeClass("g-disabled", sectionExcp);
+            } else if (checkedRadio && checkedRadio.value === "regex") {
+              whippet.helper.addClass("g-disabled", sectionExcp);
+              if (sectionRegex) {
+                whippet.helper.removeClass("g-disabled", sectionRegex);
+              }
+            }
+          }
+          document.whippetChanged = true;
+        });
+      });
+      elements = document.querySelectorAll("#whippet .g-cond input[type=radio]");
+      Array.prototype.forEach.call(elements, function (el) {
+        el.addEventListener("change", function () {
+          var tr = this.parentNode.parentNode.parentNode;
+          var sectionExcp = tr.querySelector(".g-excp");
+          var sectionRegex = tr.querySelector(".g-regex");
+          if (this.value === "here") {
+            whippet.helper.addClass("g-disabled", sectionExcp);
+            if (sectionRegex) {
+              whippet.helper.addClass("g-disabled", sectionRegex);
+            }
+            whippet.helper.clearSelected(sectionExcp);
+            if (sectionRegex) {
+              whippet.helper.clearSelected(sectionRegex);
+            }
+          } else if (this.value === "everywhere") {
+            if (sectionRegex) {
+              whippet.helper.addClass("g-disabled", sectionRegex);
+            }
+            whippet.helper.removeClass("g-disabled", sectionExcp);
+          } else if (this.value === "regex") {
+            whippet.helper.addClass("g-disabled", sectionExcp);
+            if (sectionRegex) {
+              whippet.helper.removeClass("g-disabled", sectionRegex);
+            }
+          }
+          document.whippetChanged = true;
+        });
+      });
+      var submitButton = document.getElementById("submit-whippet");
+      if (submitButton) {
+        submitButton.addEventListener("click", function () {
+          var currentPanel = document.getElementById("whippet");
+          document.whippetChanged = false;
+          whippet.state.setRestoreAfterSubmit();
+          whippet.state.setActiveView(whippet.state.getCurrentActiveView(currentPanel) || "script-manager");
+        });
+      }
+      document.addEventListener("click", function (e) {
+        var viewButton = e.target && e.target.closest ? e.target.closest("#whippet [data-whippet-view-target]") : null;
+        var cleanupButton = e.target && e.target.closest ? e.target.closest("#whippet .whippet-global-view__cleanup") : null;
+        var deleteButton = e.target && e.target.closest ? e.target.closest("#whippet .whippet-global-view__delete") : null;
+        var panel;
+        var targetView;
+        var buttons;
+        var views;
+        var deletionsContainer;
+        if (viewButton) {
+          panel = document.getElementById("whippet");
+          targetView = viewButton.getAttribute("data-whippet-view-target");
+          if (!panel || !targetView) {
+            return;
+          }
+          whippet.state.applyActiveView(panel, targetView);
+          whippet.state.setActiveView(targetView);
+          return;
+        }
+        if (cleanupButton) {
+          deletionsContainer = document.getElementById("whippet-global-view-deletions");
+          if (!deletionsContainer) {
+            return;
+          }
+          whippet.helper.appendDeleteRules(deletionsContainer, cleanupButton.getAttribute("data-whippet-delete-rules") || "");
+          whippet.helper.removeRowsByKeys(cleanupButton.getAttribute("data-whippet-delete-row-keys") || "");
+          cleanupButton.disabled = true;
+          cleanupButton.textContent = "Outdated post IDs queued";
+          document.whippetChanged = true;
+          return;
+        }
+        if (!deleteButton) {
+          return;
+        }
+        deletionsContainer = document.getElementById("whippet-global-view-deletions");
+        if (!deletionsContainer) {
+          return;
+        }
+        if (!window.confirm('Are you sure you want to delete the rule for "' + (deleteButton.getAttribute("data-whippet-delete-label") || "this item") + '"?')) {
+          return;
+        }
+        whippet.helper.appendDeleteRule(deletionsContainer, deleteButton.getAttribute("data-whippet-delete-rule") || "");
+        whippet.helper.removeRuleRow(deleteButton.closest("tr"));
+        document.whippetChanged = true;
+      });
+      var resetButton = document.getElementById("whippet-frontend-reset-btn");
+      var resetMessage = document.getElementById("whippet-frontend-reset-msg");
+      if (resetButton) {
+        resetButton.addEventListener("click", function () {
+          if (!window.confirm("Are you sure? This will remove all Script Manager disabled/enabled rules. This cannot be undone.")) {
+            return;
+          }
+          resetButton.disabled = true;
+          if (resetMessage) {
+            resetMessage.textContent = "Resetting...";
+            resetMessage.style.color = "#64748b";
+          }
+          fetch(resetButton.getAttribute("data-whippet-ajax-url"), {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/x-www-form-urlencoded"
+            },
+            body: new URLSearchParams({
+              action: "whippet_scripts_reset",
+              nonce: resetButton.getAttribute("data-whippet-reset-nonce") || ""
+            })
+          }).then(function (response) {
+            return response.json();
+          }).then(function (result) {
+            resetButton.disabled = false;
+            if (!resetMessage) {
+              return;
+            }
+            if (result.success) {
+              resetMessage.style.color = "#00a32a";
+              resetMessage.textContent = result.data.message;
+            } else {
+              resetMessage.style.color = "#d63638";
+              resetMessage.textContent = result.data || "Reset failed.";
+            }
+          })["catch"](function () {
+            resetButton.disabled = false;
+            if (resetMessage) {
+              resetMessage.style.color = "#d63638";
+              resetMessage.textContent = "Request failed.";
+            }
+          });
+        });
+      }
+    },
+    protection: function protection() {
+      "use strict";
+
+      window.addEventListener("beforeunload", function (e) {
+        if (document.whippetChanged) {
+          var confirmationMessage = "It looks like you have been editing configuration and tried to leave page without saving. Press cancel to stay on page.";
+          (e || window.event).returnValue = confirmationMessage;
+          return confirmationMessage;
+        }
+      });
+    }
+  },
+  helper: {
+    addClass: function addClass(className, el) {
+      "use strict";
+
+      if (!el) {
+        return;
+      }
+      if (el.classList) {
+        el.classList.add(className);
+      } else {
+        el.className += " " + className;
+      }
+    },
+    removeClass: function removeClass(className, el) {
+      "use strict";
+
+      if (!el) {
+        return;
+      }
+      if (el.classList) {
+        el.classList.remove(className);
+      } else {
+        el.className = el.className.replace(new RegExp("(^|\\b)" + className.split(" ").join("|") + "(\\b|$)", "gi"), " ");
+      }
+    },
+    clearSelected: function clearSelected(el) {
+      "use strict";
+
+      if (!el) {
+        return;
+      }
+      var checkboxes = el.querySelectorAll("input[type=checkbox]");
+      Array.prototype.forEach.call(checkboxes, function (input) {
+        input.checked = false;
+      });
+      var textareas = el.querySelectorAll("textarea");
+      Array.prototype.forEach.call(textareas, function (input) {
+        input.value = "";
+      });
+      var textInputs = el.querySelectorAll('input[type="text"]');
+      Array.prototype.forEach.call(textInputs, function (input) {
+        input.value = "";
+      });
+      var selects = el.querySelectorAll("select");
+      Array.prototype.forEach.call(selects, function (input) {
+        input.selectedIndex = 0;
+      });
+    },
+    appendDeleteRule: function appendDeleteRule(container, value) {
+      "use strict";
+
+      var input;
+      if (!container || !value) {
+        return;
+      }
+      input = document.createElement("input");
+      input.type = "hidden";
+      input.name = "whippet_delete_rules[]";
+      input.value = value;
+      container.appendChild(input);
+    },
+    appendDeleteRules: function appendDeleteRules(container, encodedRules) {
+      "use strict";
+
+      var rules;
+      try {
+        rules = JSON.parse(window.atob(encodedRules || ""));
+      } catch (error) {
+        return;
+      }
+      if (!Array.isArray(rules)) {
+        return;
+      }
+      Array.prototype.forEach.call(rules, function (rule) {
+        whippet.helper.appendDeleteRule(container, rule);
+      });
+    },
+    ensureEmptyState: function ensureEmptyState(tbody) {
+      "use strict";
+
+      var emptyRow;
+      if (!tbody || tbody.querySelector("tr")) {
+        return;
+      }
+      emptyRow = document.createElement("tr");
+      emptyRow.className = "whippet-global-view__empty-row";
+      emptyRow.innerHTML = '<td colspan="4">No rules found in this section.</td>';
+      tbody.appendChild(emptyRow);
+    },
+    removeRuleRow: function removeRuleRow(row) {
+      "use strict";
+
+      var tbody;
+      var footer;
+      if (!row || !row.parentNode) {
+        return;
+      }
+      tbody = row.parentNode;
+      footer = tbody.parentNode.nextElementSibling;
+      row.parentNode.removeChild(row);
+      whippet.helper.ensureEmptyState(tbody);
+      if (footer && footer.classList && footer.classList.contains("whippet-global-view__footer") && !tbody.querySelector("tr.is-outdated")) {
+        footer.parentNode.removeChild(footer);
+      }
+    },
+    removeRowsByKeys: function removeRowsByKeys(encodedKeys) {
+      "use strict";
+
+      var keys;
+      try {
+        keys = JSON.parse(window.atob(encodedKeys || ""));
+      } catch (error) {
+        return;
+      }
+      if (!Array.isArray(keys)) {
+        return;
+      }
+      Array.prototype.forEach.call(keys, function (key) {
+        var row = document.querySelector('#whippet [data-whippet-row-key="' + key + '"]');
+        whippet.helper.removeRuleRow(row);
+      });
+    }
+  },
+  ready: function ready(fn) {
+    "use strict";
+
+    if (document.readyState !== "loading") {
+      fn();
+    } else {
+      document.addEventListener("DOMContentLoaded", fn);
+    }
+  },
+  init: function init() {
+    "use strict";
+
+    whippet.ready(whippet.menu.init);
+    whippet.ready(whippet.UI.init);
+    whippet.ready(whippet.UI.protection);
+  }
+};
+setTimeout(function () {
+  whippet.init();
+}, 100);
+
+/***/ }),
+
+/***/ "./resources/scss/admin.scss":
+/*!***********************************!*\
+  !*** ./resources/scss/admin.scss ***!
+  \***********************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+// extracted by mini-css-extract-plugin
+
+
+/***/ }),
+
+/***/ "./resources/scss/style-whippet.scss":
+/*!*******************************************!*\
+  !*** ./resources/scss/style-whippet.scss ***!
+  \*******************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+// extracted by mini-css-extract-plugin
+
+
+/***/ }),
+
+/***/ "./resources/scss/style.scss":
+/*!***********************************!*\
+  !*** ./resources/scss/style.scss ***!
+  \***********************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+// extracted by mini-css-extract-plugin
+
+
+/***/ })
+
+/******/ 	});
+/************************************************************************/
+/******/ 	// The module cache
+/******/ 	var __webpack_module_cache__ = {};
+/******/ 	
+/******/ 	// The require function
+/******/ 	function __webpack_require__(moduleId) {
+/******/ 		// Check if module is in cache
+/******/ 		var cachedModule = __webpack_module_cache__[moduleId];
+/******/ 		if (cachedModule !== undefined) {
+/******/ 			return cachedModule.exports;
+/******/ 		}
+/******/ 		// Create a new module (and put it into the cache)
+/******/ 		var module = __webpack_module_cache__[moduleId] = {
+/******/ 			// no module.id needed
+/******/ 			// no module.loaded needed
+/******/ 			exports: {}
+/******/ 		};
+/******/ 	
+/******/ 		// Execute the module function
+/******/ 		__webpack_modules__[moduleId](module, module.exports, __webpack_require__);
+/******/ 	
+/******/ 		// Return the exports of the module
+/******/ 		return module.exports;
+/******/ 	}
+/******/ 	
+/******/ 	// expose the modules object (__webpack_modules__)
+/******/ 	__webpack_require__.m = __webpack_modules__;
+/******/ 	
+/************************************************************************/
+/******/ 	/* webpack/runtime/chunk loaded */
+/******/ 	(() => {
+/******/ 		var deferred = [];
+/******/ 		__webpack_require__.O = (result, chunkIds, fn, priority) => {
+/******/ 			if(chunkIds) {
+/******/ 				priority = priority || 0;
+/******/ 				for(var i = deferred.length; i > 0 && deferred[i - 1][2] > priority; i--) deferred[i] = deferred[i - 1];
+/******/ 				deferred[i] = [chunkIds, fn, priority];
+/******/ 				return;
+/******/ 			}
+/******/ 			var notFulfilled = Infinity;
+/******/ 			for (var i = 0; i < deferred.length; i++) {
+/******/ 				var [chunkIds, fn, priority] = deferred[i];
+/******/ 				var fulfilled = true;
+/******/ 				for (var j = 0; j < chunkIds.length; j++) {
+/******/ 					if ((priority & 1 === 0 || notFulfilled >= priority) && Object.keys(__webpack_require__.O).every((key) => (__webpack_require__.O[key](chunkIds[j])))) {
+/******/ 						chunkIds.splice(j--, 1);
+/******/ 					} else {
+/******/ 						fulfilled = false;
+/******/ 						if(priority < notFulfilled) notFulfilled = priority;
+/******/ 					}
+/******/ 				}
+/******/ 				if(fulfilled) {
+/******/ 					deferred.splice(i--, 1)
+/******/ 					var r = fn();
+/******/ 					if (r !== undefined) result = r;
+/******/ 				}
+/******/ 			}
+/******/ 			return result;
+/******/ 		};
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/hasOwnProperty shorthand */
+/******/ 	(() => {
+/******/ 		__webpack_require__.o = (obj, prop) => (Object.prototype.hasOwnProperty.call(obj, prop))
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/make namespace object */
+/******/ 	(() => {
+/******/ 		// define __esModule on exports
+/******/ 		__webpack_require__.r = (exports) => {
+/******/ 			if(typeof Symbol !== 'undefined' && Symbol.toStringTag) {
+/******/ 				Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
+/******/ 			}
+/******/ 			Object.defineProperty(exports, '__esModule', { value: true });
+/******/ 		};
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/jsonp chunk loading */
+/******/ 	(() => {
+/******/ 		// no baseURI
+/******/ 		
+/******/ 		// object to store loaded and loading chunks
+/******/ 		// undefined = chunk not loaded, null = chunk preloaded/prefetched
+/******/ 		// [resolve, reject, Promise] = chunk loading, 0 = chunk loaded
+/******/ 		var installedChunks = {
+/******/ 			"/js/app": 0,
+/******/ 			"css/admin": 0,
+/******/ 			"css/style": 0,
+/******/ 			"css/style-whippet": 0
+/******/ 		};
+/******/ 		
+/******/ 		// no chunk on demand loading
+/******/ 		
+/******/ 		// no prefetching
+/******/ 		
+/******/ 		// no preloaded
+/******/ 		
+/******/ 		// no HMR
+/******/ 		
+/******/ 		// no HMR manifest
+/******/ 		
+/******/ 		__webpack_require__.O.j = (chunkId) => (installedChunks[chunkId] === 0);
+/******/ 		
+/******/ 		// install a JSONP callback for chunk loading
+/******/ 		var webpackJsonpCallback = (parentChunkLoadingFunction, data) => {
+/******/ 			var [chunkIds, moreModules, runtime] = data;
+/******/ 			// add "moreModules" to the modules object,
+/******/ 			// then flag all "chunkIds" as loaded and fire callback
+/******/ 			var moduleId, chunkId, i = 0;
+/******/ 			if(chunkIds.some((id) => (installedChunks[id] !== 0))) {
+/******/ 				for(moduleId in moreModules) {
+/******/ 					if(__webpack_require__.o(moreModules, moduleId)) {
+/******/ 						__webpack_require__.m[moduleId] = moreModules[moduleId];
+/******/ 					}
+/******/ 				}
+/******/ 				if(runtime) var result = runtime(__webpack_require__);
+/******/ 			}
+/******/ 			if(parentChunkLoadingFunction) parentChunkLoadingFunction(data);
+/******/ 			for(;i < chunkIds.length; i++) {
+/******/ 				chunkId = chunkIds[i];
+/******/ 				if(__webpack_require__.o(installedChunks, chunkId) && installedChunks[chunkId]) {
+/******/ 					installedChunks[chunkId][0]();
+/******/ 				}
+/******/ 				installedChunks[chunkId] = 0;
+/******/ 			}
+/******/ 			return __webpack_require__.O(result);
+/******/ 		}
+/******/ 		
+/******/ 		var chunkLoadingGlobal = self["webpackChunk"] = self["webpackChunk"] || [];
+/******/ 		chunkLoadingGlobal.forEach(webpackJsonpCallback.bind(null, 0));
+/******/ 		chunkLoadingGlobal.push = webpackJsonpCallback.bind(null, chunkLoadingGlobal.push.bind(chunkLoadingGlobal));
+/******/ 	})();
+/******/ 	
+/************************************************************************/
+/******/ 	
+/******/ 	// startup
+/******/ 	// Load entry module and return exports
+/******/ 	// This entry module depends on other loaded chunks and execution need to be delayed
+/******/ 	__webpack_require__.O(undefined, ["css/admin","css/style","css/style-whippet"], () => (__webpack_require__("./resources/js/app.js")))
+/******/ 	__webpack_require__.O(undefined, ["css/admin","css/style","css/style-whippet"], () => (__webpack_require__("./resources/scss/style-whippet.scss")))
+/******/ 	__webpack_require__.O(undefined, ["css/admin","css/style","css/style-whippet"], () => (__webpack_require__("./resources/scss/style.scss")))
+/******/ 	var __webpack_exports__ = __webpack_require__.O(undefined, ["css/admin","css/style","css/style-whippet"], () => (__webpack_require__("./resources/scss/admin.scss")))
+/******/ 	__webpack_exports__ = __webpack_require__.O(__webpack_exports__);
+/******/ 	
+/******/ })()
+;
+//# sourceMappingURL=app.js.map
