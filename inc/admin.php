@@ -15,6 +15,13 @@ if ( ! in_array( $whippet_active_tab, $whippet_valid_tabs, true ) ) {
 	$whippet_active_tab = 'dashboard';
 }
 
+$whippet_waitlist_email = '';
+$whippet_current_user   = wp_get_current_user();
+if ( $whippet_current_user && is_email( $whippet_current_user->user_email ) ) {
+	$whippet_waitlist_email = $whippet_current_user->user_email;
+}
+$whippet_waitlist_saved = (string) get_option( 'whippet_premium_waitlist_email', '' );
+$whippet_premium_unlocked = '' !== $whippet_waitlist_saved;
 ?>
 <div class="wrap whippet-admin" x-data="{
 	activeTab: (function() {
@@ -23,8 +30,32 @@ if ( ! in_array( $whippet_active_tab, $whippet_valid_tabs, true ) ) {
 		var valid = ['dashboard','performance','analytics','fonts','lazyload','pages','scripts','snippets','extras','tools','import-export','docs','premium'];
 		return valid.indexOf(h) !== -1 ? h : serverTab;
 	})(),
+	lastNonPremiumTab: (function() {
+		var serverTab = '<?php echo esc_js( $whippet_active_tab ); ?>';
+		var h = window.location.hash.slice(1) || serverTab || localStorage.getItem('whippet_tab') || 'dashboard';
+		var valid = ['dashboard','performance','analytics','fonts','lazyload','pages','scripts','snippets','extras','tools','import-export','docs','premium'];
+		var tab = valid.indexOf(h) !== -1 ? h : serverTab;
+		return tab === 'premium' ? 'dashboard' : tab;
+	})(),
 	isDragging: false,
+	premiumModalOpen: false,
+	premiumUnlocked: (function() {
+		if (<?php echo $whippet_premium_unlocked ? 'true' : 'false'; ?>) {
+			return true;
+		}
+		try {
+			return localStorage.getItem('whippet_premium_waitlist_joined') === '1';
+		} catch (e) {
+			return false;
+		}
+	})(),
+	premiumWaitlistEmail: '<?php echo esc_js( $whippet_waitlist_saved ? $whippet_waitlist_saved : $whippet_waitlist_email ); ?>',
+	premiumWaitlistBusy: false,
+	premiumWaitlistMessage: '',
 	setTab(tab) {
+		if (this.activeTab && this.activeTab !== 'premium') {
+			this.lastNonPremiumTab = this.activeTab;
+		}
 		this.activeTab = tab;
 		localStorage.setItem('whippet_tab', tab);
 		// Drop sticky Lazy Load subtab query when leaving that panel.
@@ -38,6 +69,79 @@ if ( ! in_array( $whippet_active_tab, $whippet_valid_tabs, true ) ) {
 		} catch (e) {
 			window.location.hash = tab;
 		}
+		if (tab === 'premium') {
+			this.maybeOpenPremiumModal();
+		}
+	},
+	maybeOpenPremiumModal() {
+		if (this.activeTab !== 'premium') {
+			return;
+		}
+		if (this.premiumUnlocked) {
+			this.premiumModalOpen = false;
+			return;
+		}
+		this.premiumModalOpen = true;
+	},
+	openPremiumModal() {
+		this.premiumWaitlistMessage = '';
+		this.premiumModalOpen = true;
+	},
+	declinePremium() {
+		this.premiumModalOpen = false;
+		this.premiumWaitlistMessage = '';
+		if (this.premiumUnlocked) {
+			return;
+		}
+		var dest = this.lastNonPremiumTab || 'dashboard';
+		if (dest === 'premium') {
+			dest = 'dashboard';
+		}
+		this.setTab(dest);
+	},
+	closePremiumModal() {
+		if (this.premiumUnlocked) {
+			this.premiumModalOpen = false;
+			return;
+		}
+		this.declinePremium();
+	},
+	submitPremiumWaitlist() {
+		var self = this;
+		var email = (this.premiumWaitlistEmail || '').trim();
+		if (!email) {
+			this.premiumWaitlistMessage = '<?php echo esc_js( __( 'Enter your email address.', 'whippet' ) ); ?>';
+			return;
+		}
+		this.premiumWaitlistBusy = true;
+		this.premiumWaitlistMessage = '';
+		fetch(ajaxurl, {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+			body: new URLSearchParams({
+				action: 'whippet_premium_waitlist',
+				nonce: '<?php echo esc_js( wp_create_nonce( 'whippet_premium_waitlist' ) ); ?>',
+				email: email
+			})
+		})
+		.then(function(r) { return r.json(); })
+		.then(function(res) {
+			self.premiumWaitlistBusy = false;
+			if (!res.success) {
+				self.premiumWaitlistMessage = (res.data && res.data.message) ? res.data.message : '<?php echo esc_js( __( 'Could not save your interest. Please try again.', 'whippet' ) ); ?>';
+				return;
+			}
+			self.premiumWaitlistMessage = (res.data && res.data.message) ? res.data.message : '<?php echo esc_js( __( 'You are on the list. We will be in touch.', 'whippet' ) ); ?>';
+			self.premiumUnlocked = true;
+			try {
+				localStorage.setItem('whippet_premium_waitlist_joined', '1');
+			} catch (e) {}
+			setTimeout(function() { self.premiumModalOpen = false; }, 1200);
+		})
+		.catch(function() {
+			self.premiumWaitlistBusy = false;
+			self.premiumWaitlistMessage = '<?php echo esc_js( __( 'Could not save your interest. Please try again.', 'whippet' ) ); ?>';
+		});
 	},
 	selectAllDashboard() {
 		var form = document.getElementById('whippet-dashboard-form');
@@ -47,7 +151,7 @@ if ( ! in_array( $whippet_active_tab, $whippet_valid_tabs, true ) ) {
 		var form = document.getElementById('whippet-dashboard-form');
 		if (form) form.querySelectorAll('input[type=checkbox]').forEach(function(cb) { cb.checked = false; });
 	}
-}" x-cloak>
+}" x-init="maybeOpenPremiumModal()" @keydown.escape.window="premiumModalOpen && closePremiumModal()" x-cloak>
 
 <div class="wa-shell">
 
@@ -695,13 +799,28 @@ if ( ! in_array( $whippet_active_tab, $whippet_valid_tabs, true ) ) {
 		<div class="wa-panel" x-show="activeTab === 'premium'" style="<?php echo 'premium' === $whippet_active_tab ? '' : 'display:none'; ?>"
 			 x-transition:enter="wa-fade-in" x-transition:enter-start="wa-fade-start" x-transition:enter-end="wa-fade-end">
 
+			<div x-show="premiumUnlocked" x-cloak>
+
 			<div class="wa-panel-hd">
 				<h2>
 					<?php esc_html_e( 'Premium', 'whippet' ); ?>
-					<span class="wa-premium-badge"><?php esc_html_e( 'Premium', 'whippet' ); ?></span>
+					<span class="wa-premium-badge"><?php esc_html_e( 'Coming soon', 'whippet' ); ?></span>
 				</h2>
-		<p><?php esc_html_e( 'Premium features for advanced performance — image optimisation, delivery, and critical CSS generation.', 'whippet' ); ?></p>
+				<p><?php esc_html_e( 'Whippet Cloud Premium brings advanced image optimisation and critical CSS — early access tools are below while we finalise the launch.', 'whippet' ); ?></p>
 			</div>
+
+			<div class="wa-premium-teaser-banner">
+				<div class="wa-premium-teaser-banner__copy">
+					<strong><?php esc_html_e( 'Whippet Cloud Premium is launching soon', 'whippet' ); ?></strong>
+					<span><?php esc_html_e( 'Faster images, instant CSS, and Cloud plans built for serious WordPress sites.', 'whippet' ); ?></span>
+				</div>
+				<button type="button" class="button wa-premium-teaser-banner__btn" @click="openPremiumModal()">
+					<?php esc_html_e( "See what's coming", 'whippet' ); ?>
+				</button>
+			</div>
+
+			<p class="wa-premium-early-access-note"><?php esc_html_e( 'Early access: connect a Cloud API key below if you already have one.', 'whippet' ); ?></p>
+
 		<?php whippet_render_cloud_panel(); ?>
 
 		<?php
@@ -1543,6 +1662,9 @@ if ( ! in_array( $whippet_active_tab, $whippet_valid_tabs, true ) ) {
 
 		<?php endif; // $whippet_ptab ?>
 
+			</div>
+			<!-- /premiumUnlocked -->
+
 	</div>
 
 	</div>
@@ -1550,5 +1672,77 @@ if ( ! in_array( $whippet_active_tab, $whippet_valid_tabs, true ) ) {
 
 </div>
 <!-- /wa-shell -->
+
+	<!-- Premium Coming Soon modal -->
+	<div
+		class="wa-premium-modal"
+		x-show="premiumModalOpen"
+		x-cloak
+		@click.self="closePremiumModal()"
+		role="dialog"
+		aria-modal="true"
+		aria-labelledby="wa-premium-modal-title"
+		style="display:none;"
+	>
+		<div class="wa-premium-modal__dialog" @click.stop>
+			<button type="button" class="wa-premium-modal__close" @click="closePremiumModal()" aria-label="<?php esc_attr_e( 'Close', 'whippet' ); ?>">
+				<span aria-hidden="true">&times;</span>
+			</button>
+			<p class="wa-premium-modal__eyebrow"><?php esc_html_e( 'Whippet Cloud Premium', 'whippet' ); ?></p>
+			<h2 id="wa-premium-modal-title" class="wa-premium-modal__title"><?php esc_html_e( 'Faster images. Instant CSS. Coming soon.', 'whippet' ); ?></h2>
+			<p class="wa-premium-modal__lead"><?php esc_html_e( 'Cloud image optimisation and critical CSS that ship with your site — without babysitting servers or juggling extra plugins.', 'whippet' ); ?></p>
+			<ul class="wa-premium-modal__benefits">
+				<li>
+					<span class="wa-premium-modal__benefit-icon" aria-hidden="true">
+						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+					</span>
+					<span>
+						<strong><?php esc_html_e( 'Image Engine', 'whippet' ); ?></strong>
+						<?php esc_html_e( 'AVIF/WebP delivery and bulk optimisation from the cloud.', 'whippet' ); ?>
+					</span>
+				</li>
+				<li>
+					<span class="wa-premium-modal__benefit-icon" aria-hidden="true">
+						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+					</span>
+					<span>
+						<strong><?php esc_html_e( 'Critical CSS', 'whippet' ); ?></strong>
+						<?php esc_html_e( 'Above-the-fold CSS plus remove unused CSS for leaner pages.', 'whippet' ); ?>
+					</span>
+				</li>
+				<li>
+					<span class="wa-premium-modal__benefit-icon" aria-hidden="true">
+						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+					</span>
+					<span>
+						<strong><?php esc_html_e( 'Cloud plans', 'whippet' ); ?></strong>
+						<?php esc_html_e( 'Pro and Agency with usage tracking and support when you need it.', 'whippet' ); ?>
+					</span>
+				</li>
+			</ul>
+			<form class="wa-premium-modal__form" @submit.prevent="submitPremiumWaitlist()">
+				<label class="screen-reader-text" for="wa-premium-waitlist-email"><?php esc_html_e( 'Email address', 'whippet' ); ?></label>
+				<input
+					id="wa-premium-waitlist-email"
+					type="email"
+					name="email"
+					autocomplete="email"
+					placeholder="<?php esc_attr_e( 'you@example.com', 'whippet' ); ?>"
+					x-model="premiumWaitlistEmail"
+					:disabled="premiumWaitlistBusy"
+					required
+				>
+				<button type="submit" class="button button-primary" :disabled="premiumWaitlistBusy">
+					<span x-show="!premiumWaitlistBusy"><?php esc_html_e( 'Notify me', 'whippet' ); ?></span>
+					<span x-show="premiumWaitlistBusy" x-cloak><?php esc_html_e( 'Saving…', 'whippet' ); ?></span>
+				</button>
+			</form>
+			<p class="wa-premium-modal__message" x-show="premiumWaitlistMessage" x-text="premiumWaitlistMessage" x-cloak></p>
+			<button type="button" class="wa-premium-modal__dismiss" @click="declinePremium()">
+				<?php esc_html_e( "I'll wait", 'whippet' ); ?>
+			</button>
+		</div>
+	</div>
+
 </div>
 <!-- /wrap.whippet-admin -->

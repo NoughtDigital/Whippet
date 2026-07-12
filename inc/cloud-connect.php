@@ -15,6 +15,7 @@ class CloudConnect {
 	public static function boot() {
 		add_action( 'admin_init', array( __CLASS__, 'save' ) );
 		add_action( 'wp_ajax_whippet_cloud_test', array( __CLASS__, 'ajax_test' ) );
+		add_action( 'wp_ajax_whippet_premium_waitlist', array( __CLASS__, 'ajax_waitlist' ) );
 	}
 
 	private static function api_url() {
@@ -74,6 +75,32 @@ class CloudConnect {
 			wp_send_json_error( array( 'message' => $result->get_error_message() ) );
 		}
 		wp_send_json_success( $result );
+	}
+
+	/**
+	 * Store Premium launch interest email for the current admin.
+	 */
+	public static function ajax_waitlist() {
+		check_ajax_referer( 'whippet_premium_waitlist', 'nonce' );
+		if ( ! Helper::user_can_manage() ) {
+			wp_send_json_error( array( 'message' => __( 'Permission denied.', 'whippet' ) ), 403 );
+		}
+		$email = isset( $_POST['email'] ) ? sanitize_email( wp_unslash( $_POST['email'] ) ) : '';
+		if ( ! is_email( $email ) ) {
+			wp_send_json_error( array( 'message' => __( 'Enter a valid email address.', 'whippet' ) ) );
+		}
+		update_option( 'whippet_premium_waitlist_email', $email, false );
+		Helper::audit_log(
+			'premium_waitlist',
+			array(
+				'email' => $email,
+			)
+		);
+		wp_send_json_success(
+			array(
+				'message' => __( 'You are on the list. We will be in touch.', 'whippet' ),
+			)
+		);
 	}
 
 	public static function is_pro() {
