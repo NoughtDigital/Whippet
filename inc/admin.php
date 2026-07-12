@@ -746,35 +746,12 @@ $whippet_premium_waitlisted  = '' !== $whippet_waitlist_saved;
 
 			<div class="wa-panel-hd">
 				<h2><?php esc_html_e( 'Documentation', 'whippet' ); ?></h2>
-				<p><?php esc_html_e( 'Learn how to use Whippet and fix common issues.', 'whippet' ); ?></p>
+				<p><?php esc_html_e( 'A practical guide to every Whippet tab — what to enable, what to avoid, and how to recover when something goes wrong.', 'whippet' ); ?></p>
 			</div>
 
 			<?php
 			if ( function_exists( 'whippet_tutorials_page' ) ) {
 				whippet_tutorials_page();
-			} else {
-				?>
-				<div class="wa-docs-grid">
-					<div class="wa-docs-feature">
-						<h3><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg><?php esc_html_e( 'Getting Started', 'whippet' ); ?></h3>
-						<ul>
-							<li><?php esc_html_e( 'Enable Dashboard tweaks one by one and test after each change', 'whippet' ); ?></li>
-							<li><?php esc_html_e( 'Turn on Page Caching in Performance for the biggest single speed gain', 'whippet' ); ?></li>
-							<li><?php esc_html_e( 'Enable Apache Direct-Serve to bypass PHP for cached pages entirely', 'whippet' ); ?></li>
-							<li><?php esc_html_e( 'Always clear third-party caches after saving settings', 'whippet' ); ?></li>
-						</ul>
-					</div>
-					<div class="wa-docs-feature">
-						<h3><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><?php esc_html_e( 'Troubleshooting', 'whippet' ); ?></h3>
-						<ul>
-							<li><?php esc_html_e( 'If a plugin breaks, add its script keyword to the Scripts exclude list', 'whippet' ); ?></li>
-							<li><?php esc_html_e( 'Use local Analytics for better Core Web Vitals (avoids GA blocking)', 'whippet' ); ?></li>
-							<li><?php esc_html_e( 'Check Tools tab to verify your server supports Brotli and WebP', 'whippet' ); ?></li>
-							<li><?php esc_html_e( 'Export settings before major changes as a quick backup', 'whippet' ); ?></li>
-						</ul>
-					</div>
-				</div>
-				<?php
 			}
 			?>
 		</div>
