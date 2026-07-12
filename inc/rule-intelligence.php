@@ -92,11 +92,17 @@ class RuleIntelligence {
 		?>
 		<div class="wa-card">
 			<div class="wa-card-section-title"><?php esc_html_e( 'Rule intelligence', 'whippet' ); ?></div>
-			<p><?php esc_html_e( 'Optional telemetry sends only a one-way hash of active plugin slugs, disabled asset handles and a date. It never sends page URLs, content, user details, IP addresses or cookies.', 'whippet' ); ?></p>
-			<form method="post"><?php wp_nonce_field( 'whippet_telemetry_save', 'whippet_telemetry_nonce' ); ?>
-				<label><input type="checkbox" name="whippet_telemetry_opt_in" value="1" <?php checked( get_option( 'whippet_telemetry_opt_in', false ) ); ?>> <?php esc_html_e( 'Share anonymised rule patterns', 'whippet' ); ?></label>
-				<p><button class="button button-primary" name="whippet_telemetry_save" value="1"><?php esc_html_e( 'Save privacy setting', 'whippet' ); ?></button></p>
-			</form>
+			<div class="wa-card-body">
+				<p><?php esc_html_e( 'Optional telemetry sends only a one-way hash of active plugin slugs, disabled asset handles and a date. It never sends page URLs, content, user details, IP addresses or cookies.', 'whippet' ); ?></p>
+				<form method="post" class="wa-card-form">
+					<?php wp_nonce_field( 'whippet_telemetry_save', 'whippet_telemetry_nonce' ); ?>
+					<label class="wa-card-check">
+						<input type="checkbox" name="whippet_telemetry_opt_in" value="1" <?php checked( get_option( 'whippet_telemetry_opt_in', false ) ); ?>>
+						<span><?php esc_html_e( 'Share anonymised rule patterns', 'whippet' ); ?></span>
+					</label>
+					<button class="button button-primary" name="whippet_telemetry_save" value="1"><?php esc_html_e( 'Save privacy setting', 'whippet' ); ?></button>
+				</form>
+			</div>
 		</div>
 		<?php
 	}

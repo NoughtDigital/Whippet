@@ -239,6 +239,143 @@
 	padding: 1rem 1.5rem 0;
 }
 
+/* ─── Card body (platform panels) ──────────────────────────────────────── */
+.wa-card-body {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 0.875rem;
+	padding: 1rem 1.5rem 1.25rem;
+
+	> p,
+	> .description {
+		margin: 0;
+		font-size: 0.8125rem;
+		line-height: 1.55;
+		color: var(--wa-text-sm);
+	}
+
+	> .description {
+		color: var(--wa-text-muted);
+	}
+
+	> form,
+	> ul,
+	> pre,
+	> .wa-2col {
+		margin: 0;
+		width: 100%;
+	}
+
+	> ul {
+		padding-left: 1.25rem;
+		font-size: 0.8125rem;
+		color: var(--wa-text-sm);
+		line-height: 1.6;
+
+		li + li { margin-top: 0.375rem; }
+	}
+
+	> pre {
+		font-size: 0.75rem;
+		line-height: 1.5;
+		color: var(--wa-text-muted);
+		white-space: pre-wrap;
+	}
+
+	> input.large-text,
+	> textarea.large-text,
+	> .large-text {
+		width: 100%;
+		max-width: 100%;
+		margin: 0;
+	}
+
+	> label,
+	.wa-card-check {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.625rem;
+		margin: 0;
+		font-size: 0.875rem;
+		line-height: 1.4;
+		color: var(--wa-text-sm);
+		cursor: pointer;
+	}
+}
+
+.wa-card-body > form,
+.wa-card-form {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 0.875rem;
+	margin: 0;
+	width: 100%;
+}
+
+.wa-card-field {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 0.375rem;
+	width: 100%;
+
+	> label {
+		font-size: 0.8125rem;
+		font-weight: 500;
+		color: var(--wa-text-sm);
+		margin: 0;
+	}
+
+	> input,
+	> textarea {
+		margin: 0;
+	}
+}
+
+.wa-card-row {
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 0.5rem;
+	width: 100%;
+
+	input[type="password"],
+	input[type="text"],
+	input[type="url"],
+	input[type="email"] {
+		flex: 1 1 220px;
+		min-width: 0;
+		max-width: 360px;
+		margin: 0;
+	}
+
+	.button {
+		margin: 0;
+		flex: 0 0 auto;
+	}
+}
+
+.wa-card-actions {
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 0.5rem;
+	padding: 1rem 1.5rem 1.25rem;
+}
+
+.wa-card-body + .wa-card-actions,
+.form-table + .wa-card-actions {
+	padding-top: 0.25rem;
+}
+
+/* Keep form-table cards flush to the card edges (rows supply their own padding). */
+.wa-card > .form-table,
+.wa-card > form > .form-table {
+	margin: 0.5rem 0 0;
+}
+
 /* ─── Sub-tab pills ────────────────────────────────────────────────────── */
 .wa-subtabs {
 	display: flex;
@@ -332,7 +469,7 @@
 		font-size: 0.875rem;
 		font-weight: 500;
 		color: var(--wa-text-sm);
-		padding: 0.125rem 1.5rem 0 0;
+		padding: 0.5rem 1.5rem 0 0;
 		vertical-align: top;
 		border: none;
 

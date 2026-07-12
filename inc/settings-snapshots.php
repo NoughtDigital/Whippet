@@ -100,6 +100,7 @@ class SettingsSnapshots {
 		?>
 		<div class="wa-card">
 			<div class="wa-card-section-title"><?php esc_html_e( 'Settings snapshots', 'whippet' ); ?></div>
+			<div class="wa-card-body">
 			<?php if ( empty( $snapshots ) ) : ?>
 				<p><?php esc_html_e( 'Snapshots are created automatically before settings changes and after imports.', 'whippet' ); ?></p>
 			<?php else : ?>
@@ -111,6 +112,7 @@ class SettingsSnapshots {
 				<?php endforeach; ?>
 				</ul>
 			<?php endif; ?>
+			</div>
 		</div>
 		<?php
 	}

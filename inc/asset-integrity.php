@@ -51,7 +51,9 @@ class AssetIntegrity {
 		?>
 		<div class="wa-card">
 			<div class="wa-card-section-title"><?php esc_html_e( 'Asset integrity', 'whippet' ); ?></div>
-			<p><?php echo $missing ? esc_html( sprintf( __( 'Missing: %s', 'whippet' ), implode( ', ', $missing ) ) ) : esc_html__( 'All required Whippet assets are present.', 'whippet' ); ?></p>
+			<div class="wa-card-body">
+				<p><?php echo $missing ? esc_html( sprintf( __( 'Missing: %s', 'whippet' ), implode( ', ', $missing ) ) ) : esc_html__( 'All required Whippet assets are present.', 'whippet' ); ?></p>
+			</div>
 		</div>
 		<?php
 	}

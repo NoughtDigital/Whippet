@@ -68,7 +68,9 @@ class CdnIntegrations {
 						<tr><th><label for="<?php echo esc_attr( $key ); ?>"><?php echo esc_html( $label ); ?></label></th><td><input id="<?php echo esc_attr( $key ); ?>" name="<?php echo esc_attr( $key ); ?>" type="<?php echo false !== strpos( $key, 'key' ) || false !== strpos( $key, 'token' ) ? 'password' : 'text'; ?>" value="" placeholder="<?php echo esc_attr( Helper::mask_secret( $saved ) ); ?>" autocomplete="off"></td></tr>
 					<?php endforeach; ?>
 				</tbody></table>
-				<button class="button button-primary" name="whippet_cdn_save" value="1"><?php esc_html_e( 'Save CDN settings', 'whippet' ); ?></button>
+				<div class="wa-card-actions">
+					<button class="button button-primary" name="whippet_cdn_save" value="1"><?php esc_html_e( 'Save CDN settings', 'whippet' ); ?></button>
+				</div>
 			</form>
 		</div>
 		<?php

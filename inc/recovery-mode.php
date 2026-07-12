@@ -76,9 +76,11 @@ class RecoveryMode {
 		?>
 		<div class="wa-card">
 			<div class="wa-card-section-title"><?php esc_html_e( 'Recovery mode', 'whippet' ); ?></div>
-			<p><?php esc_html_e( 'This private URL temporarily bypasses Whippet page caching and front-end rewrites for one hour.', 'whippet' ); ?></p>
-			<input type="text" class="large-text code" readonly value="<?php echo esc_attr( $url ); ?>" onclick="this.select()">
-			<p><button type="button" class="button" onclick="navigator.clipboard.writeText('<?php echo esc_js( $url ); ?>')"><?php esc_html_e( 'Copy recovery URL', 'whippet' ); ?></button></p>
+			<div class="wa-card-body">
+				<p><?php esc_html_e( 'This private URL temporarily bypasses Whippet page caching and front-end rewrites for one hour.', 'whippet' ); ?></p>
+				<input type="text" class="large-text code" readonly value="<?php echo esc_attr( $url ); ?>" onclick="this.select()">
+				<button type="button" class="button" onclick="navigator.clipboard.writeText('<?php echo esc_js( $url ); ?>')"><?php esc_html_e( 'Copy recovery URL', 'whippet' ); ?></button>
+			</div>
 		</div>
 		<?php
 	}

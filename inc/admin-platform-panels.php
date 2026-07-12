@@ -15,11 +15,11 @@ function whippet_render_impact_panel() {
 
 function whippet_render_activity_log_panel() {
 	$entries = (array) get_option( 'whippet_audit_log', array() );
-	echo '<div class="wa-card"><div class="wa-card-section-title">' . esc_html__( 'Activity log', 'whippet' ) . '</div>';
+	echo '<div class="wa-card"><div class="wa-card-section-title">' . esc_html__( 'Activity log', 'whippet' ) . '</div><div class="wa-card-body">';
 	if ( ! $entries ) {
 		echo '<p>' . esc_html__( 'No recorded activity yet.', 'whippet' ) . '</p>';
 	} else {
-		echo '<table class="widefat striped" style="margin:0 0 1rem;"><thead><tr><th>' . esc_html__( 'When', 'whippet' ) . '</th><th>' . esc_html__( 'Action', 'whippet' ) . '</th><th>' . esc_html__( 'User', 'whippet' ) . '</th></tr></thead><tbody>';
+		echo '<table class="widefat striped" style="margin:0;width:100%;"><thead><tr><th>' . esc_html__( 'When', 'whippet' ) . '</th><th>' . esc_html__( 'Action', 'whippet' ) . '</th><th>' . esc_html__( 'User', 'whippet' ) . '</th></tr></thead><tbody>';
 		foreach ( array_slice( $entries, 0, 25 ) as $entry ) {
 			$user = isset( $entry['user_id'] ) ? get_userdata( (int) $entry['user_id'] ) : false;
 			printf(
@@ -31,7 +31,7 @@ function whippet_render_activity_log_panel() {
 		}
 		echo '</tbody></table>';
 	}
-	echo '</div>';
+	echo '</div></div>';
 }
 
 function whippet_render_snapshots_panel() {

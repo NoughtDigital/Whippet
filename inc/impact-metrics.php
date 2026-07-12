@@ -146,25 +146,29 @@ class ImpactMetrics {
 		?>
 		<div class="wa-card">
 			<div class="wa-card-section-title"><?php esc_html_e( 'Impact metrics', 'whippet' ); ?></div>
-			<div class="wa-2col">
-				<p><strong><?php esc_html_e( 'Enabled optimisations', 'whippet' ); ?></strong><br><?php echo esc_html( (string) ( $latest['enabled_options'] ?? 0 ) ); ?></p>
-				<p><strong><?php esc_html_e( 'Cached pages', 'whippet' ); ?></strong><br><?php echo esc_html( (string) ( $latest['cache_files'] ?? 0 ) ); ?></p>
-			</div>
-			<?php if ( $psi ) : ?>
-				<p><?php echo esc_html( sprintf( __( 'Last PageSpeed score: %1$d (LCP %2$s, CLS %3$s)', 'whippet' ), (int) ( $psi['score'] ?? 0 ), (string) ( $psi['lcp'] ?? '—' ), (string) ( $psi['cls'] ?? '—' ) ) ); ?></p>
-			<?php endif; ?>
-			<p>
-				<button type="button" class="button" onclick="fetch(ajaxurl,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({action:'whippet_capture_impact',nonce:'<?php echo esc_js( wp_create_nonce( 'whippet_impact' ) ); ?>'})}).then(()=>location.reload())"><?php esc_html_e( 'Capture current impact', 'whippet' ); ?></button>
-				<?php if ( $psi_key ) : ?>
-					<button type="button" class="button" onclick="fetch(ajaxurl,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({action:'whippet_run_psi',nonce:'<?php echo esc_js( wp_create_nonce( 'whippet_impact' ) ); ?>'})}).then(r=>r.json()).then(r=>{alert(r.success?('Score '+r.data.score):r.data.message);location.reload();})"><?php esc_html_e( 'Run PageSpeed Insights', 'whippet' ); ?></button>
+			<div class="wa-card-body">
+				<div class="wa-2col">
+					<p><strong><?php esc_html_e( 'Enabled optimisations', 'whippet' ); ?></strong><br><?php echo esc_html( (string) ( $latest['enabled_options'] ?? 0 ) ); ?></p>
+					<p><strong><?php esc_html_e( 'Cached pages', 'whippet' ); ?></strong><br><?php echo esc_html( (string) ( $latest['cache_files'] ?? 0 ) ); ?></p>
+				</div>
+				<?php if ( $psi ) : ?>
+					<p><?php echo esc_html( sprintf( __( 'Last PageSpeed score: %1$d (LCP %2$s, CLS %3$s)', 'whippet' ), (int) ( $psi['score'] ?? 0 ), (string) ( $psi['lcp'] ?? '—' ), (string) ( $psi['cls'] ?? '—' ) ) ); ?></p>
 				<?php endif; ?>
-			</p>
-			<p class="description"><?php esc_html_e( 'Optional PageSpeed Insights API key enables lab score capture for before/after comparisons.', 'whippet' ); ?></p>
-			<form method="post">
-				<?php wp_nonce_field( 'whippet_psi_key', 'whippet_psi_nonce' ); ?>
-				<input type="password" name="whippet_psi_api_key" value="" placeholder="<?php echo esc_attr( Helper::mask_secret( $psi_key ) ); ?>" class="regular-text" autocomplete="off">
-				<button class="button" name="whippet_psi_save" value="1"><?php esc_html_e( 'Save PSI API key', 'whippet' ); ?></button>
-			</form>
+				<div class="wa-card-row">
+					<button type="button" class="button" onclick="fetch(ajaxurl,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({action:'whippet_capture_impact',nonce:'<?php echo esc_js( wp_create_nonce( 'whippet_impact' ) ); ?>'})}).then(()=>location.reload())"><?php esc_html_e( 'Capture current impact', 'whippet' ); ?></button>
+					<?php if ( $psi_key ) : ?>
+						<button type="button" class="button" onclick="fetch(ajaxurl,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({action:'whippet_run_psi',nonce:'<?php echo esc_js( wp_create_nonce( 'whippet_impact' ) ); ?>'})}).then(r=>r.json()).then(r=>{alert(r.success?('Score '+r.data.score):r.data.message);location.reload();})"><?php esc_html_e( 'Run PageSpeed Insights', 'whippet' ); ?></button>
+					<?php endif; ?>
+				</div>
+				<p class="description"><?php esc_html_e( 'Optional PageSpeed Insights API key enables lab score capture for before/after comparisons.', 'whippet' ); ?></p>
+				<form method="post" class="wa-card-form">
+					<?php wp_nonce_field( 'whippet_psi_key', 'whippet_psi_nonce' ); ?>
+					<div class="wa-card-row">
+						<input type="password" name="whippet_psi_api_key" value="" placeholder="<?php echo esc_attr( Helper::mask_secret( $psi_key ) ); ?>" class="regular-text" autocomplete="off">
+						<button class="button" name="whippet_psi_save" value="1"><?php esc_html_e( 'Save PSI API key', 'whippet' ); ?></button>
+					</div>
+				</form>
+			</div>
 		</div>
 		<?php
 	}

@@ -116,10 +116,12 @@ class ScriptAdvisor {
 		?>
 		<div class="wa-card">
 			<div class="wa-card-section-title"><?php esc_html_e( 'Script adviser', 'whippet' ); ?></div>
-			<p><?php esc_html_e( 'Paste registered script or style handles to receive review suggestions. Whippet never applies these suggestions automatically.', 'whippet' ); ?></p>
-			<textarea id="whippet-advisor-handles" class="large-text code" rows="4" placeholder="wc-cart-fragments&#10;contact-form-7"></textarea>
-			<p><button type="button" class="button" onclick="var h=document.getElementById('whippet-advisor-handles').value.split(/\s+/);fetch(ajaxurl,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({action:'whippet_advisor_suggest',nonce:'<?php echo esc_js( wp_create_nonce( 'whippet_script_advisor' ) ); ?>',handles:h})}).then(r=>r.json()).then(r=>document.getElementById('whippet-advisor-results').textContent=JSON.stringify(r.data.suggestions||[],null,2))"><?php esc_html_e( 'Review handles', 'whippet' ); ?></button></p>
-			<pre id="whippet-advisor-results" style="white-space:pre-wrap"></pre>
+			<div class="wa-card-body">
+				<p><?php esc_html_e( 'Paste registered script or style handles to receive review suggestions. Whippet never applies these suggestions automatically.', 'whippet' ); ?></p>
+				<textarea id="whippet-advisor-handles" class="large-text code" rows="4" placeholder="wc-cart-fragments&#10;contact-form-7"></textarea>
+				<button type="button" class="button" onclick="var h=document.getElementById('whippet-advisor-handles').value.split(/\s+/);fetch(ajaxurl,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({action:'whippet_advisor_suggest',nonce:'<?php echo esc_js( wp_create_nonce( 'whippet_script_advisor' ) ); ?>',handles:h})}).then(r=>r.json()).then(r=>document.getElementById('whippet-advisor-results').textContent=JSON.stringify(r.data.suggestions||[],null,2))"><?php esc_html_e( 'Review handles', 'whippet' ); ?></button>
+				<pre id="whippet-advisor-results"></pre>
+			</div>
 		</div>
 		<?php
 	}

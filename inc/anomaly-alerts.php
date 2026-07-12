@@ -81,11 +81,20 @@ class AnomalyAlerts {
 		?>
 		<div class="wa-card">
 			<div class="wa-card-section-title"><?php esc_html_e( 'Anomaly alerts', 'whippet' ); ?></div>
-			<form method="post"><?php wp_nonce_field( 'whippet_alerts_save', 'whippet_alerts_nonce' ); ?>
-				<p><label><input type="checkbox" name="whippet_alerts_email" value="1" <?php checked( get_option( 'whippet_alerts_email', false ) ); ?>> <?php esc_html_e( 'Email the site administrator when failures are detected', 'whippet' ); ?></label></p>
-				<p><label><?php esc_html_e( 'Slack webhook URL', 'whippet' ); ?><br><input type="password" name="whippet_alerts_slack_webhook" value="" placeholder="<?php echo esc_attr( Helper::mask_secret( $webhook ) ); ?>" class="regular-text" autocomplete="off"></label></p>
-				<button class="button button-primary" name="whippet_alerts_save" value="1"><?php esc_html_e( 'Save alert settings', 'whippet' ); ?></button>
-			</form>
+			<div class="wa-card-body">
+				<form method="post" class="wa-card-form">
+					<?php wp_nonce_field( 'whippet_alerts_save', 'whippet_alerts_nonce' ); ?>
+					<label class="wa-card-check">
+						<input type="checkbox" name="whippet_alerts_email" value="1" <?php checked( get_option( 'whippet_alerts_email', false ) ); ?>>
+						<span><?php esc_html_e( 'Email the site administrator when failures are detected', 'whippet' ); ?></span>
+					</label>
+					<div class="wa-card-field">
+						<label for="whippet_alerts_slack_webhook"><?php esc_html_e( 'Slack webhook URL', 'whippet' ); ?></label>
+						<input id="whippet_alerts_slack_webhook" type="password" name="whippet_alerts_slack_webhook" value="" placeholder="<?php echo esc_attr( Helper::mask_secret( $webhook ) ); ?>" class="regular-text" autocomplete="off">
+					</div>
+					<button class="button button-primary" name="whippet_alerts_save" value="1"><?php esc_html_e( 'Save alert settings', 'whippet' ); ?></button>
+				</form>
+			</div>
 		</div>
 		<?php
 	}

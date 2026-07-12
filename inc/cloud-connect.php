@@ -89,13 +89,17 @@ class CloudConnect {
 		?>
 		<div class="wa-card">
 			<div class="wa-card-section-title"><?php esc_html_e( 'Whippet Cloud', 'whippet' ); ?></div>
-			<form method="post">
-				<?php wp_nonce_field( 'whippet_cloud_save', 'whippet_cloud_nonce' ); ?>
-				<input type="password" name="whippet_cloud_api_key" value="" placeholder="<?php echo esc_attr( Helper::mask_secret( $key ) ); ?>" autocomplete="off">
-				<button class="button button-primary" type="submit" name="whippet_cloud_save" value="1"><?php esc_html_e( 'Save connection', 'whippet' ); ?></button>
-			</form>
-			<p><?php echo esc_html( sprintf( __( 'Status: %1$s. Plan: %2$s.', 'whippet' ), get_option( 'whippet_cloud_status', 'not connected' ), get_option( 'whippet_cloud_plan', 'free' ) ) ); ?></p>
-			<button type="button" class="button" onclick="fetch(ajaxurl,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({action:'whippet_cloud_test',nonce:'<?php echo esc_js( wp_create_nonce( 'whippet_cloud_test' ) ); ?>'})}).then(r=>r.json()).then(r=>alert(r.success?'<?php echo esc_js( __( 'Connection successful.', 'whippet' ) ); ?>':r.data.message))"><?php esc_html_e( 'Test connection', 'whippet' ); ?></button>
+			<div class="wa-card-body">
+				<form method="post" class="wa-card-form">
+					<?php wp_nonce_field( 'whippet_cloud_save', 'whippet_cloud_nonce' ); ?>
+					<div class="wa-card-row">
+						<input type="password" name="whippet_cloud_api_key" value="" placeholder="<?php echo esc_attr( Helper::mask_secret( $key ) ); ?>" autocomplete="off">
+						<button class="button button-primary" type="submit" name="whippet_cloud_save" value="1"><?php esc_html_e( 'Save connection', 'whippet' ); ?></button>
+					</div>
+				</form>
+				<p><?php echo esc_html( sprintf( __( 'Status: %1$s. Plan: %2$s.', 'whippet' ), get_option( 'whippet_cloud_status', 'not connected' ), get_option( 'whippet_cloud_plan', 'free' ) ) ); ?></p>
+				<button type="button" class="button" onclick="fetch(ajaxurl,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({action:'whippet_cloud_test',nonce:'<?php echo esc_js( wp_create_nonce( 'whippet_cloud_test' ) ); ?>'})}).then(r=>r.json()).then(r=>alert(r.success?'<?php echo esc_js( __( 'Connection successful.', 'whippet' ) ); ?>':r.data.message))"><?php esc_html_e( 'Test connection', 'whippet' ); ?></button>
+			</div>
 		</div>
 		<?php
 	}
