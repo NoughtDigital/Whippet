@@ -252,7 +252,7 @@ GPL2 - See [license.txt](license.txt)
 ## Credits
 
 **Author**: Jake Henshall  
-**Website**: https://hashbangcode.com/
+**Website**: https://nought.digital/
 
 ## Changelog
 
@@ -264,7 +264,7 @@ For issues and questions:
 
 - GitHub Issues: [Create an issue](#)
 - Documentation: [Read the docs](#)
-- Website: https://hashbangcode.com/
+- Website: https://nought.digital/
 
 ---
 

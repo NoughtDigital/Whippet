@@ -7,7 +7,7 @@
  * @package  Whippet
  * @author   Jake Henshall
  * @license  http://www.gnu.org/copyleft/gpl.html GNU General Public License
- * @link     http://www.hashbangcode.com/
+ * @link     http://www.nought.digital/
  */
 
 // Exit if accessed directly.
@@ -579,7 +579,7 @@ function whippet_tutorials_page() {
 					<h4><?php esc_html_e( 'Need more help?', 'whippet' ); ?></h4>
 					<p><?php esc_html_e( 'For product updates and support, visit the Whippet site.', 'whippet' ); ?></p>
 				</div>
-				<a class="wa-docs-btn" href="https://hashbangcode.com/" target="_blank" rel="noopener noreferrer">
+				<a class="wa-docs-btn" href="https://nought.digital/" target="_blank" rel="noopener noreferrer">
 					<?php esc_html_e( 'Visit website', 'whippet' ); ?>
 				</a>
 			</div>

@@ -1,16 +1,16 @@
 === Whippet ===
 
-Contributors: JaHe, noughtdigital, hashbangcode
+Contributors: JaHe, noughtdigital
 Plugin Name: Whippet
 Plugin URI: https://whippetwp.com/
-Tags: performance, cache, script manager, optimisation, speed, critical css, webp, lazy load, woocommerce
-Author URI: https://www.hashbangcode.com/
+Tags: performance, cache, script manager, optimisation, speed
+Author URI: https://www.nought.digital/
 Author: Jake Henshall
 Donate link: https://whippetwp.com/
 Requires at least: 5.8
-Tested up to: 6.7
+Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 1.1.0
+Stable tag: 1.1.1
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -71,13 +71,17 @@ Tools → Whippet → Dashboard shows recent audited actions. Destructive action
 
 == Screenshots ==
 
-1. Unified Tools → Whippet admin shell
+1. Unified Tools - Whippet admin shell
 2. Performance and cache controls
 3. Script Manager
 4. Premium Image Engine and Critical CSS
 5. Setup wizard and Tools diagnostics
 
 == Changelog ==
+
+= 1.1.1 =
+* Tested up to WordPress 7.0
+* Updated WordPress.org listing tags, contributors, and screenshots
 
 = 1.1.0 =
 * Setup wizard, Safe preset, conflict detection
