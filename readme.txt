@@ -4,7 +4,7 @@ Contributors: JaHe, noughtdigital
 Plugin Name: Whippet
 Plugin URI: https://whippetwp.com/
 Tags: performance, cache, script manager, optimisation, speed
-Author URI: https://www.nought.digital/
+Author URI: https://nought.digital
 Author: Jake Henshall
 Donate link: https://whippetwp.com/
 Requires at least: 5.8

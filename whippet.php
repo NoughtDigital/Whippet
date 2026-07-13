@@ -5,7 +5,7 @@
  * Description: All-in-one WordPress performance: remove bloat, cache pages, control scripts, optimise images, and connect optional Cloud premium services.
  * Version: 1.1.1
  * Author: Jake Henshall
- * Author URI: https://www.nought.digital/
+ * Author URI: https://nought.digital
  * License: GPLv3
  * Requires at least: 5.8
  * Requires PHP: 7.4

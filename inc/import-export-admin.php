@@ -6,7 +6,7 @@
  * @package  Whippet
  * @author   Jake Henshall
  * @license  http://www.gnu.org/copyleft/gpl.html GNU General Public License
- * @link     http://www.nought.digital/
+ * @link     https://nought.digital
  */
 
 /**

@@ -6,7 +6,7 @@
  * @package  Whippet
  * @author   Jake Henshall
  * @license  http://www.gnu.org/copyleft/gpl.html GNU General Public License
- * @link     http://www.nought.digital/
+ * @link     https://nought.digital
  */
 
 namespace Whippet;
@@ -23,7 +23,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @package  Whippet
  * @author   Jake Henshall
  * @license  http://www.gnu.org/copyleft/gpl.html GNU General Public License
- * @link     http://www.nought.digital/
+ * @link     https://nought.digital
  */
 // Register a 'monthly' WP-Cron interval if not already present.
 add_filter( 'cron_schedules', function( $schedules ) {

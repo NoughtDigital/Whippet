@@ -366,7 +366,7 @@
               - heading "Need More Help?" [level=3] [ref=f7e495]
               - paragraph [ref=f7e496]: If you need updates, support, or product information, visit the Whippet site below.
               - link "Visit Website" [ref=f7e498] [cursor=pointer]:
-                - /url: https://hashbangcode.com/
+                - /url: https://nought.digital
   - contentinfo [ref=f7e334]:
     - paragraph [ref=f7e335]:
       - generic [ref=f7e336]:
